@@ -3,7 +3,7 @@
 
 # WORK IN PROGRESS
 
-This library is not yet ready for usage. So please save this page to bookmarks or (give it a star on GitHub)[https://github.com/KazanExpress/web-orm] and come here later! 😊
+This library is not yet ready for usage. So please save this page to bookmarks or [give it a star on GitHub](https://github.com/KazanExpress/web-orm) and come here later! 😊
 
 ## What is it?
 
