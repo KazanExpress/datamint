@@ -1,0 +1,35 @@
+{
+  "name": "web-orm",
+  "version": "0.0.0",
+  "description": "A fully-fledged ORM for the browser 💪",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KazanExpress/web-orm.git"
+  },
+  "keywords": [
+    "ORM",
+    "web",
+    "web-orm",
+    "IndexedDB",
+    "indexeddb",
+    "websql",
+    "WebSQL",
+    "webSQL",
+    "localStorage",
+    "localForage",
+    "data",
+    "data-map",
+    "ajax",
+    "api"
+  ],
+  "author": "Raiondesu <a.raiondesu@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/KazanExpress/web-orm/issues"
+  },
+  "homepage": "https://github.com/KazanExpress/web-orm#readme"
+}
