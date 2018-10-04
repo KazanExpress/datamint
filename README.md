@@ -27,7 +27,7 @@ Part of the cool stuff is that `web-orm` can also keep your data fresh for you, 
 
 ## Isn't it too big for my needs?
 
-Not really. `web-orm` is modular and allows parts of it to be imported separately, leaving only the functionality you need. But if you're still sure that you don't need that much functionality - here are some lighter alternatives:
+Not really. `web-orm` is modular and allows parts of it to be imported separately, leaving only the functionality you need. But if you're still sure that you don't need that much functionality - here are some lighter alternatives (most-popular to least-popular):
 * [localForage](https://github.com/localForage/localForage)
 * [Dexie](http://dexie.org)
 * [idb](https://github.com/jakearchibald/idb)
