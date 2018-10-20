@@ -12,9 +12,6 @@
     "web-orm",
     "IndexedDB",
     "indexeddb",
-    "websql",
-    "WebSQL",
-    "webSQL",
     "localStorage",
     "localForage",
     "data",
@@ -33,7 +30,7 @@
   "files": [
     "dist"
   ],
-  "author": "Raiondesu <a.raiondesu@gmail.com>",
+  "author": "KazanExpress",
   "license": "MIT",
   "engines": {
     "node": ">=6.0.0"

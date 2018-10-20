@@ -14,10 +14,10 @@
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "downlevelIteration": true,
-    "declarationDir": "dist/types",
+    "declarationDir": "src/types",
     "outDir": "dist/lib",
     "typeRoots": [
-      "node_modules/@types"
+      "node_modules/@types",
     ]
   },
   "include": [
