@@ -1,7 +1,7 @@
 {
   "name": "web-orm",
   "version": "0.0.0",
-  "description": "A fully-fledged ORM for the browser 💪",
+  "description": "An ORM that works over Web 💪",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/KazanExpress/web-orm.git"
@@ -99,5 +99,9 @@
     "ts-node": "^7.0.1",
     "tslint": "^5.11.0",
     "typescript": "^3.0.3"
+  },
+  "dependencies": {
+    "js-simple-events": "^1.0.7",
+    "ts-async-queue": "^1.0.0"
   }
 }
