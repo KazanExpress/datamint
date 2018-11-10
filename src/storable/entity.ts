@@ -1,8 +1,14 @@
 import { IStorable } from './istorable';
+import { NonEnumerable } from '../util';
 
 export class Entity<ID = any> implements IStorable {
+  @NonEnumerable
   private __col__: Array<string> = [];
+
+  @NonEnumerable
   private __idCol__: string = '';
+
+  @NonEnumerable
   private __idValue__: ID;
 
   constructor(options) {
