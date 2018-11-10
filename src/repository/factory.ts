@@ -3,7 +3,7 @@ import { Connection } from '../orm/connection';
 import { EntityRepository } from './entityRepository';
 import { RecordRepository } from './recordRepository';
 import { Debug } from '../debug';
-import { Repository } from './common';
+import { Repository } from './base';
 
 export function makeRepository<
   C extends IStorableConstructor<E>,

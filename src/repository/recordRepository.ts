@@ -1,4 +1,4 @@
-import { Repository } from './common';
+import { Repository } from './base';
 import { IStorable, IStorableConstructor } from '../storable';
 import { QueryResult } from '../queryResult';
 
