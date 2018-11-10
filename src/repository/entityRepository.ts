@@ -1,5 +1,5 @@
-import { Repository } from '.';
-import { Entity, IStorable, IStorableConstructor } from '..';
+import { Repository } from './common';
+import { Entity, IStorable, IStorableConstructor } from '../storable';
 import { Connection } from '../orm/connection';
 import { QueryResult } from '../queryResult';
 import { Key } from '../util';
@@ -67,4 +67,3 @@ export class EntityRepository<
 
   // TODO: Find, find by, etc...
 }
-

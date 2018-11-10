@@ -1,5 +1,5 @@
-import { Repository } from '.';
-import { IStorable, IStorableConstructor } from '..';
+import { Repository } from './common';
+import { IStorable, IStorableConstructor } from '../storable';
 import { QueryResult } from '../queryResult';
 
 export class RecordRepository<
