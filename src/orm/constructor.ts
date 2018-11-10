@@ -10,9 +10,7 @@ export interface IRepositoryMap {
 }
 
 export type RepoStore<M extends IRepositoryMap> = {
-  [name in keyof M]: Repository<
-  M[name]
-  >;
+  [name in keyof M]: Repository<M[name]>;
 };
 
 export class Connection<T extends IRepositoryMap> {
