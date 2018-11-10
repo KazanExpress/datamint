@@ -9,7 +9,7 @@ This library is not yet ready for usage. So please save this page to bookmarks o
 
 ORM (Object-relational mapper) - a programming tool for converting data between incompatible type systems using object-oriented paradigms. It often reduces the amount of code that needs to be written in order to access the needed data.
 
-[Many ORMs](https://github.com/search?q=ORM) exist for back-end data storages and browsers, but yet no real ORM exists to connect these 2. That's why `web-orm` was created.
+[Many ORMs](https://github.com/search?q=ORM) exist for back-end data storages and browsers, but yet no real ORM exists to connect them. That's why `web-orm` was created.
 
 ## Why ORM over web?
 
