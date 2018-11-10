@@ -3,7 +3,7 @@ import { Driver, IDriverConstructor } from '../drivers';
 import { FallbackDriver } from '../drivers/fallback';
 import { IStorableConstructor } from '../storable';
 import { Debug } from '../debug';
-import { DebugType, ExceptionType } from '../debug/types';
+import { DebugType, ExceptionType } from '../debug';
 
 export interface IRepositoryMap {
   [name: string]: IStorableConstructor<any>;

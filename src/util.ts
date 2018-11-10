@@ -1,5 +1,3 @@
-import { Connection, DebugType } from './orm';
-
 /**
  * fromPath
  * Returns a value from an object by a given path (usually string).

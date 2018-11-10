@@ -14,7 +14,7 @@
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "downlevelIteration": true,
-    "declarationDir": "src/types",
+    "declarationDir": "dist/types",
     "outDir": "dist/lib",
     "typeRoots": [
       "node_modules/@types",
