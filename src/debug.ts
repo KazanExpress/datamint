@@ -16,8 +16,9 @@ export type IDebugMap = Partial<{
 
 export type LogLevel = 'log' | 'debug' | 'warn' | 'error';
 
-
 export abstract class Debug {
+  private constructor() {}
+
   protected static debugState: 'enabled' | 'disabled' | 'custom' = 'disabled';
 
   /**
