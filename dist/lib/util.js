@@ -19,4 +19,10 @@ function fromPath(obj, path, splitter = '.') {
     return path.split(splitter).reduce((o, i) => (o === Object(o) ? o[i] : o), obj);
 }
 exports.fromPath = fromPath;
+function NonEnumerable(target, key, desc = {}) {
+    Object.defineProperty(target, key, Object.assign({}, desc, { 
+        // TODO: check to be writable
+        enumerable: false }));
+}
+exports.NonEnumerable = NonEnumerable;
 //# sourceMappingURL=util.js.map

@@ -13,6 +13,17 @@ See the Apache Version 2.0 License for specific language governing permissions
 and limitations under the License.
 ***************************************************************************** */
 
+function __decorate(decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+}
+
+function __metadata(metadataKey, metadataValue) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
+}
+
 function __awaiter(thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -87,6 +98,9 @@ class Repository {
     get(id) {
         return new QueryResult(true, Promise.resolve(new this.entity({})));
     }
+    update(options) {
+        return new QueryResult(true, Promise.resolve(new this.entity({})));
+    }
     updateById(id, query) {
         return new QueryResult(true, Promise.resolve(new this.entity({})));
     }
@@ -130,6 +144,7 @@ class FallbackDriver extends Driver {
 
 const LOG_PREFIX = (name) => name ? `[WebORM:${name}]` : `[WebORM]`;
 class Debug {
+    constructor() { }
     /**
      * `true` if any debug is enabled
      */
@@ -208,7 +223,7 @@ Debug.decoratedLogs = {};
 
 class Connection {
     /**
-     * Creates an instance of WebOrm.
+     * Creates a WebORM connection instance.
      * @param connectionName the name of the connection to the storage. Namespaces all respositories invoked from the instance.
      * @param drivers determine a variety of drivers the orm can select from. The first one that fits for the environment is selected.
      * @param repositories sets the relation of a repository name to its contents' prototype.
@@ -274,20 +289,30 @@ class Connection {
 
 const Connection$1 = Connection;
 
-const Column = (target, key) => {
-    target.__col__ = {};
-    Object.defineProperty(target.__col__, key, {
-        value: true,
-        enumerable: true,
-        writable: true
-    });
-};
-const ID = (target, key) => {
-    target.__id__ = key;
-};
+/**
+ * fromPath
+ * Returns a value from an object by a given path (usually string).
+ *
+ * https://gist.github.com/Raiondesu/759425dede5b7ff38db51ea5a1fb8f11
+ *
+ * @param obj an object to get a value from.
+ * @param path to get a value by.
+ * @param splitter to split the path by. Default is '.' ('obj.path.example')
+ * @returns a value from a given path. If a path is invalid - returns undefined.
+ */
+function NonEnumerable(target, key, desc = {}) {
+    Object.defineProperty(target, key, Object.assign({}, desc, { 
+        // TODO: check to be writable
+        enumerable: false }));
+}
 
 class Entity {
     constructor(options) {
+        // TODO: check to be writable
+        this.__col__ = [];
+        if (this.__idCol__) {
+            this.__idValue__ = options[this.__idCol__];
+        }
     }
     $save() {
         return Promise.resolve();
@@ -295,7 +320,27 @@ class Entity {
     $delete() {
         return Promise.resolve();
     }
+    static Column(target, key) {
+        target.__col__.push(key);
+    }
+    static ID(target, key) {
+        target.__idCol__ = key;
+    }
 }
+__decorate([
+    NonEnumerable,
+    __metadata("design:type", Array)
+], Entity.prototype, "__col__", void 0);
+__decorate([
+    NonEnumerable,
+    __metadata("design:type", Object)
+], Entity.prototype, "__idCol__", void 0);
+__decorate([
+    NonEnumerable,
+    __metadata("design:type", Object)
+], Entity.prototype, "__idValue__", void 0);
+const Column = Entity.Column;
+const ID = Entity.ID;
 
 class Record {
     $save() {
@@ -306,5 +351,5 @@ class Record {
     }
 }
 
-export { Connection$1 as Connection, Column, ID, Entity, Record };
+export { Connection$1 as Connection, Entity, Column, ID, Record };
 //# sourceMappingURL=weborm.es.js.map

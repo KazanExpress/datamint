@@ -33,6 +33,28 @@
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     }
 
+    var __assign = function() {
+        __assign = Object.assign || function __assign(t) {
+            for (var s, i = 1, n = arguments.length; i < n; i++) {
+                s = arguments[i];
+                for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+            }
+            return t;
+        };
+        return __assign.apply(this, arguments);
+    };
+
+    function __decorate(decorators, target, key, desc) {
+        var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+        if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+        else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+        return c > 3 && r && Object.defineProperty(target, key, r), r;
+    }
+
+    function __metadata(metadataKey, metadataValue) {
+        if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
+    }
+
     function __awaiter(thisArg, _arguments, P, generator) {
         return new (P || (P = Promise))(function (resolve, reject) {
             function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -145,6 +167,9 @@
             return new QueryResult(true, Promise.resolve(new this.entity(options)));
         };
         Repository.prototype.get = function (id) {
+            return new QueryResult(true, Promise.resolve(new this.entity({})));
+        };
+        Repository.prototype.update = function (options) {
             return new QueryResult(true, Promise.resolve(new this.entity({})));
         };
         Repository.prototype.updateById = function (id, query) {
@@ -296,7 +321,7 @@
 
     var Connection = /** @class */ (function () {
         /**
-         * Creates an instance of WebOrm.
+         * Creates a WebORM connection instance.
          * @param connectionName the name of the connection to the storage. Namespaces all respositories invoked from the instance.
          * @param drivers determine a variety of drivers the orm can select from. The first one that fits for the environment is selected.
          * @param repositories sets the relation of a repository name to its contents' prototype.
@@ -364,20 +389,20 @@
 
     var Connection$1 = Connection;
 
-    var Column = function (target, key) {
-        target.__col__ = {};
-        Object.defineProperty(target.__col__, key, {
-            value: true,
-            enumerable: true,
-            writable: true
-        });
-    };
-    var ID = function (target, key) {
-        target.__id__ = key;
-    };
+    function NonEnumerable(target, key, desc) {
+        if (desc === void 0) { desc = {}; }
+        Object.defineProperty(target, key, __assign({}, desc, { 
+            // TODO: check to be writable
+            enumerable: false }));
+    }
 
     var Entity = /** @class */ (function () {
         function Entity(options) {
+            // TODO: check to be writable
+            this.__col__ = [];
+            if (this.__idCol__) {
+                this.__idValue__ = options[this.__idCol__];
+            }
         }
         Entity.prototype.$save = function () {
             return Promise.resolve();
@@ -385,8 +410,28 @@
         Entity.prototype.$delete = function () {
             return Promise.resolve();
         };
+        Entity.Column = function (target, key) {
+            target.__col__.push(key);
+        };
+        Entity.ID = function (target, key) {
+            target.__idCol__ = key;
+        };
+        __decorate([
+            NonEnumerable,
+            __metadata("design:type", Array)
+        ], Entity.prototype, "__col__", void 0);
+        __decorate([
+            NonEnumerable,
+            __metadata("design:type", Object)
+        ], Entity.prototype, "__idCol__", void 0);
+        __decorate([
+            NonEnumerable,
+            __metadata("design:type", Object)
+        ], Entity.prototype, "__idValue__", void 0);
         return Entity;
     }());
+    var Column = Entity.Column;
+    var ID = Entity.ID;
 
     var Record = /** @class */ (function () {
         function Record() {
@@ -401,9 +446,9 @@
     }());
 
     exports.Connection = Connection$1;
+    exports.Entity = Entity;
     exports.Column = Column;
     exports.ID = ID;
-    exports.Entity = Entity;
     exports.Record = Record;
 
     Object.defineProperty(exports, '__esModule', { value: true });

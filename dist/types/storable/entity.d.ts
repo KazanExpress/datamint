@@ -1,7 +1,14 @@
 import { IStorable } from './istorable';
-export declare class Entity<ID = any> implements IStorable {
+import { Key } from '../util';
+export declare class Entity<IDKey extends Key = string, ID = any> implements IStorable {
+    private __col__;
+    private __idCol__?;
+    private __idValue__?;
     constructor(options: any);
-    repository: any;
     $save(): Promise<void>;
     $delete(): Promise<void>;
+    static Column(target: typeof Entity['prototype'], key: string): void;
+    static ID(target: typeof Entity['prototype'], key: string): void;
 }
+export declare const Column: typeof Entity.Column;
+export declare const ID: typeof Entity.ID;

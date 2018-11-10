@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const LOG_PREFIX = (name) => name ? `[WebORM:${name}]` : `[WebORM]`;
 class Debug {
+    constructor() { }
     /**
      * `true` if any debug is enabled
      */

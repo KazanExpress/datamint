@@ -5,6 +5,7 @@ export declare type IDebugMap = Partial<{
 }>;
 export declare type LogLevel = 'log' | 'debug' | 'warn' | 'error';
 export declare abstract class Debug {
+    private constructor();
     protected static debugState: 'enabled' | 'disabled' | 'custom';
     /**
      * Contains the map for all debug types and their respective error types for the ORM.
