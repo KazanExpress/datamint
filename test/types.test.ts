@@ -1,16 +1,16 @@
-import { Connection, Column, ID, Entity } from '../src';
+import { Connection, Entity } from '../src';
 
 describe('types', () => {
   it('types', () => {
     class Product extends Entity<number> {
-      @ID
-      @Column
+      @Entity.ID
+      @Entity.Column
       public id: number;
 
-      @Column
+      @Entity.Column
       public title: string;
 
-      @Column
+      @Entity.Column
       public url: string;
 
       constructor(options: {
@@ -32,14 +32,14 @@ describe('types', () => {
     }
 
     class User extends Entity<string> implements IUser {
-      @ID
-      @Column
+      @Entity.ID
+      @Entity.Column
       public name: string;
 
-      @Column
+      @Entity.Column
       public birthDate: Date;
 
-      @Column
+      @Entity.Column
       public cart: Product[];
 
       constructor(options: IUser) {
