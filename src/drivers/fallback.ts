@@ -1,6 +1,4 @@
 import { Driver } from '.';
-import { Repository } from '../repository';
-import { QueryResult } from '../queryResult';
 
 export class FallbackDriver extends Driver {
   public create<T extends object>(repositoryName: string, entity: T): Promise<T> {
@@ -22,9 +20,9 @@ export class FallbackDriver extends Driver {
   public delete<T extends object>(repositoryName: string, entity: Partial<T>): Promise<T>;
   public async delete(repositoryName: any, entity: any) {
     throw new Error('Method not implemented.');
-    
+
     return {};
   }
 
-  
+
 }

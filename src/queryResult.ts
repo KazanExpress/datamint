@@ -1,7 +1,5 @@
 type PromiseExecutor<T> = (resolve: (value?: T | PromiseLike<T>) => void, reject: (reason?: any) => void) => void;
 
-
-
 /**
  * Incapsulates the query result data for further manipulation
  *
@@ -46,7 +44,7 @@ export class QueryResult<T> {
     this.handlers.forEach(async h => h());
   }
 
-  
+
   /**
    * Fires a handler whenever the data in the result has been changed
    *
@@ -55,7 +53,7 @@ export class QueryResult<T> {
   public onChange(callback: Function) {
     this.handlers.push(callback);
   }
-  
+
   /**
    * Unsubscribe the callback from the result data changes
    */

@@ -1,8 +1,8 @@
+import { Debug } from '../debug';
 import { Connection } from '../orm';
-import { IStorableConstructor, IStorable, Entity, Record } from '../storable';
+import { Entity, IStorable, IStorableConstructor, Record } from '../storable';
 import { EntityRepository } from './entityRepository';
 import { RecordRepository } from './recordRepository';
-import { Debug } from '../debug';
 
 /**
  * @TODO:
@@ -46,3 +46,4 @@ export function makeRepository<
 }
 
 export * from './entityRepository';
+

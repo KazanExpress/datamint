@@ -1,5 +1,5 @@
+import { Key, NonEnumerable } from '../util';
 import { IStorable } from './istorable';
-import { NonEnumerable, Key } from '../util';
 
 export class Entity<
   IDKey extends Key = string,

@@ -20,3 +20,4 @@ export const Connection = connection as {
 export type Connection<T extends IRepositoryMap = any> = connection<T>;
 
 export * from './namespace';
+

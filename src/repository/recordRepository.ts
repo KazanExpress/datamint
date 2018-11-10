@@ -1,5 +1,5 @@
 import { Repository } from '.';
-import { IStorableConstructor, IStorable } from '..';
+import { IStorable, IStorableConstructor } from '..';
 import { QueryResult } from '../queryResult';
 
 export class RecordRepository<
@@ -27,7 +27,7 @@ export class RecordRepository<
       Promise.resolve(new this.Data({}))
     );
   }
-  
+
   public delete(): QueryResult<E> {
     return new QueryResult(
       true,

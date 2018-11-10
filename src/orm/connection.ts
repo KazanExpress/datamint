@@ -1,10 +1,9 @@
-import { Repository, makeRepository, EntityRepository } from '../repository';
+import { Debug, DebugType, ExceptionType } from '../debug';
 import { Driver, IDriverConstructor } from '../drivers';
 import { FallbackDriver } from '../drivers/fallback';
-import { IStorableConstructor, Entity, Record } from '../storable';
-import { Debug } from '../debug';
-import { DebugType, ExceptionType } from '../debug';
+import { EntityRepository, makeRepository, Repository } from '../repository';
 import { RecordRepository } from '../repository/recordRepository';
+import { Entity, IStorableConstructor, Record } from '../storable';
 
 export interface IRepositoryMap {
   [name: string]: IStorableConstructor<any>;

@@ -1,5 +1,5 @@
 import { Repository } from '.';
-import { IStorableConstructor, IStorable, Entity } from '..';
+import { Entity, IStorable, IStorableConstructor } from '..';
 import { Connection } from '../orm/connection';
 import { QueryResult } from '../queryResult';
 import { Key } from '../util';
