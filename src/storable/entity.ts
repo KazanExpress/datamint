@@ -1,16 +1,12 @@
 import { IStorable } from './istorable';
-import { IRepository, Repository } from '../repository';
 
 export class Entity<ID = any> implements IStorable {
   private __col__: Array<string> = [];
-  private __id__: string = '';
+  private __idCol__: string = '';
+  private __idValue__: ID;
 
   constructor(options) {
-    
-  }
-
-  public $setID(id: ID) {
-    
+    this.__idValue__ = options[this.__idCol__];
   }
 
   public $save() {
@@ -26,6 +22,6 @@ export class Entity<ID = any> implements IStorable {
   }
 
   public static ID(target: typeof Entity['prototype'], key: string) {
-    target.__id__ = key;
+    target.__idCol__ = key;
   }
 }
