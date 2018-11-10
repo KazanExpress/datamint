@@ -7,6 +7,10 @@ export class Entity<ID = any> implements IStorable {
 
   public repository;
 
+  public $setID(id: ID) {
+    
+  }
+
   public $save() {
     return Promise.resolve();
   }
