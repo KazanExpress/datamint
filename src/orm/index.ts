@@ -1,5 +1,4 @@
 import { IDriverConstructor } from '../drivers';
-import { Entity } from '../storable/entity';
 import { Connection as connection, IRepositoryMap, RepoStore } from './constructor';
 
 export const Connection = connection as {
@@ -21,45 +20,3 @@ export const Connection = connection as {
 export type Connection<T extends IRepositoryMap = any> = connection<T>;
 
 export * from './namespace';
-
-class Product extends Entity {
-  constructor(options: {
-      title: string;
-      url: string;
-  }) {
-    super(options);
-  }
-}
-
-class User extends Entity {
-  constructor(options: {
-    name: string;
-    birthDate: Date;
-    cart: Product[];
-  }) {
-    super(options);
-  }
-}
-
-const orm = new Connection('asd', [], {
-  Products: Product,
-  User
-});
-
-orm.User.add({
-  name: 'max',
-  birthDate: new Date(),
-  cart: [
-    new Product({
-      title: 'podguzniki',
-      url: '/package.json'
-    })
-  ]
-});
-
-
-orm.User.update(0, {
-  
-});
-
-orm.Products.delete(1);
