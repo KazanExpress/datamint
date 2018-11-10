@@ -37,3 +37,6 @@ export class Entity<
     target.__idCol__ = key;
   }
 }
+
+export const Column = Entity.Column;
+export const ID = Entity.ID;

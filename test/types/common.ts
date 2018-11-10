@@ -1,4 +1,4 @@
-import { Entity } from '../../src';
+import { Entity, ID, Column } from '../../src';
 
 export class Product extends Entity<'id', number> {
   @Entity.ID
@@ -30,14 +30,14 @@ export interface IUser {
 }
 
 export class User extends Entity<'name', string> implements IUser {
-  @Entity.ID
-  @Entity.Column
+  @ID
+  @Column
   public name: string;
 
-  @Entity.Column
+  @Column
   public birthDate: Date;
 
-  @Entity.Column
+  @Column
   public cart: Product[];
 
   constructor(options: IUser) {
