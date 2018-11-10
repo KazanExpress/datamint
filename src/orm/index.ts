@@ -1,5 +1,5 @@
 import { IDriverConstructor } from '../drivers';
-import { Connection as connection, IRepositoryMap, RepoStore } from './constructor';
+import { Connection as connection, IRepositoryMap, RepoStore } from './connection';
 
 export const Connection = connection as {
   /**
