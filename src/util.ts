@@ -22,6 +22,8 @@ export function fromPath(obj, path, splitter = '.') {
 export function NonEnumerable(target: object, key: string, desc: PropertyDescriptor = {}) {
   Object.defineProperty(target, key, {
     ...desc,
+    
+    // TODO: check to be writable
     enumerable: false
   });
 }

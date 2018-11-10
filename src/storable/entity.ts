@@ -2,6 +2,7 @@ import { IStorable } from './istorable';
 import { NonEnumerable } from '../util';
 
 export class Entity<ID = any> implements IStorable {
+  // TODO: check to be writable
   @NonEnumerable
   private __col__: Array<string> = [];
 
