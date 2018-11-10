@@ -27,3 +27,5 @@ export function NonEnumerable(target: object, key: string, desc: PropertyDescrip
     enumerable: false
   });
 }
+
+export type Key = string | number | symbol;

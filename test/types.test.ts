@@ -31,7 +31,7 @@ describe('types', () => {
       cart: Product[];
     }
 
-    class User extends Entity<string> implements IUser {
+    class User extends Entity<'name', string> implements IUser {
       @Entity.ID
       @Entity.Column
       public name: string;
@@ -67,6 +67,11 @@ describe('types', () => {
       ]
     });
 
+    orm.User.update({
+      // name: 'max',
+      // tslint:disable-next-line:no-magic-numbers
+      birthDate: new Date(new Date().getUTCMilliseconds() - 10000)
+    });
 
     orm.User.updateById('max', user => ({
       cart: user.cart.concat([

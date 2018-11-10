@@ -1,19 +1,24 @@
 import { IStorable } from './istorable';
-import { NonEnumerable } from '../util';
+import { NonEnumerable, Key } from '../util';
 
-export class Entity<ID = any> implements IStorable {
+export class Entity<
+  IDKey extends Key = string,
+  ID = any
+> implements IStorable {
   // TODO: check to be writable
   @NonEnumerable
   private __col__: Array<string> = [];
 
   @NonEnumerable
-  private __idCol__: string = '';
+  private __idCol__?: IDKey;
 
   @NonEnumerable
-  private __idValue__: ID;
+  private __idValue__?: ID;
 
   constructor(options) {
-    this.__idValue__ = options[this.__idCol__];
+    if (this.__idCol__) {
+      this.__idValue__ = options[this.__idCol__];
+    }
   }
 
   public $save() {
