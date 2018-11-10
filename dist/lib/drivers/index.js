@@ -1,12 +1,15 @@
 "use strict";
-function __export(m) {
-    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
-}
 Object.defineProperty(exports, "__esModule", { value: true });
-__export(require("./LocalStorageDriver"));
-__export(require("./NoDriver"));
-function fromPath(obj, path, sep = '.') {
-    return path.split(sep).reduce((o, i) => (o === Object(o) ? o[i] : o), obj);
+class Driver {
+    constructor(connection) {
+        this.connection = connection;
+    }
+    /**
+     * Determines if the driver is supported in current environment
+     */
+    static get isSupported() {
+        throw new Error('Not implemented.');
+    }
 }
-exports.fromPath = fromPath;
+exports.Driver = Driver;
 //# sourceMappingURL=index.js.map

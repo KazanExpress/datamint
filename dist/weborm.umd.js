@@ -18,17 +18,20 @@
     See the Apache Version 2.0 License for specific language governing permissions
     and limitations under the License.
     ***************************************************************************** */
+    /* global Reflect, Promise */
 
-    var __assign = function() {
-        __assign = Object.assign || function __assign(t) {
-            for (var s, i = 1, n = arguments.length; i < n; i++) {
-                s = arguments[i];
-                for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
-            }
-            return t;
-        };
-        return __assign.apply(this, arguments);
+    var extendStatics = function(d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
     };
+
+    function __extends(d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    }
 
     function __awaiter(thisArg, _arguments, P, generator) {
         return new (P || (P = Promise))(function (resolve, reject) {
@@ -67,217 +70,336 @@
         }
     }
 
-    var Entry = /** @class */ (function () {
-        function Entry(driver, path, value, fetchHandler) {
-            if (fetchHandler === void 0) { fetchHandler = function () { }; }
-            this.driver = driver;
-            this.path = path;
-            this.value = value;
-            this.fetchHandler = fetchHandler;
+    var Entity = /** @class */ (function () {
+        function Entity(options) {
         }
-        Entry.prototype.sync = function () {
-            var _this = this;
-            return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-                var data;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, this.fetchHandler()];
-                        case 1:
-                            data = _a.sent();
-                            return [4 /*yield*/, this.driver.add(this.path, data)];
-                        case 2:
-                            _a.sent();
-                            resolve(data);
-                            return [2 /*return*/];
-                    }
-                });
-            }); });
+        Entity.prototype.$save = function () {
+            return Promise.resolve();
         };
-        return Entry;
+        Entity.prototype.$delete = function () {
+            return Promise.resolve();
+        };
+        return Entity;
     }());
 
-    var NoDriver = /** @class */ (function () {
-        function NoDriver() {
+    /**
+     * Incapsulates the query result data for further manipulation
+     *
+     * @template T the type of data encapsulated
+     */
+    var QueryResult = /** @class */ (function () {
+        function QueryResult(ok, result, error) {
+            this.error = error;
+            this.handlers = [];
+            this._ok = ok;
+            this._result = result;
         }
-        NoDriver.prototype.isSuitable = function () {
-            return true;
-        };
-        NoDriver.prototype.setName = function (name) { };
-        NoDriver.prototype.get = function (key, fetchHandler) {
-            return __awaiter(this, void 0, void 0, function () {
-                return __generator(this, function (_a) {
-                    return [2 /*return*/, new Entry(this, key, null)];
-                });
-            });
-        };
-        NoDriver.prototype.add = function (key, entry, fetchHandler) {
-            return __awaiter(this, void 0, void 0, function () {
-                return __generator(this, function (_a) {
-                    return [2 /*return*/, false];
-                });
-            });
-        };
-        return NoDriver;
-    }());
-
-    var LocalStorageDriver$$1 = /** @class */ (function () {
-        function LocalStorageDriver$$1() {
-            this.name = '';
-        }
-        LocalStorageDriver$$1.prototype.isSuitable = function () {
-            return typeof localStorage !== 'undefined';
-        };
-        LocalStorageDriver$$1.prototype.setName = function (name) {
-            this.name = name;
-        };
-        LocalStorageDriver$$1.prototype.get = function (key, fetchHandler) {
-            return __awaiter(this, void 0, void 0, function () {
-                var result, obj, path;
-                return __generator(this, function (_a) {
-                    result = undefined;
-                    obj = this.getRootFromPath(key);
-                    if (obj) {
-                        path = key.split('/').slice(1).join('/');
-                        result = fromPath(obj, path, '/');
-                    }
-                    return [2 /*return*/, new Entry(this, key, result, fetchHandler)];
-                });
-            });
-        };
-        LocalStorageDriver$$1.prototype.add = function (key, entry, fetchHandler) {
-            return __awaiter(this, void 0, void 0, function () {
-                var obj, pathArr, path;
-                return __generator(this, function (_a) {
-                    obj = this.getRootFromPath(key);
-                    obj = typeof obj === 'object' ? Object(obj) : {};
-                    pathArr = key.split('/');
-                    path = pathArr.slice(1).join('/');
-                    obj = this.setDeepVal(obj, path, entry);
-                    localStorage.setItem(this.name + "_" + pathArr[0], JSON.stringify(obj));
-                    return [2 /*return*/, true];
-                });
-            });
-        };
-        LocalStorageDriver$$1.prototype.setDeepVal = function (obj, path, val) {
-            if (!path) {
-                if (typeof val === 'object') {
-                    return __assign({}, obj, val);
-                }
-                return obj;
-            }
-            var props = path.split('/');
-            var workingObj = obj;
-            for (var i = 0, n = props.length - 1; i < n; ++i) {
-                workingObj = workingObj[props[i]] = workingObj[props[i]] || {};
-            }
-            workingObj[props[i]] = val;
-            return obj;
-        };
-        LocalStorageDriver$$1.prototype.getRootFromPath = function (path) {
-            var rootPath = path.split('/')[0];
-            if (rootPath) {
-                var stringObj = localStorage.getItem(this.name + "_" + rootPath);
-                if (stringObj) {
-                    return JSON.parse(stringObj);
-                }
-            }
-        };
-        return LocalStorageDriver$$1;
-    }());
-
-    function fromPath(obj, path, sep) {
-        if (sep === void 0) { sep = '.'; }
-        return path.split(sep).reduce(function (o, i) { return (o === Object(o) ? o[i] : o); }, obj);
-    }
-
-    var LOG_PREFIX = '[WebORM] ';
-    var WebORM = /** @class */ (function () {
-        function WebORM(name, options) {
-            if (options === void 0) { options = {}; }
-            var _this = this;
-            this.name = name;
-            this.APIMap = options.APIMap || {};
-            this.driver = new NoDriver();
-            if (options.drivers) {
-                options.drivers.forEach(function (driver) {
-                    if ((_this.driver instanceof NoDriver) && driver.isSuitable()) {
-                        _this.driver = driver;
-                    }
-                });
-            }
-            if (this.driver instanceof NoDriver) {
-                console.warn(LOG_PREFIX + " Warning! You have no suitable driver for database. Using memory instead.");
-            }
-            this.driver.setName(name);
-            this.initPressetData(options.preset);
-        }
-        WebORM.prototype.initPressetData = function (data) {
-            var _this = this;
-            if (data === void 0) { data = {}; }
-            Object.keys(data).forEach(function (presetKey) { return __awaiter(_this, void 0, void 0, function () {
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, this.driver.add(presetKey, data[presetKey])];
-                        case 1:
-                            _a.sent();
-                            return [2 /*return*/];
-                    }
-                });
-            }); });
-        };
-        WebORM.prototype.getEntry = function (key) {
-            return __awaiter(this, void 0, void 0, function () {
-                var mapForPath;
-                return __generator(this, function (_a) {
-                    mapForPath = this.APIMap[key];
-                    if (mapForPath && mapForPath.get) {
-                        return [2 /*return*/, this.driver.get(key, mapForPath.get)];
-                    }
-                    return [2 /*return*/, this.driver.get(key)];
-                });
-            });
-        };
-        WebORM.prototype.addEntry = function (key, entry) {
-            return __awaiter(this, void 0, void 0, function () {
-                return __generator(this, function (_a) {
-                    return [2 /*return*/, this.driver.add(key, entry)];
-                });
-            });
-        };
-        return WebORM;
-    }());
-    var WebORMDriver = /** @class */ (function () {
-        function WebORMDriver() {
-        }
+        Object.defineProperty(QueryResult.prototype, "ok", {
+            /**
+             * Determines whether the incapsulated data is OK and contains no errors
+             */
+            get: function () { return this._ok; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(QueryResult.prototype, "result", {
+            /**
+             * The resulting data of the query request
+             */
+            get: function () { return this._result; },
+            set: function (value) {
+                var _this = this;
+                this._result = value;
+                this.handlers.forEach(function (h) { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
+                    return [2 /*return*/, h()];
+                }); }); });
+            },
+            enumerable: true,
+            configurable: true
+        });
         /**
-         * Checks if driver can operate in current environment
+         * Fires a handler whenever the data in the result has been changed
          *
-         * @returns is driver suitable
+         * @param callback the callback to fire
          */
-        WebORMDriver.prototype.isSuitable = function () { return false; };
-        WebORMDriver.prototype.setName = function (name) { };
-        WebORMDriver.prototype.get = function (key, fetchHandler) {
-            return __awaiter(this, void 0, void 0, function () {
-                return __generator(this, function (_a) {
-                    return [2 /*return*/, new Entry(this, key, null, fetchHandler)];
-                });
-            });
+        QueryResult.prototype.onChange = function (callback) {
+            this.handlers.push(callback);
         };
-        WebORMDriver.prototype.add = function (key, entry, fetchHandler) {
-            return __awaiter(this, void 0, void 0, function () {
-                return __generator(this, function (_a) {
-                    return [2 /*return*/, false];
-                });
-            });
+        /**
+         * Unsubscribe the callback from the result data changes
+         */
+        QueryResult.prototype.offChange = function (callback) {
+            var idx = this.handlers.indexOf(callback);
+            if (idx > -1) {
+                this.handlers.splice(idx, 1);
+            }
         };
-        return WebORMDriver;
+        return QueryResult;
     }());
 
-    exports.default = WebORM;
-    exports.WebORMDriver = WebORMDriver;
-    exports.fromPath = fromPath;
-    exports.LocalStorageDriver = LocalStorageDriver$$1;
-    exports.NoDriver = NoDriver;
+    var Repository = /** @class */ (function () {
+        function Repository(name, connection, entity) {
+            this.name = name;
+            this.connection = connection;
+            this.entity = entity;
+            this.primaryKey = entity.prototype.__id__;
+            this.columns = Object.keys(entity.prototype.__col__);
+            delete entity.prototype.__col__;
+        }
+        Repository.prototype.add = function (options) {
+            return new QueryResult(true, Promise.resolve(new this.entity(options)));
+        };
+        Repository.prototype.get = function (id) {
+            return new QueryResult(true, Promise.resolve(new this.entity({})));
+        };
+        Repository.prototype.update = function (id, options) {
+            return new QueryResult(true, Promise.resolve(new this.entity(options)));
+        };
+        Repository.prototype.delete = function (id) {
+            return new QueryResult(true, Promise.resolve(new this.entity({})));
+        };
+        return Repository;
+    }());
+
+    var Driver = /** @class */ (function () {
+        function Driver(connection) {
+            this.connection = connection;
+        }
+        Object.defineProperty(Driver, "isSupported", {
+            /**
+             * Determines if the driver is supported in current environment
+             */
+            get: function () {
+                throw new Error('Not implemented.');
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return Driver;
+    }());
+
+    var FallbackDriver = /** @class */ (function (_super) {
+        __extends(FallbackDriver, _super);
+        function FallbackDriver() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        FallbackDriver.prototype.create = function (repositoryName, entity) {
+            throw new Error('Method not implemented.');
+        };
+        FallbackDriver.prototype.read = function (repositoryName, id) {
+            throw new Error('Method not implemented.');
+        };
+        FallbackDriver.prototype.update = function (repositoryName, id, data) {
+            return __awaiter(this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    throw new Error('Method not implemented.');
+                });
+            });
+        };
+        FallbackDriver.prototype.delete = function (repositoryName, entity) {
+            return __awaiter(this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    throw new Error('Method not implemented.');
+                });
+            });
+        };
+        return FallbackDriver;
+    }(Driver));
+
+    var LOG_PREFIX = function (name) { return name ? "[WebORM:" + name + "]" : "[WebORM]"; };
+    var Debug = /** @class */ (function () {
+        function Debug() {
+        }
+        Object.defineProperty(Debug, "isEnabled", {
+            /**
+             * `true` if any debug is enabled
+             */
+            get: function () { return this.debugState !== 'disabled'; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Debug, "state", {
+            /**
+             * Shows the current debug state of WebORM
+             *
+             * - `enabled` - all the logs and exceptions are enabled
+             * - `custom` - custom rules are set via a `debug()` function
+             * - `disabled` - all the logs and most exceptions are suppressed
+             */
+            get: function () { return this.debugState; },
+            set: function (v) { this.debugState = v; },
+            enumerable: true,
+            configurable: true
+        });
+        Debug.error = function (instanceName, type, message) {
+            return this.print(instanceName, type, message, 'error');
+        };
+        Debug.log = function (instanceName, type, message) {
+            return this.print(instanceName, type, message, 'log');
+        };
+        Debug.warn = function (instanceName, type, message) {
+            return this.print(instanceName, type, message, 'warn');
+        };
+        Debug.errorType = function (type) {
+            var _this = this;
+            if (this.map['*']) {
+                return true;
+            }
+            var isString = function (t) { return typeof t === 'string'; };
+            if (isString(type) && this.map[type]) {
+                return this.map[type];
+            }
+            if (isString(type)) {
+                var matchingType = Object.keys(this.map)
+                    .find(function (t) { return !!t && t.includes(type) && !!_this.map[t]; });
+                return matchingType || false;
+            }
+            return Object.keys(this.map).find(function (t) { return type.test(t); }) || false;
+        };
+        Debug.print = function (instanceName, type, message, level) {
+            if (this.debugState !== 'disabled') {
+                var typeOfError = this.errorType(type);
+                if (typeOfError) {
+                    if (typeOfError === 'hard' && level === 'error') {
+                        throw new Error(LOG_PREFIX(instanceName) + ":" + type + " - " + message);
+                    }
+                    else {
+                        console[level]("%c" + LOG_PREFIX(instanceName) + "%c:%c" + type + "%c - " + message, 'color: purple', 'color: initial', 'color: blue', 'color: initial');
+                    }
+                }
+            }
+        };
+        Debug.prints = function (message, level, type) {
+            var _this = this;
+            if (level === void 0) { level = 'log'; }
+            if (type === void 0) { type = '*'; }
+            return function (target, key, desc) {
+                Object.defineProperty(_this.decoratedLogs, key, desc || {
+                    value: undefined,
+                    writable: true,
+                    enumerable: true
+                });
+                Object.defineProperty(target, key, {
+                    get: function () {
+                        _this.print('', type, message, level);
+                        return _this.decoratedLogs[key];
+                    },
+                    set: function (v) {
+                        _this.decoratedLogs[key] = v;
+                    }
+                });
+            };
+        };
+        Debug.debugState = 'disabled';
+        /**
+         * Contains the map for all debug types and their respective error types for the ORM.
+         */
+        Debug.map = {};
+        Debug.decoratedLogs = {};
+        return Debug;
+    }());
+
+    var Connection = /** @class */ (function () {
+        /**
+         * Creates an instance of WebOrm.
+         * @param connectionName the name of the connection to the storage. Namespaces all respositories invoked from the instance.
+         * @param drivers determine a variety of drivers the orm can select from. The first one that fits for the environment is selected.
+         * @param repositories sets the relation of a repository name to its contents' prototype.
+         * @param apiMap maps the API calls onto the current entity structure
+         */
+        function Connection(connectionName, drivers, repositories, apiMap // TODO
+        ) {
+            var _this = this;
+            this.connectionName = connectionName;
+            this.drivers = drivers;
+            this.apiMap = apiMap;
+            /**
+             * A current map of bound repositories
+             */
+            this.repositories = {};
+            // Select the first supported driver from the bunch
+            var SupportedDriver = drivers.find(function (d) { return d.isSupported; });
+            if (SupportedDriver) {
+                // TODO: multi-driver mode
+                Debug.log(this.connectionName, 'orm', "Using driver \"" + SupportedDriver.name + "\" as the first supported driver");
+                this.currentDriver = new SupportedDriver(this);
+            }
+            else {
+                Debug.warn(this.connectionName, 'orm', 'No supported driver provided. Using fallback.');
+                this.currentDriver = new FallbackDriver(this);
+            }
+            var reProxy;
+            if (!Proxy) {
+                Debug.warn(this.connectionName, 'orm', "window.Proxy is unavailable. Using insufficient property forwarding.");
+                reProxy = function (repoName) { return Object.defineProperty(_this, repoName, {
+                    get: function () { return _this.repositories[repoName]; },
+                }); };
+            }
+            for (var repoName in repositories) {
+                var entityConstructor = repositories[repoName];
+                this.repositories[repoName] = new Repository(repoName, this, entityConstructor);
+                reProxy && reProxy(repoName);
+            }
+            if (Proxy) {
+                Debug.log(this.connectionName, 'orm', "window.Proxy is available. Using modern property forwarding.");
+                return new Proxy(this, {
+                    get: function (target, key) {
+                        if (!target.repositories[key]) {
+                            if (!target[key]) {
+                                Debug.log(target.connectionName, 'orm', "Repository \"" + key + "\" is not registered upon initialization. No other property with the same name was found.");
+                            }
+                            return target[key];
+                        }
+                        return target.repositories[key];
+                    }
+                });
+            }
+        }
+        Connection.debug = function (type, exceptions) {
+            if (typeof type === 'boolean') {
+                Debug.state = (type ? 'enabled' : 'disabled');
+            }
+            else {
+                Debug.state = ('custom');
+                Debug.map[type] = exceptions || !Debug.map[type];
+            }
+        };
+        return Connection;
+    }());
+
+    var Connection$1 = Connection;
+    var Product = /** @class */ (function (_super) {
+        __extends(Product, _super);
+        function Product(options) {
+            return _super.call(this, options) || this;
+        }
+        return Product;
+    }(Entity));
+    var User = /** @class */ (function (_super) {
+        __extends(User, _super);
+        function User(options) {
+            return _super.call(this, options) || this;
+        }
+        return User;
+    }(Entity));
+    var orm = new Connection$1('asd', [], {
+        Products: Product,
+        User: User
+    });
+    orm.User.add({
+        name: 'max',
+        birthDate: new Date(),
+        cart: [
+            new Product({
+                title: 'podguzniki',
+                url: '/package.json'
+            })
+        ]
+    });
+    orm.User.update(0, {});
+    orm.Products.delete(1);
+
+    exports.Connection = Connection$1;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 

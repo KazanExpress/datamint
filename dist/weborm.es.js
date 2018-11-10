@@ -1,3 +1,14 @@
+class Entity {
+    constructor(options) {
+    }
+    $save() {
+        return Promise.resolve();
+    }
+    $delete() {
+        return Promise.resolve();
+    }
+}
+
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation. All rights reserved.
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
@@ -22,160 +33,276 @@ function __awaiter(thisArg, _arguments, P, generator) {
     });
 }
 
-class Entry {
-    constructor(driver, path, value, fetchHandler = () => { }) {
-        this.driver = driver;
-        this.path = path;
-        this.value = value;
-        this.fetchHandler = fetchHandler;
+/**
+ * Incapsulates the query result data for further manipulation
+ *
+ * @template T the type of data encapsulated
+ */
+class QueryResult {
+    constructor(ok, result, error) {
+        this.error = error;
+        this.handlers = [];
+        this._ok = ok;
+        this._result = result;
     }
-    sync() {
-        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-            let data = yield this.fetchHandler();
-            yield this.driver.add(this.path, data);
-            resolve(data);
-        }));
+    /**
+     * Determines whether the incapsulated data is OK and contains no errors
+     */
+    get ok() { return this._ok; }
+    /**
+     * The resulting data of the query request
+     */
+    get result() { return this._result; }
+    set result(value) {
+        this._result = value;
+        this.handlers.forEach((h) => __awaiter(this, void 0, void 0, function* () { return h(); }));
+    }
+    /**
+     * Fires a handler whenever the data in the result has been changed
+     *
+     * @param callback the callback to fire
+     */
+    onChange(callback) {
+        this.handlers.push(callback);
+    }
+    /**
+     * Unsubscribe the callback from the result data changes
+     */
+    offChange(callback) {
+        const idx = this.handlers.indexOf(callback);
+        if (idx > -1) {
+            this.handlers.splice(idx, 1);
+        }
     }
 }
 
-class NoDriver {
-    isSuitable() {
-        return true;
-    }
-    setName(name) { }
-    get(key, fetchHandler) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return new Entry(this, key, null);
-        });
-    }
-    add(key, entry, fetchHandler) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return false;
-        });
-    }
-}
-
-class LocalStorageDriver$$1 {
-    constructor() {
-        this.name = '';
-    }
-    isSuitable() {
-        return typeof localStorage !== 'undefined';
-    }
-    setName(name) {
+class Repository {
+    constructor(name, connection, entity) {
         this.name = name;
+        this.connection = connection;
+        this.entity = entity;
+        this.primaryKey = entity.prototype.__id__;
+        this.columns = Object.keys(entity.prototype.__col__);
+        delete entity.prototype.__col__;
     }
-    get(key, fetchHandler) {
+    add(options) {
+        return new QueryResult(true, Promise.resolve(new this.entity(options)));
+    }
+    get(id) {
+        return new QueryResult(true, Promise.resolve(new this.entity({})));
+    }
+    update(id, options) {
+        return new QueryResult(true, Promise.resolve(new this.entity(options)));
+    }
+    delete(id) {
+        return new QueryResult(true, Promise.resolve(new this.entity({})));
+    }
+}
+
+class Driver {
+    constructor(connection) {
+        this.connection = connection;
+    }
+    /**
+     * Determines if the driver is supported in current environment
+     */
+    static get isSupported() {
+        throw new Error('Not implemented.');
+    }
+}
+
+class FallbackDriver extends Driver {
+    create(repositoryName, entity) {
+        throw new Error('Method not implemented.');
+    }
+    read(repositoryName, id) {
+        throw new Error('Method not implemented.');
+    }
+    update(repositoryName, id, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            let result = undefined;
-            let obj = this.getRootFromPath(key);
-            if (obj) {
-                let path = key.split('/').slice(1).join('/');
-                result = fromPath(obj, path, '/');
-            }
-            return new Entry(this, key, result, fetchHandler);
+            throw new Error('Method not implemented.');
+            return {};
         });
     }
-    add(key, entry, fetchHandler) {
+    delete(repositoryName, entity) {
         return __awaiter(this, void 0, void 0, function* () {
-            let obj = this.getRootFromPath(key);
-            obj = typeof obj === 'object' ? Object(obj) : {};
-            let pathArr = key.split('/');
-            let path = pathArr.slice(1).join('/');
-            obj = this.setDeepVal(obj, path, entry);
-            localStorage.setItem(`${this.name}_${pathArr[0]}`, JSON.stringify(obj));
+            throw new Error('Method not implemented.');
+            return {};
+        });
+    }
+}
+
+const LOG_PREFIX = (name) => name ? `[WebORM:${name}]` : `[WebORM]`;
+class Debug {
+    /**
+     * `true` if any debug is enabled
+     */
+    static get isEnabled() { return this.debugState !== 'disabled'; }
+    /**
+     * Shows the current debug state of WebORM
+     *
+     * - `enabled` - all the logs and exceptions are enabled
+     * - `custom` - custom rules are set via a `debug()` function
+     * - `disabled` - all the logs and most exceptions are suppressed
+     */
+    static get state() { return this.debugState; }
+    static set state(v) { this.debugState = v; }
+    static error(instanceName, type, message) {
+        return this.print(instanceName, type, message, 'error');
+    }
+    static log(instanceName, type, message) {
+        return this.print(instanceName, type, message, 'log');
+    }
+    static warn(instanceName, type, message) {
+        return this.print(instanceName, type, message, 'warn');
+    }
+    static errorType(type) {
+        if (this.map['*']) {
             return true;
-        });
+        }
+        const isString = (t) => typeof t === 'string';
+        if (isString(type) && this.map[type]) {
+            return this.map[type];
+        }
+        if (isString(type)) {
+            const matchingType = Object.keys(this.map)
+                .find(t => !!t && t.includes(type) && !!this.map[t]);
+            return matchingType || false;
+        }
+        return Object.keys(this.map).find(t => type.test(t)) || false;
     }
-    setDeepVal(obj, path, val) {
-        if (!path) {
-            if (typeof val === 'object') {
-                return Object.assign({}, obj, val);
+    static print(instanceName, type, message, level) {
+        if (this.debugState !== 'disabled') {
+            const typeOfError = this.errorType(type);
+            if (typeOfError) {
+                if (typeOfError === 'hard' && level === 'error') {
+                    throw new Error(`${LOG_PREFIX(instanceName)}:${type} - ${message}`);
+                }
+                else {
+                    console[level](`%c${LOG_PREFIX(instanceName)}%c:%c${type}%c - ${message}`, 'color: purple', 'color: initial', 'color: blue', 'color: initial');
+                }
             }
-            return obj;
         }
-        let props = path.split('/');
-        let workingObj = obj;
-        for (var i = 0, n = props.length - 1; i < n; ++i) {
-            workingObj = workingObj[props[i]] = workingObj[props[i]] || {};
-        }
-        workingObj[props[i]] = val;
-        return obj;
     }
-    getRootFromPath(path) {
-        let rootPath = path.split('/')[0];
-        if (rootPath) {
-            let stringObj = localStorage.getItem(`${this.name}_${rootPath}`);
-            if (stringObj) {
-                return JSON.parse(stringObj);
-            }
-        }
+    static prints(message, level = 'log', type = '*') {
+        return (target, key, desc) => {
+            Object.defineProperty(this.decoratedLogs, key, desc || {
+                value: undefined,
+                writable: true,
+                enumerable: true
+            });
+            Object.defineProperty(target, key, {
+                get: () => {
+                    this.print('', type, message, level);
+                    return this.decoratedLogs[key];
+                },
+                set: v => {
+                    this.decoratedLogs[key] = v;
+                }
+            });
+        };
     }
 }
+Debug.debugState = 'disabled';
+/**
+ * Contains the map for all debug types and their respective error types for the ORM.
+ */
+Debug.map = {};
+Debug.decoratedLogs = {};
 
-function fromPath(obj, path, sep = '.') {
-    return path.split(sep).reduce((o, i) => (o === Object(o) ? o[i] : o), obj);
-}
-
-const LOG_PREFIX = '[WebORM] ';
-class WebORM {
-    constructor(name, options = {}) {
-        this.name = name;
-        this.APIMap = options.APIMap || {};
-        this.driver = new NoDriver();
-        if (options.drivers) {
-            options.drivers.forEach(driver => {
-                if ((this.driver instanceof NoDriver) && driver.isSuitable()) {
-                    this.driver = driver;
+class Connection {
+    /**
+     * Creates an instance of WebOrm.
+     * @param connectionName the name of the connection to the storage. Namespaces all respositories invoked from the instance.
+     * @param drivers determine a variety of drivers the orm can select from. The first one that fits for the environment is selected.
+     * @param repositories sets the relation of a repository name to its contents' prototype.
+     * @param apiMap maps the API calls onto the current entity structure
+     */
+    constructor(connectionName, drivers, repositories, apiMap // TODO
+    ) {
+        this.connectionName = connectionName;
+        this.drivers = drivers;
+        this.apiMap = apiMap;
+        /**
+         * A current map of bound repositories
+         */
+        this.repositories = {};
+        // Select the first supported driver from the bunch
+        const SupportedDriver = drivers.find(d => d.isSupported);
+        if (SupportedDriver) {
+            // TODO: multi-driver mode
+            Debug.log(this.connectionName, 'orm', `Using driver "${SupportedDriver.name}" as the first supported driver`);
+            this.currentDriver = new SupportedDriver(this);
+        }
+        else {
+            Debug.warn(this.connectionName, 'orm', 'No supported driver provided. Using fallback.');
+            this.currentDriver = new FallbackDriver(this);
+        }
+        let reProxy;
+        if (!Proxy) {
+            Debug.warn(this.connectionName, 'orm', `window.Proxy is unavailable. Using insufficient property forwarding.`);
+            reProxy = (repoName) => Object.defineProperty(this, repoName, {
+                get: () => this.repositories[repoName],
+            });
+        }
+        for (const repoName in repositories) {
+            const entityConstructor = repositories[repoName];
+            this.repositories[repoName] = new Repository(repoName, this, entityConstructor);
+            reProxy && reProxy(repoName);
+        }
+        if (Proxy) {
+            Debug.log(this.connectionName, 'orm', `window.Proxy is available. Using modern property forwarding.`);
+            return new Proxy(this, {
+                get(target, key) {
+                    if (!target.repositories[key]) {
+                        if (!target[key]) {
+                            Debug.log(target.connectionName, 'orm', `Repository "${key}" is not registered upon initialization. No other property with the same name was found.`);
+                        }
+                        return target[key];
+                    }
+                    return target.repositories[key];
                 }
             });
         }
-        if (this.driver instanceof NoDriver) {
-            console.warn(`${LOG_PREFIX} Warning! You have no suitable driver for database. Using memory instead.`);
+    }
+    static debug(type, exceptions) {
+        if (typeof type === 'boolean') {
+            Debug.state = (type ? 'enabled' : 'disabled');
         }
-        this.driver.setName(name);
-        this.initPressetData(options.preset);
-    }
-    initPressetData(data = {}) {
-        Object.keys(data).forEach((presetKey) => __awaiter(this, void 0, void 0, function* () {
-            yield this.driver.add(presetKey, data[presetKey]);
-        }));
-    }
-    getEntry(key) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let mapForPath = this.APIMap[key];
-            if (mapForPath && mapForPath.get) {
-                return this.driver.get(key, mapForPath.get);
-            }
-            return this.driver.get(key);
-        });
-    }
-    addEntry(key, entry) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return this.driver.add(key, entry);
-        });
-    }
-}
-class WebORMDriver {
-    /**
-     * Checks if driver can operate in current environment
-     *
-     * @returns is driver suitable
-     */
-    isSuitable() { return false; }
-    setName(name) { }
-    get(key, fetchHandler) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return new Entry(this, key, null, fetchHandler);
-        });
-    }
-    add(key, entry, fetchHandler) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return false;
-        });
+        else {
+            Debug.state = ('custom');
+            Debug.map[type] = exceptions || !Debug.map[type];
+        }
     }
 }
 
-export default WebORM;
-export { WebORMDriver, fromPath, LocalStorageDriver$$1 as LocalStorageDriver, NoDriver };
+const Connection$1 = Connection;
+class Product extends Entity {
+    constructor(options) {
+        super(options);
+    }
+}
+class User extends Entity {
+    constructor(options) {
+        super(options);
+    }
+}
+const orm = new Connection$1('asd', [], {
+    Products: Product,
+    User
+});
+orm.User.add({
+    name: 'max',
+    birthDate: new Date(),
+    cart: [
+        new Product({
+            title: 'podguzniki',
+            url: '/package.json'
+        })
+    ]
+});
+orm.User.update(0, {});
+orm.Products.delete(1);
+
+export { Connection$1 as Connection };
 //# sourceMappingURL=weborm.es.js.map
