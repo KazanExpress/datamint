@@ -68,18 +68,6 @@ function __generator(thisArg, body) {
     }
 }
 
-var Entity = /** @class */ (function () {
-    function Entity(options) {
-    }
-    Entity.prototype.$save = function () {
-        return Promise.resolve();
-    };
-    Entity.prototype.$delete = function () {
-        return Promise.resolve();
-    };
-    return Entity;
-}());
-
 /**
  * Incapsulates the query result data for further manipulation
  *
@@ -90,7 +78,14 @@ var QueryResult = /** @class */ (function () {
         this.error = error;
         this.handlers = [];
         this._ok = ok;
-        this._result = result;
+        var promise;
+        if (typeof result === 'function') {
+            promise = new Promise(result);
+        }
+        else {
+            promise = result;
+        }
+        this._result = promise;
     }
     Object.defineProperty(QueryResult.prototype, "ok", {
         /**
@@ -150,8 +145,8 @@ var Repository = /** @class */ (function () {
     Repository.prototype.get = function (id) {
         return new QueryResult(true, Promise.resolve(new this.entity({})));
     };
-    Repository.prototype.update = function (id, options) {
-        return new QueryResult(true, Promise.resolve(new this.entity(options)));
+    Repository.prototype.updateById = function (id, query) {
+        return new QueryResult(true, Promise.resolve(new this.entity({})));
     };
     Repository.prototype.delete = function (id) {
         return new QueryResult(true, Promise.resolve(new this.entity({})));
@@ -366,36 +361,46 @@ var Connection = /** @class */ (function () {
 }());
 
 var Connection$1 = Connection;
-var Product = /** @class */ (function (_super) {
-    __extends(Product, _super);
-    function Product(options) {
-        return _super.call(this, options) || this;
+
+var Column = function (target, key) {
+    target.__col__ = {};
+    Object.defineProperty(target.__col__, key, {
+        value: true,
+        enumerable: true,
+        writable: true
+    });
+};
+var ID = function (target, key) {
+    target.__id__ = key;
+};
+
+var Entity = /** @class */ (function () {
+    function Entity(options) {
     }
-    return Product;
-}(Entity));
-var User = /** @class */ (function (_super) {
-    __extends(User, _super);
-    function User(options) {
-        return _super.call(this, options) || this;
+    Entity.prototype.$save = function () {
+        return Promise.resolve();
+    };
+    Entity.prototype.$delete = function () {
+        return Promise.resolve();
+    };
+    return Entity;
+}());
+
+var Record = /** @class */ (function () {
+    function Record() {
     }
-    return User;
-}(Entity));
-var orm = new Connection$1('asd', [], {
-    Products: Product,
-    User: User
-});
-orm.User.add({
-    name: 'max',
-    birthDate: new Date(),
-    cart: [
-        new Product({
-            title: 'podguzniki',
-            url: '/package.json'
-        })
-    ]
-});
-orm.User.update(0, {});
-orm.Products.delete(1);
+    Record.prototype.$save = function () {
+        throw new Error('Method not implemented.');
+    };
+    Record.prototype.$delete = function () {
+        throw new Error('Method not implemented.');
+    };
+    return Record;
+}());
 
 exports.Connection = Connection$1;
+exports.Column = Column;
+exports.ID = ID;
+exports.Entity = Entity;
+exports.Record = Record;
 //# sourceMappingURL=weborm.cjs.js.map

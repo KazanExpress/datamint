@@ -16,8 +16,8 @@ class Repository {
     get(id) {
         return new queryResult_1.QueryResult(true, Promise.resolve(new this.entity({})));
     }
-    update(id, options) {
-        return new queryResult_1.QueryResult(true, Promise.resolve(new this.entity(options)));
+    updateById(id, query) {
+        return new queryResult_1.QueryResult(true, Promise.resolve(new this.entity({})));
     }
     delete(id) {
         return new queryResult_1.QueryResult(true, Promise.resolve(new this.entity({})));

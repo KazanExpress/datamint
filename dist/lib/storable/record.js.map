@@ -1,1 +1,1 @@
-{"version":3,"file":"record.js","sourceRoot":"","sources":["../../../src/storable/record.ts"],"names":[],"mappings":""}
+{"version":3,"file":"record.js","sourceRoot":"","sources":["../../../src/storable/record.ts"],"names":[],"mappings":";;AAEA,MAAa,MAAM;IACV,KAAK;QACV,MAAM,IAAI,KAAK,CAAC,yBAAyB,CAAC,CAAC;IAC7C,CAAC;IAEM,OAAO;QACZ,MAAM,IAAI,KAAK,CAAC,yBAAyB,CAAC,CAAC;IAC7C,CAAC;CACF;AARD,wBAQC"}

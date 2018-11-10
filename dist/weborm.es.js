@@ -1,14 +1,3 @@
-class Entity {
-    constructor(options) {
-    }
-    $save() {
-        return Promise.resolve();
-    }
-    $delete() {
-        return Promise.resolve();
-    }
-}
-
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation. All rights reserved.
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
@@ -43,7 +32,14 @@ class QueryResult {
         this.error = error;
         this.handlers = [];
         this._ok = ok;
-        this._result = result;
+        let promise;
+        if (typeof result === 'function') {
+            promise = new Promise(result);
+        }
+        else {
+            promise = result;
+        }
+        this._result = promise;
     }
     /**
      * Determines whether the incapsulated data is OK and contains no errors
@@ -91,8 +87,8 @@ class Repository {
     get(id) {
         return new QueryResult(true, Promise.resolve(new this.entity({})));
     }
-    update(id, options) {
-        return new QueryResult(true, Promise.resolve(new this.entity(options)));
+    updateById(id, query) {
+        return new QueryResult(true, Promise.resolve(new this.entity({})));
     }
     delete(id) {
         return new QueryResult(true, Promise.resolve(new this.entity({})));
@@ -277,32 +273,38 @@ class Connection {
 }
 
 const Connection$1 = Connection;
-class Product extends Entity {
-    constructor(options) {
-        super(options);
-    }
-}
-class User extends Entity {
-    constructor(options) {
-        super(options);
-    }
-}
-const orm = new Connection$1('asd', [], {
-    Products: Product,
-    User
-});
-orm.User.add({
-    name: 'max',
-    birthDate: new Date(),
-    cart: [
-        new Product({
-            title: 'podguzniki',
-            url: '/package.json'
-        })
-    ]
-});
-orm.User.update(0, {});
-orm.Products.delete(1);
 
-export { Connection$1 as Connection };
+const Column = (target, key) => {
+    target.__col__ = {};
+    Object.defineProperty(target.__col__, key, {
+        value: true,
+        enumerable: true,
+        writable: true
+    });
+};
+const ID = (target, key) => {
+    target.__id__ = key;
+};
+
+class Entity {
+    constructor(options) {
+    }
+    $save() {
+        return Promise.resolve();
+    }
+    $delete() {
+        return Promise.resolve();
+    }
+}
+
+class Record {
+    $save() {
+        throw new Error('Method not implemented.');
+    }
+    $delete() {
+        throw new Error('Method not implemented.');
+    }
+}
+
+export { Connection$1 as Connection, Column, ID, Entity, Record };
 //# sourceMappingURL=weborm.es.js.map

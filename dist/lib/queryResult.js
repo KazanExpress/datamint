@@ -18,7 +18,14 @@ class QueryResult {
         this.error = error;
         this.handlers = [];
         this._ok = ok;
-        this._result = result;
+        let promise;
+        if (typeof result === 'function') {
+            promise = new Promise(result);
+        }
+        else {
+            promise = result;
+        }
+        this._result = promise;
     }
     /**
      * Determines whether the incapsulated data is OK and contains no errors

@@ -1,3 +1,4 @@
+declare type PromiseExecutor<T> = (resolve: (value?: T | PromiseLike<T>) => void, reject: (reason?: any) => void) => void;
 /**
  * Incapsulates the query result data for further manipulation
  *
@@ -8,7 +9,8 @@ export declare class QueryResult<T> {
     private _ok;
     private _result;
     private handlers;
-    constructor(ok: boolean, result: Promise<T>, error?: Error | undefined);
+    constructor(ok: boolean, result: PromiseExecutor<T>, error?: Error);
+    constructor(ok: boolean, result: Promise<T>, error?: Error);
     /**
      * Determines whether the incapsulated data is OK and contains no errors
      */
@@ -28,3 +30,4 @@ export declare class QueryResult<T> {
      */
     offChange(callback: Function): void;
 }
+export {};
