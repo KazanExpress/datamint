@@ -1,6 +1,7 @@
 import { QueryResult } from '../queryResult';
 import { Connection } from '../orm';
 import { IStorable, IStorableConstructor } from '../storable';
+import { Entity } from '../storable/entity';
 
 /**
  * @TODO:
@@ -18,6 +19,7 @@ export interface IRepository {
 export class Repository<
   C extends IStorableConstructor<E>,
   E extends IStorable = InstanceType<C>,
+  ID = E extends Entity<infer IdType> ? IdType : any,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]
 > implements IRepository {
   public readonly columns: Array<string>;
@@ -40,19 +42,25 @@ export class Repository<
     );
   }
   
-  public get(id: any): QueryResult<E> {
+  public get(id: ID): QueryResult<E> {
     return new QueryResult(
       true,
       Promise.resolve(new this.entity({}))
     );
   }
   
-  public update(id: any, options: Partial<A>): QueryResult<E> {
-    return new QueryResult(true, Promise.resolve(new this.entity(options)));
+  public updateById(id: ID, query: (entity: E) => Partial<A>): QueryResult<E> {
+    return new QueryResult(
+      true,
+      Promise.resolve(new this.entity({}))
+    );
   }
   
-  public delete(id: any): QueryResult<E> {
-    return new QueryResult(true, Promise.resolve(new this.entity({})));
+  public delete(id: ID): QueryResult<E> {
+    return new QueryResult(
+      true,
+      Promise.resolve(new this.entity({}))
+    );
   }
 
   // TODO: Find, find by, etc...
