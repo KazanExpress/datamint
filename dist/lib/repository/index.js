@@ -6,5 +6,5 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./factory"));
 __export(require("./entityRepository"));
 __export(require("./recordRepository"));
-__export(require("./common"));
+__export(require("./base"));
 //# sourceMappingURL=index.js.map

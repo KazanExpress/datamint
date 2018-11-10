@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const common_1 = require("./common");
+const base_1 = require("./base");
 const queryResult_1 = require("../queryResult");
-class EntityRepository extends common_1.Repository {
+class EntityRepository extends base_1.Repository {
     constructor(name, connection, entity) {
         super(name, connection, entity);
         this.primaryKey = entity.prototype.__id__;

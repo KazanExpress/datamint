@@ -1,4 +1,4 @@
-import { Repository } from './common';
+import { Repository } from './base';
 import { IStorable, IStorableConstructor } from '../storable';
 import { QueryResult } from '../queryResult';
 export declare class RecordRepository<C extends IStorableConstructor<E>, E extends IStorable = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]> extends Repository<C, E> {
