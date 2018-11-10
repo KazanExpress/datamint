@@ -1,5 +1,5 @@
-import { IStorable } from './istorable';
 import { Key } from '../util';
+import { IStorable } from './istorable';
 export declare class Entity<IDKey extends Key = string, ID = any> implements IStorable {
     private __col__;
     private __idCol__?;

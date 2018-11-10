@@ -1,5 +1,26 @@
+/**
+ * A type of debug errors
+ *
+ * - `soft` - informative, only logs to console
+ * - `hard` - throws exceptions, forcing proper error-handling
+ */
 export declare type ExceptionType = 'soft' | 'hard';
+/**
+ * Dictates the type of debug to set
+ *
+ * - `*` - debug everything
+ * - `connection` - debug the orm connection
+ * - `driver` - debug all drivers
+ * - `driver:[name]` - debug a driver with [name]
+ * - `db` - debug all repositories
+ * - `db:[name]` - debug a repo with [name]
+ * - `db:[name]:entity` - debug all entities in the repository
+ * - `db:[name]:entity:[name]` - debug entity [name]
+ */
 export declare type DebugType = '*' | 'connection' | 'driver' | 'driver:[name]' | 'db' | 'db:[name]' | 'db:[name]:entity' | 'db:[name]:entity:[name]';
+/**
+ * Maps all debug types to all errors types, telling which debug type will throw
+ */
 export declare type IDebugMap = Partial<{
     [key: string]: boolean | ExceptionType;
 }>;

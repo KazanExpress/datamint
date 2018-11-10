@@ -1,19 +1,19 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const repository_1 = require("../repository");
-const fallback_1 = require("../drivers/fallback");
 const debug_1 = require("../debug");
+const fallback_1 = require("../drivers/fallback");
+const repository_1 = require("../repository");
 class Connection {
     /**
      * Creates a WebORM connection instance.
-     * @param connectionName the name of the connection to the storage. Namespaces all respositories invoked from the instance.
+     * @param name the name of the connection to the storage. Namespaces all respositories invoked from the instance.
      * @param drivers determine a variety of drivers the orm can select from. The first one that fits for the environment is selected.
      * @param repositories sets the relation of a repository name to its contents' prototype.
      * @param apiMap maps the API calls onto the current entity structure
      */
-    constructor(connectionName, drivers, repositories, apiMap // TODO
+    constructor(name, drivers, repositories, apiMap // TODO
     ) {
-        this.connectionName = connectionName;
+        this.name = name;
         this.drivers = drivers;
         this.apiMap = apiMap;
         /**
@@ -24,32 +24,32 @@ class Connection {
         const SupportedDriver = drivers.find(d => d.isSupported);
         if (SupportedDriver) {
             // TODO: multi-driver mode
-            debug_1.Debug.log(this.connectionName, 'orm', `Using driver "${SupportedDriver.name}" as the first supported driver`);
+            debug_1.Debug.log(this.name, 'orm', `Using driver "${SupportedDriver.name}" as the first supported driver`);
             this.currentDriver = new SupportedDriver(this);
         }
         else {
-            debug_1.Debug.warn(this.connectionName, 'orm', 'No supported driver provided. Using fallback.');
+            debug_1.Debug.warn(this.name, 'orm', 'No supported driver provided. Using fallback.');
             this.currentDriver = new fallback_1.FallbackDriver(this);
         }
         let reProxy;
         if (!Proxy) {
-            debug_1.Debug.warn(this.connectionName, 'orm', `window.Proxy is unavailable. Using insufficient property forwarding.`);
+            debug_1.Debug.warn(this.name, 'orm', `window.Proxy is unavailable. Using insufficient property forwarding.`);
             reProxy = (repoName) => Object.defineProperty(this, repoName, {
                 get: () => this.repositories[repoName],
             });
         }
         for (const repoName in repositories) {
             const entityConstructor = repositories[repoName];
-            this.repositories[repoName] = new repository_1.Repository(repoName, this, entityConstructor);
+            this.repositories[repoName] = repository_1.makeRepository(repoName, this, entityConstructor);
             reProxy && reProxy(repoName);
         }
         if (Proxy) {
-            debug_1.Debug.log(this.connectionName, 'orm', `window.Proxy is available. Using modern property forwarding.`);
+            debug_1.Debug.log(this.name, 'orm', `window.Proxy is available. Using modern property forwarding.`);
             return new Proxy(this, {
                 get(target, key) {
                     if (!target.repositories[key]) {
                         if (!target[key]) {
-                            debug_1.Debug.log(target.connectionName, 'orm', `Repository "${key}" is not registered upon initialization. No other property with the same name was found.`);
+                            debug_1.Debug.log(target.name, 'orm', `Repository "${key}" is not registered upon initialization. No other property with the same name was found.`);
                         }
                         return target[key];
                     }
