@@ -1,21 +1,21 @@
-import * as WebORM from './namespace';
-import { Constructor, Repository } from '../repository';
+import { Repository } from '../repository';
 import { Driver, IDriverConstructor } from '../drivers';
-import { log, warn } from './logs';
 import { FallbackDriver } from '../drivers/fallback';
+import { IStorableConstructor } from '../storable';
+import { Debug } from '../debug';
+import { DebugType, ExceptionType } from '../debug/types';
 
 export interface IRepositoryMap {
-  [name: string]: Constructor;
+  [name: string]: IStorableConstructor<any>;
 }
 
 export type RepoStore<M extends IRepositoryMap> = {
   [name in keyof M]: Repository<
-    M[name]
+  M[name]
   >;
 };
 
-
-export class WebOrm<T extends IRepositoryMap> {
+export class Connection<T extends IRepositoryMap> {
   // TODO
   // public static readonly plugins: WebORM.IPlugin[] = [];
 
@@ -47,7 +47,7 @@ export class WebOrm<T extends IRepositoryMap> {
 
     if (SupportedDriver) {
       // TODO: multi-driver mode
-      log(
+      Debug.log(
         this.connectionName,
         'orm',
         `Using driver "${SupportedDriver.name}" as the first supported driver`
@@ -55,19 +55,19 @@ export class WebOrm<T extends IRepositoryMap> {
 
       this.currentDriver = new SupportedDriver(this);
     } else {
-      warn(
+      Debug.warn(
         this.connectionName,
         'orm',
         'No supported driver provided. Using fallback.'
       );
-      
+
       this.currentDriver = new FallbackDriver(this);
     }
-    
+
     let reProxy;
-    
+
     if (!Proxy) {
-      warn(
+      Debug.warn(
         this.connectionName,
         'orm',
         `window.Proxy is unavailable. Using insufficient property forwarding.`
@@ -81,13 +81,13 @@ export class WebOrm<T extends IRepositoryMap> {
     for (const repoName in repositories) {
       const entityConstructor = repositories[repoName];
 
-      this.repositories[repoName] = new Repository(this, entityConstructor);
+      this.repositories[repoName] = new Repository(repoName, this, entityConstructor);
 
       reProxy && reProxy(repoName);
     }
 
     if (Proxy) {
-      log(
+      Debug.log(
         this.connectionName,
         'orm',
         `window.Proxy is available. Using modern property forwarding.`
@@ -97,16 +97,16 @@ export class WebOrm<T extends IRepositoryMap> {
         get(target, key: string) {
           if (!target.repositories[key]) {
             if (!target[key]) {
-              log(
+              Debug.log(
                 target.connectionName,
                 'orm',
                 `Repository "${key}" is not registered upon initialization. No other property with the same name was found.`
               );
             }
-            
+
             return target[key];
           }
-          
+
           return target.repositories[key];
         }
       });
@@ -116,72 +116,24 @@ export class WebOrm<T extends IRepositoryMap> {
   //#region Debug
 
   /**
-   * Enable a certain debug option for WebORM.
+   * Enable a certain debug option for WebORM
    *
    * Allows for detailed debug type - exception type mapping.
    */
   public static debug(enabled: boolean): void;
-  public static debug(type: WebORM.DebugType): void;
-  public static debug(type: WebORM.DebugType, exceptions: WebORM.ExceptionType): void;
+  public static debug(type: DebugType): void;
+  public static debug(type: DebugType, exceptions: ExceptionType): void;
   public static debug(type: string): void;
-  public static debug(type: string, exceptions: WebORM.ExceptionType): void;
-  public static debug(type: boolean | string, exceptions?: WebORM.ExceptionType) {
+  public static debug(type: string, exceptions: ExceptionType): void;
+  public static debug(type: boolean | string, exceptions?: ExceptionType) {
     if (typeof type === 'boolean') {
-      this.debugState = type ? 'enabled' : 'disabled';
+      Debug.state = (type ? 'enabled' : 'disabled');
     } else {
-      this.debugState = 'custom';
+      Debug.state = ('custom');
 
-      this.debugMap[type] = exceptions || !this.debugMap[type];
+      Debug.map[type] = exceptions || !Debug.map[type];
     }
   }
-
-  /**
-   * `true` if any debug is enabled
-   */
-  public static get DebugEnabled() { return this.debugState !== 'disabled'; }
-
-  /**
-   * Shows the current debug state of WebORM
-   * 
-   * - `enabled` - all the logs and exceptions are enabled
-   * - `custom` - custom rules are set via a `debug()` function
-   * - `disabled` - all the logs and most exceptions are suppressed
-   */
-  public static get DebugState() { return this.debugState; }
-
-  /**
-   * Returns the current error type for a specific type of debugging
-   */
-  public static errorType(type: string): boolean | WebORM.ExceptionType;
-  public static errorType(type: RegExp): boolean | WebORM.ExceptionType;
-  public static errorType(type: WebORM.DebugType): boolean | WebORM.ExceptionType;
-  public static errorType(type: string | RegExp | WebORM.DebugType): boolean | WebORM.ExceptionType {
-    const constructor = this.constructor as typeof WebOrm;
-
-    if (constructor.debugMap['*']) { return true; }
-
-    const isString = (t): t is string => typeof t === 'string';
-
-    if (isString(type) && constructor.debugMap[type]) {
-      return constructor.debugMap[type]!;
-    }
-
-    if (isString(type)) {
-      const matchingType = Object.keys(constructor.debugMap)
-        .find(t => !!t && t.includes(type) && !!constructor.debugMap[t]) as WebORM.ExceptionType | undefined;
-
-      return matchingType || false;
-    }
-
-    return (Object.keys(constructor.debugMap).find(t => type.test(t)) as WebORM.ExceptionType | undefined) || false;
-  }
-  
-  private static debugState: 'enabled' | 'disabled' | 'custom' = 'disabled';
-
-  /**
-   * Contains the map for all debug types and their respective error types for the ORM.
-   */
-  private static debugMap: WebORM.IDebugMap = {};
 
   //#endregion
 }

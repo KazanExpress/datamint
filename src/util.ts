@@ -1,4 +1,4 @@
-import { WebORM, DebugType } from './orm';
+import { Connection, DebugType } from './orm';
 
 /**
  * fromPath

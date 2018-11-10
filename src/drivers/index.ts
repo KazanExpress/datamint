@@ -1,17 +1,15 @@
-import { WebORM } from '../orm';
+import { Connection } from '../orm';
 
 export interface IDriverConstructor extends Function {
-  new (webOrmInstance: WebORM): Driver;
+  new (connection: Connection): Driver;
 
   readonly isSupported: boolean;
 }
 
 export abstract class Driver {
-  protected orm: WebORM;
-
-  constructor(webOrmInstance: WebORM) {
-    this.orm = webOrmInstance;
-  }
+  constructor(
+    protected connection: Connection
+  ) {}
 
   public abstract create<T extends object>(repositoryName: string, entity: T): Promise<T>;
   public abstract read<T extends object>(repositoryName: string, id: any): Promise<T>;
