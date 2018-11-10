@@ -1,3 +1,7 @@
+type PromiseExecutor<T> = (resolve: (value?: T | PromiseLike<T>) => void, reject: (reason?: any) => void) => void;
+
+
+
 /**
  * Incapsulates the query result data for further manipulation
  *
@@ -8,9 +12,24 @@ export class QueryResult<T> {
   private _result: Promise<T>;
   private handlers: Function[] = [];
 
-  constructor(ok: boolean, result: Promise<T>, public readonly error?: Error) {
+  constructor(ok: boolean, result: PromiseExecutor<T>, error?: Error);
+  constructor(ok: boolean, result: Promise<T>, error?: Error);
+  constructor(
+    ok: boolean,
+    result: Promise<T> | PromiseExecutor<T>,
+    public readonly error?: Error
+  ) {
     this._ok = ok;
-    this._result = result;
+
+    let promise: Promise<T>;
+
+    if (typeof result === 'function') {
+      promise = new Promise(result);
+    } else {
+      promise = result;
+    }
+
+    this._result = promise;
   }
 
   /**
