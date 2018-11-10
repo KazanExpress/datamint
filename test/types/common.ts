@@ -43,3 +43,7 @@ export class User extends Record implements IUser {
     this.cart = options.cart;
   }
 }
+
+export class Broken {
+  public brokenProperty = 'broken';
+}

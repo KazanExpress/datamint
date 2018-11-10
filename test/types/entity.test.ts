@@ -1,11 +1,12 @@
-import { Connection, Entity } from '../../src';
-import { Product, User } from './common';
+import { Connection } from '../../src';
+import { Broken, Product, User } from './common';
 
 describe('types', () => {
   it('types', () => {
     const orm = new Connection('asd', [], {
       Products: Product,
-      User
+      User,
+      Broken
     });
 
     orm.Products.add({
@@ -42,5 +43,7 @@ describe('types', () => {
     )();
 
     orm.User.delete();
+
+    orm.Broken.connection === orm;
   });
 });
