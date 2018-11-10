@@ -79,7 +79,13 @@ export class Connection<T extends IRepositoryMap> {
     for (const repoName in repositories) {
       const entityConstructor = repositories[repoName];
 
-      this.repositories[repoName] = new Repository(repoName, this, entityConstructor);
+      this.repositories[repoName] = new Repository<
+        any,
+        any,
+        any,
+        any,
+        any
+      >(repoName, this, entityConstructor);
 
       reProxy && reProxy(repoName);
     }
