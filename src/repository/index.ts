@@ -1,82 +1,48 @@
-import { QueryResult } from '../queryResult';
 import { Connection } from '../orm';
-import { IStorable, IStorableConstructor } from '../storable';
-import { Entity } from '../storable/entity';
-import { Key } from '../util';
+import { IStorableConstructor, IStorable, Entity, Record } from '../storable';
+import { EntityRepository } from './entityRepository';
+import { RecordRepository } from './recordRepository';
+import { Debug } from '../debug';
 
 /**
  * @TODO:
  * - Async API MAP crap for handling QueryResults
  */
 
-type PartialWithId<T, ID, IDKey extends Key> = Partial<T> & {
-  [key in IDKey]: ID;
-};
-
-export interface IRepository {
-  name: string;
-
-  readonly connection: Connection;
-  readonly columns: Array<string>;
-  readonly primaryKey: Key;
-}
-
 export class Repository<
-  // TODO: hide most of the generic params from end-user...
   C extends IStorableConstructor<E>,
   E extends IStorable = InstanceType<C>,
-  ID = E extends Entity<string, infer IdType> ? IdType : any,
-  IDKey extends string = E extends Entity<infer IdKey, unknown> ? IdKey : string,
-  A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]
-> implements IRepository {
-  public readonly columns: Array<string>;
-  public readonly primaryKey: string | number;
-  
+> {
   constructor(
     public name: string,
-    public readonly connection: Connection,
-    protected entity: C
+    public readonly connection: Connection<any>,
+    protected Data: C
   ) {
-    this.primaryKey = entity.prototype.__id__;
-    this.columns = Object.keys(entity.prototype.__col__);
-    delete entity.prototype.__col__;
-  }
+    if (
+      // If this class was instantiated directly (without inheritance)
+      Repository.prototype === this.constructor.prototype
 
-  public add(options: A): QueryResult<E> {
-    return new QueryResult(
-      true,
-      Promise.resolve(new this.entity(options))
-    );
+      // And set debug for db:[name]
+      && Debug.map[`db:${name}`]
+    ) {
+      Debug.warn(connection.name, `db:${name}`, `Using default empty repository for ${name}`);
+    }
   }
-  
-  public get(id: ID): QueryResult<E> {
-    return new QueryResult(
-      true,
-      Promise.resolve(new this.entity({}))
-    );
-  }
-
-  public update(options: PartialWithId<A, ID, IDKey>): QueryResult<E> {
-    return new QueryResult(
-      true,
-      Promise.resolve(new this.entity({}))
-    );
-  }
-  
-  public updateById(id: ID, query: (entity: E) => Partial<A>): QueryResult<E> {
-    return new QueryResult(
-      true,
-      Promise.resolve(new this.entity({}))
-    );
-  }
-  
-  public delete(id: ID): QueryResult<E> {
-    return new QueryResult(
-      true,
-      Promise.resolve(new this.entity({}))
-    );
-  }
-
-  // TODO: Find, find by, etc...
 }
 
+export function makeRepository<
+  C extends IStorableConstructor<E>,
+  E extends IStorable = InstanceType<C>,
+>(name: string, connection: Connection<any>, data: C) {
+  if (data.prototype instanceof Entity) {
+    return new EntityRepository<C, E, any, any, any>(name, connection, data);
+  } else if (data.prototype instanceof Record) {
+    return new RecordRepository<C, E>(name, connection, data);
+  } else {
+    Debug.error(connection.name, 'db', `No suitable repository found for ${data.name} when trying to connect with ${name}.`);
+
+    return new Repository<C, E>(name, connection, data);
+  }
+}
+
+export * from './entityRepository';
