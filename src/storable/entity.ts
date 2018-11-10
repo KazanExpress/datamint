@@ -1,11 +1,10 @@
 import { IStorable } from './istorable';
+import { IRepository, Repository } from '../repository';
 
 export class Entity<ID = any> implements IStorable {
   constructor(options) {
     
   }
-
-  public repository;
 
   public $setID(id: ID) {
     
