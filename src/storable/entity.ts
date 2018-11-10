@@ -1,6 +1,6 @@
 import { IStorable } from './istorable';
 
-export class Entity implements IStorable {
+export class Entity<ID = any> implements IStorable {
   constructor(options) {
     
   }
