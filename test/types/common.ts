@@ -1,14 +1,14 @@
-import { Entity, ID, Column } from '../../src';
+import { Entity, ID, Column, Record } from '../../src';
 
 export class Product extends Entity<'id', number> {
-  @Entity.ID
-  @Entity.Column
+  @ID
+  @Column
   public id: number;
 
-  @Entity.Column
+  @Column
   public title: string;
 
-  @Entity.Column
+  @Column
   public url: string;
 
   constructor(options: {
@@ -29,19 +29,15 @@ export interface IUser {
   cart: Product[];
 }
 
-export class User extends Entity<'name', string> implements IUser {
-  @ID
-  @Column
+export class User extends Record implements IUser {
   public name: string;
 
-  @Column
   public birthDate: Date;
 
-  @Column
   public cart: Product[];
 
   constructor(options: IUser) {
-    super(options);
+    super();
     this.name = options.name;
     this.birthDate = options.birthDate;
     this.cart = options.cart;
