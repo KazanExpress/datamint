@@ -9,7 +9,7 @@ describe('types', () => {
       Broken
     }, {
       User: {
-        create(username: string, password: string) {
+        create({ username }: { username: string; password: string }) {
           return Promise.resolve(new User({
             birthDate: new Date(),
             cart: [],
@@ -25,21 +25,19 @@ describe('types', () => {
         }
       },
       Products: {
-        create(title: string, id: number, url: string) {
-          return Promise.resolve(new Product({
-            title,
-            id,
-            url
-          }));
+        create(options: { title: string; id: number; url: string }) {
+          return Promise.resolve(new Product(options));
         }
       }
     });
 
-    orm.Products.add({
+    const podguzniki = {
       id: 0,
       title: 'podguzniki',
       url: '/products'
-    });
+    };
+
+    orm.Products.add(podguzniki, podguzniki);
 
     orm.Products.update({
       id: 0,

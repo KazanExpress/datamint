@@ -11,7 +11,7 @@ type PartialWithId<T, ID, IDKey extends Key> = Partial<T> & {
   [key in IDKey]: ID;
 };
 
-type Args<T extends undefined | ((...args: any[]) => any)> = T extends (...args: infer U) => any ? U : any;
+type Arg<T extends undefined | ((arg: any) => any)> = T extends (arg: infer U) => any ? U : undefined;
 
 export class EntityRepository<
   // TODO: hide most of the generic params from end-user..?
@@ -42,7 +42,11 @@ export class EntityRepository<
 
   public test?: DM;
 
-  public async add(options: A, apiOptions?: Args<DM['create']>) {
+  public async add(
+    options: A,
+    // TODO: up to debate - singular arguments always or multiple args inference?
+    apiOptions?: Arg<DM['create']>
+  ) {
     const instance = new this.Data(options);
 
     try {
