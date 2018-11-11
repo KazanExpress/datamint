@@ -8,14 +8,15 @@ type PromiseExecutor<T> = (resolve: (value?: T | PromiseLike<T>) => void, reject
 export class QueryResult<T> {
   private _ok: boolean;
   private _result: Promise<T>;
-  private handlers: Function[] = [];
+  private _error?: Error;
+  private handlers: ((error?: Error, result?: T) => any)[] = [];
 
   constructor(ok: boolean, result: PromiseExecutor<T>, error?: Error);
   constructor(ok: boolean, result: Promise<T>, error?: Error);
   constructor(
     ok: boolean,
     result: Promise<T> | PromiseExecutor<T>,
-    public readonly error?: Error
+    error?: Error
   ) {
     this._ok = ok;
 
@@ -28,6 +29,8 @@ export class QueryResult<T> {
     }
 
     this._result = promise;
+
+    this._error = error;
   }
 
   /**
@@ -40,24 +43,44 @@ export class QueryResult<T> {
    */
   public get result() { return this._result; }
   public set result(value: Promise<T>) {
+    this._ok = true;
     this._result = value;
-    this.handlers.forEach(async h => h());
+    this.handlers.forEach(this.callHandler);
   }
 
+  /**
+   * The error of the query (if any)
+   */
+  public get error() { return this._error; }
+  public set error(value) {
+    this._ok = false;
+    this._error = value;
+    this.handlers.forEach(this.callHandler);
+  }
+
+  private async callHandler(h) {
+    try {
+      const res = await this.result;
+      h(this.error, res);
+    } catch (e) {
+      this._ok = false;
+      h(e);
+    }
+  }
 
   /**
    * Fires a handler whenever the data in the result has been changed
    *
    * @param callback the callback to fire
    */
-  public onChange(callback: Function) {
+  public onChange(callback: (error?: Error, result?: T) => any) {
     this.handlers.push(callback);
   }
 
   /**
    * Unsubscribe the callback from the result data changes
    */
-  public offChange(callback: Function) {
+  public offChange(callback: (error?: Error, result?: T) => any) {
     const idx = this.handlers.indexOf(callback);
 
     if (idx > -1) {
