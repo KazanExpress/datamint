@@ -1,3 +1,4 @@
+import { DataMap } from '../apiMap';
 import { Debug } from '../debug';
 import { Driver } from '../drivers';
 import { ApiDriver } from '../drivers/api';
@@ -5,7 +6,6 @@ import { Entity, IStorable, IStorableConstructor, Record } from '../storable';
 import { Repository } from './base';
 import { EntityRepository } from './entityRepository';
 import { RecordRepository } from './recordRepository';
-import { DataMap } from '../apiMap';
 
 export function makeRepository<
   DM extends DataMap<any>,

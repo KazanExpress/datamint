@@ -1,6 +1,5 @@
-import { IStorable, Entity } from './storable';
-import { RepoStore, IRepositoryMap } from './orm/connection';
-import { EntityRepository, RecordRepository } from './repository';
+import { IRepositoryMap } from './orm/connection';
+import { IStorable } from './storable';
 
 export type Fabric<S> = (...options: any[]) => Promise<S>;
 

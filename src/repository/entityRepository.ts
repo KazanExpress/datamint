@@ -1,11 +1,10 @@
-import { Connection } from '../orm/connection';
+import { DataMap } from '../apiMap';
+import { Driver } from '../drivers';
+import { ApiDriver } from '../drivers/api';
 import { QueryResult } from '../queryResult';
 import { Entity, IStorable, IStorableConstructor } from '../storable';
 import { Key } from '../util';
 import { Repository } from './base';
-import { Driver } from '../drivers';
-import { ApiDriver } from '../drivers/api';
-import { DataMap } from '../apiMap';
 
 type PartialWithId<T, ID, IDKey extends Key> = Partial<T> & {
   [key in IDKey]: ID;

@@ -1,8 +1,8 @@
+import { DataMap } from '../apiMap';
 import { Debug } from '../debug';
-import { IStorable, IStorableConstructor } from '../storable';
 import { Driver } from '../drivers';
 import { ApiDriver } from '../drivers/api';
-import { DataMap } from '../apiMap';
+import { IStorable, IStorableConstructor } from '../storable';
 
 /**
  * @TODO:

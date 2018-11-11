@@ -1,8 +1,7 @@
+import { DataMap } from '../apiMap';
 import { QueryResult } from '../queryResult';
 import { IStorable, IStorableConstructor } from '../storable';
 import { Repository } from './base';
-import { Connection } from '../orm';
-import { DataMap } from '../apiMap';
 
 export class RecordRepository<
   DM extends DataMap<any>,

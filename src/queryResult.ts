@@ -1,5 +1,3 @@
-type PromiseExecutor<T> = (resolve: (value?: T | PromiseLike<T>) => void, reject: (reason?: any) => void) => void;
-
 /**
  * Incapsulates the query result data for further manipulation
  *

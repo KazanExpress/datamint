@@ -1,11 +1,11 @@
+import { ApiMap, DataMap } from '../apiMap';
 import { Debug, DebugType, ExceptionType } from '../debug';
 import { Driver, IDriverConstructor } from '../drivers';
+import { ApiDriver } from '../drivers/api';
 import { FallbackDriver } from '../drivers/fallback';
 import { EntityRepository, makeRepository, Repository } from '../repository';
 import { RecordRepository } from '../repository/recordRepository';
 import { Entity, IStorableConstructor, Record } from '../storable';
-import { ApiMap, DataMap } from '../apiMap';
-import { ApiDriver } from '../drivers/api';
 
 export interface IRepositoryMap {
   [name: string]: IStorableConstructor<any>;
