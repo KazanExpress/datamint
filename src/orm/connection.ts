@@ -4,19 +4,27 @@ import { FallbackDriver } from '../drivers/fallback';
 import { EntityRepository, makeRepository, Repository } from '../repository';
 import { RecordRepository } from '../repository/recordRepository';
 import { Entity, IStorableConstructor, Record } from '../storable';
-import { ApiMap } from '../apiMap';
+import { ApiMap, DataMap } from '../apiMap';
 import { ApiDriver } from '../drivers/api';
 
 export interface IRepositoryMap {
   [name: string]: IStorableConstructor<any>;
 }
 
-export type RepoStore<M extends IRepositoryMap> = {
-  [name in keyof M]: InstanceType<M[name]> extends Entity ? EntityRepository<M[name]>
-    : (InstanceType<M[name]> extends Record ? RecordRepository<M[name]> : Repository<M[name]>);
+export type RepoFromConstructor<
+  S extends IStorableConstructor<any>,
+  D extends DataMap<any> = any
+> = InstanceType<S> extends Entity ? EntityRepository<D, S>
+  : (InstanceType<S> extends Record ? RecordRepository<D, S> : Repository<D, S>);
+
+export type RepoStore<M extends IRepositoryMap, A extends ApiMap<any>> = {
+  [name in (keyof M | keyof A)]: RepoFromConstructor<name extends keyof M ? M[name] : any, name extends keyof A ? (A[name] extends DataMap<any> ? A[name] : any) : any>;
 };
 
-export class Connection<T extends IRepositoryMap> {
+export class Connection<
+  RM extends IRepositoryMap = IRepositoryMap,
+  AM extends ApiMap<any> = ApiMap<RM>,
+> {
   // TODO
   // public static readonly plugins: WebRM.IPlugin[] = [];
 
@@ -33,7 +41,7 @@ export class Connection<T extends IRepositoryMap> {
   /**
    * A current map of bound repositories
    */
-  public repositories: RepoStore<T> = {} as any;
+  public repositories: RepoStore<RM, AM> = {} as any;
 
   /**
    * Creates a WebRM connection instance.
@@ -45,8 +53,8 @@ export class Connection<T extends IRepositoryMap> {
   constructor(
     public name: string,
     public drivers: IDriverConstructor[],
-    repositories: T,
-    public readonly apiMap?: ApiMap<RepoStore<T>>
+    repositories: RM,
+    public readonly apiMap?: AM
   ) {
     if (apiMap) {
       this.apiDriver = new ApiDriver(this, apiMap);
@@ -93,7 +101,11 @@ export class Connection<T extends IRepositoryMap> {
     for (const repoName in repositories) {
       const entityConstructor = repositories[repoName];
 
-      this.repositories[repoName] = makeRepository(repoName, this, entityConstructor) as any;
+      this.repositories[repoName] = makeRepository(repoName, {
+        name: this.name,
+        apiDriver: this.apiDriver,
+        currentDriver: this.currentDriver
+      }, entityConstructor) as any;
 
       reProxy && reProxy(repoName);
     }

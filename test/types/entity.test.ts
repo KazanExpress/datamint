@@ -9,11 +9,27 @@ describe('types', () => {
       Broken
     }, {
       User: {
-        create(username, password) {
+        create(username: string, password: string) {
           return Promise.resolve(new User({
             birthDate: new Date(),
             cart: [],
             name: username
+          }));
+        },
+        delete() {
+          return Promise.resolve(new User({
+            birthDate: new Date(),
+            cart: [],
+            name: 'asd'
+          }));
+        }
+      },
+      Products: {
+        create(title: string, id: number, url: string) {
+          return Promise.resolve(new Product({
+            title,
+            id,
+            url
           }));
         }
       }
@@ -30,11 +46,11 @@ describe('types', () => {
       title: 'Cool Podguzninki for cool kids!'
     });
 
-    orm.Products.updateById(0, product => ({
-      url: `/products/${product.id}`
-    }));
+    // orm.Products.updateById(0, product => ({
+    //   url: `/products/${product.id}`
+    // }));
 
-    orm.Products.delete(0);
+    // orm.Products.delete(0);
 
     expect(orm.User.name).toBe('User');
 
@@ -54,6 +70,6 @@ describe('types', () => {
 
     orm.User.delete();
 
-    orm.Broken.connection === orm;
+    typeof orm.Broken.name === 'string';
   });
 });

@@ -2,12 +2,14 @@ import { QueryResult } from '../queryResult';
 import { IStorable, IStorableConstructor } from '../storable';
 import { Repository } from './base';
 import { Connection } from '../orm';
+import { DataMap } from '../apiMap';
 
 export class RecordRepository<
+  DM extends DataMap<any>,
   C extends IStorableConstructor<E>,
   E extends IStorable = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
-> extends Repository<C, E, A> {
+> extends Repository<DM, C, E, A> {
   public create(options: A): QueryResult<E> {
     return new QueryResult(
       true,

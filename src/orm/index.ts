@@ -1,5 +1,5 @@
 import { IDriverConstructor } from '../drivers';
-import { ApiMap } from '../apiMap';
+import { ApiMap, DataMap } from '../apiMap';
 import { Connection as connection, IRepositoryMap, RepoStore } from './connection';
 
 export const Connection = connection as {
@@ -10,15 +10,21 @@ export const Connection = connection as {
    * @param repositories sets the relation of a repository name to its contents' prototype.
    * @param apiMap maps the API calls onto the current data structure.
    */
-  new <T extends IRepositoryMap>(
+  new <
+    RM extends IRepositoryMap = IRepositoryMap,
+    AM extends ApiMap<any> = ApiMap<RM>
+  >(
       name: string,
       drivers: IDriverConstructor[],
-      repositories: T,
-      apiMap?: ApiMap<RepoStore<T>>
-  ): connection<T> & RepoStore<T>;
+      repositories: RM,
+      apiMap?: AM
+  ): connection<RM, AM> & RepoStore<RM, AM>;
 } & typeof connection;
 
-export type Connection<T extends IRepositoryMap = any> = connection<T>;
+export type Connection<
+RM extends IRepositoryMap = any,
+AM extends ApiMap<any> = any
+> = connection<RM, AM>;
 
 export * from './namespace';
 

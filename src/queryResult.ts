@@ -26,7 +26,7 @@ export class QueryResult<T> {
    * The resulting data of the query request
    */
   public get result() { return this._result; }
-  public set result(value: T) {
+  public set result(value) {
     this._ok = true;
     this._result = value;
     this.handlers.forEach(h => h(this.error, this.result));

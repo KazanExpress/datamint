@@ -5,7 +5,7 @@ import { ApiMap } from '../apiMap';
 /* TODO */
 export class ApiDriver extends Driver {
   constructor(
-    connection: Connection<any>,
+    connection: Connection<any, any>,
     protected apiMap: ApiMap<any>
   ) { super(connection); }
 
