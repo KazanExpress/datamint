@@ -1,5 +1,5 @@
-import { Connection, ApiMap } from '../../src';
-import { Broken, Product, User, IUser } from './common';
+import { Connection } from '../../src';
+import { Broken, Product, User } from './common';
 
 describe('types', () => {
   it('types', () => {

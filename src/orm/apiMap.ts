@@ -1,6 +1,6 @@
-import { RepoStore } from './orm/connection';
-import { EntityRepository, RecordRepository } from './repository';
-import { IStorable } from './storable';
+import { RepoStore } from './connection';
+import { EntityRepository, RecordRepository } from '../repository';
+import { IStorable } from '../storable';
 
 export type Fabric<S extends IStorable> = (...options: any[]) => Promise<S>;
 

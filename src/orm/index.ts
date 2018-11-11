@@ -1,6 +1,6 @@
 import { IDriverConstructor } from '../drivers';
+import { ApiMap } from './apiMap';
 import { Connection as connection, IRepositoryMap, RepoStore } from './connection';
-import { ApiMap } from '../apiMap';
 
 export const Connection = connection as {
   /**
