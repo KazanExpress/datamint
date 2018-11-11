@@ -94,7 +94,7 @@ export abstract class Debug {
   public static errorType(type: RegExp): boolean | ExceptionType;
   public static errorType(type: DebugType): boolean | ExceptionType;
   public static errorType(type: string | RegExp | DebugType): boolean | ExceptionType {
-    if (this.map['*']) { return true; }
+    if (this.map['*']) { return this.map['*']!; }
 
     const isString = (t): t is string => typeof t === 'string';
 
