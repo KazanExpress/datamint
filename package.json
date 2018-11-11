@@ -1,15 +1,15 @@
 {
-  "name": "web-orm",
+  "name": "webrm",
   "version": "0.0.0",
   "description": "An ORM that works over Web 💪",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/KazanExpress/web-orm.git"
+    "url": "git+https://github.com/KazanExpress/webrm.git"
   },
   "keywords": [
     "ORM",
     "web",
-    "web-orm",
+    "webrm",
     "IndexedDB",
     "indexeddb",
     "localStorage",
@@ -20,13 +20,13 @@
     "api"
   ],
   "bugs": {
-    "url": "https://github.com/KazanExpress/web-orm/issues"
+    "url": "https://github.com/KazanExpress/webrm/issues"
   },
-  "homepage": "https://github.com/KazanExpress/web-orm#readme",
-  "main": "dist/web-orm.es5.js",
-  "module": "dist/web-orm.es.js",
-  "unpkg": "dist/web-orm.iife.js",
-  "typings": "dist/types/web-orm.d.ts",
+  "homepage": "https://github.com/KazanExpress/webrm#readme",
+  "main": "dist/webrm.es5.js",
+  "module": "dist/webrm.es.js",
+  "unpkg": "dist/webrm.iife.js",
+  "typings": "dist/types/webrm.d.ts",
   "files": [
     "dist"
   ],

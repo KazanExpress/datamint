@@ -17,7 +17,7 @@ export type RepoStore<M extends IRepositoryMap> = {
 
 export class Connection<T extends IRepositoryMap> {
   // TODO
-  // public static readonly plugins: WebORM.IPlugin[] = [];
+  // public static readonly plugins: WebRM.IPlugin[] = [];
 
   /**
    * The driver currently used for operations with entities
@@ -30,7 +30,7 @@ export class Connection<T extends IRepositoryMap> {
   public repositories: RepoStore<T> = {} as any;
 
   /**
-   * Creates a WebORM connection instance.
+   * Creates a WebRM connection instance.
    * @param name the name of the connection to the storage. Namespaces all respositories invoked from the instance.
    * @param drivers determine a variety of drivers the orm can select from. The first one that fits for the environment is selected.
    * @param repositories sets the relation of a repository name to its contents' prototype.
@@ -116,7 +116,7 @@ export class Connection<T extends IRepositoryMap> {
   //#region Debug
 
   /**
-   * Enable a certain debug option for WebORM
+   * Enable a certain debug option for WebRM
    *
    * Allows for detailed debug type - exception type mapping.
    */

@@ -1,15 +1,8 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-class Driver {
-    constructor(connection) {
-        this.connection = connection;
-    }
-    /**
-     * Determines if the driver is supported in current environment
-     */
-    static get isSupported() {
-        throw new Error('Not implemented.');
-    }
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
-exports.Driver = Driver;
+Object.defineProperty(exports, "__esModule", { value: true });
+__export(require("./base"));
+__export(require("./fallback"));
 //# sourceMappingURL=index.js.map

@@ -37,7 +37,7 @@ export declare abstract class Debug {
      */
     static readonly isEnabled: boolean;
     /**
-     * Shows the current debug state of WebORM
+     * Shows the current debug state of WebRM
      *
      * - `enabled` - all the logs and exceptions are enabled
      * - `custom` - custom rules are set via a `debug()` function

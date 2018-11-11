@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const LOG_PREFIX = (name) => name ? `[WebORM:${name}]` : `[WebORM]`;
+const LOG_PREFIX = (name) => name ? `[WebRM:${name}]` : `[WebRM]`;
 class Debug {
     constructor() { }
     /**
@@ -8,7 +8,7 @@ class Debug {
      */
     static get isEnabled() { return this.debugState !== 'disabled'; }
     /**
-     * Shows the current debug state of WebORM
+     * Shows the current debug state of WebRM
      *
      * - `enabled` - all the logs and exceptions are enabled
      * - `custom` - custom rules are set via a `debug()` function

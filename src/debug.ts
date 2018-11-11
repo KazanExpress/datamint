@@ -1,8 +1,8 @@
-const LOG_PREFIX = (name: string) => name ? `[WebORM:${name}]` : `[WebORM]`;
+const LOG_PREFIX = (name: string) => name ? `[WebRM:${name}]` : `[WebRM]`;
 
 /**
  * A type of debug errors
- * 
+ *
  * - `soft` - informative, only logs to console
  * - `hard` - throws exceptions, forcing proper error-handling
  */
@@ -10,7 +10,7 @@ export type ExceptionType = 'soft' | 'hard';
 
 /**
  * Dictates the type of debug to set
- * 
+ *
  * - `*` - debug everything
  * - `connection` - debug the orm connection
  * - `driver` - debug all drivers
@@ -48,15 +48,15 @@ export abstract class Debug {
    */
   public static readonly map: IDebugMap = {};
 
-  
+
   /**
    * `true` if any debug is enabled
    */
   public static get isEnabled() { return this.debugState !== 'disabled'; }
 
   /**
-   * Shows the current debug state of WebORM
-   * 
+   * Shows the current debug state of WebRM
+   *
    * - `enabled` - all the logs and exceptions are enabled
    * - `custom` - custom rules are set via a `debug()` function
    * - `disabled` - all the logs and most exceptions are suppressed
@@ -64,7 +64,7 @@ export abstract class Debug {
   public static get state() { return this.debugState; }
   public static set state(v) { this.debugState = v; }
 
-  
+
   public static error(instanceName: string, type: string, message: string);
   public static error(instanceName: string, type: RegExp, message: string);
   public static error(instanceName: string, type: DebugType, message: string);
@@ -78,7 +78,7 @@ export abstract class Debug {
   public static log(instanceName: string, type: any, message: string) {
     return this.print(instanceName, type, message, 'log');
   }
-  
+
   public static warn(instanceName: string, type: string, message: string);
   public static warn(instanceName: string, type: RegExp, message: string);
   public static warn(instanceName: string, type: DebugType, message: string);
@@ -112,7 +112,7 @@ export abstract class Debug {
     return (Object.keys(this.map).find(t => type.test(t)) as ExceptionType | undefined) || false;
   }
 
-  
+
   public static print(instanceName: string, type: any, message: string, level: LogLevel) {
     if (this.debugState !== 'disabled') {
       const typeOfError = this.errorType(type);
@@ -143,7 +143,7 @@ export abstract class Debug {
       Object.defineProperty(target, key, {
         get: () => {
           this.print('', type, message, level);
-  
+
           return this.decoratedLogs[key];
         },
         set: v => {
@@ -152,5 +152,5 @@ export abstract class Debug {
       });
     };
   }
-  
+
 }

@@ -1,4 +1,4 @@
-const LOG_PREFIX = (name) => name ? `[WebORM:${name}]` : `[WebORM]`;
+const LOG_PREFIX = (name) => name ? `[WebRM:${name}]` : `[WebRM]`;
 class Debug {
     constructor() { }
     /**
@@ -6,7 +6,7 @@ class Debug {
      */
     static get isEnabled() { return this.debugState !== 'disabled'; }
     /**
-     * Shows the current debug state of WebORM
+     * Shows the current debug state of WebRM
      *
      * - `enabled` - all the logs and exceptions are enabled
      * - `custom` - custom rules are set via a `debug()` function
@@ -146,68 +146,6 @@ class FallbackDriver extends Driver {
 }
 
 /**
- * fromPath
- * Returns a value from an object by a given path (usually string).
- *
- * https://gist.github.com/Raiondesu/759425dede5b7ff38db51ea5a1fb8f11
- *
- * @param obj an object to get a value from.
- * @param path to get a value by.
- * @param splitter to split the path by. Default is '.' ('obj.path.example')
- * @returns a value from a given path. If a path is invalid - returns undefined.
- */
-function NonEnumerable(target, key, desc = {}) {
-    Object.defineProperty(target, key, Object.assign({}, desc, { 
-        // TODO: check to be writable
-        enumerable: false }));
-}
-
-class Entity {
-    constructor(options) {
-        // TODO: check to be writable
-        this.__col__ = [];
-        if (this.__idCol__) {
-            this.__idValue__ = options[this.__idCol__];
-        }
-    }
-    $save() {
-        return Promise.resolve();
-    }
-    $delete() {
-        return Promise.resolve();
-    }
-    static Column(target, key) {
-        target.__col__.push(key);
-    }
-    static ID(target, key) {
-        target.__idCol__ = key;
-    }
-}
-__decorate([
-    NonEnumerable,
-    __metadata("design:type", Array)
-], Entity.prototype, "__col__", void 0);
-__decorate([
-    NonEnumerable,
-    __metadata("design:type", Object)
-], Entity.prototype, "__idCol__", void 0);
-__decorate([
-    NonEnumerable,
-    __metadata("design:type", Object)
-], Entity.prototype, "__idValue__", void 0);
-const Column = Entity.Column;
-const ID = Entity.ID;
-
-class Record {
-    $save() {
-        throw new Error('Method not implemented.');
-    }
-    $delete() {
-        throw new Error('Method not implemented.');
-    }
-}
-
-/**
  * @TODO:
  * - Async API MAP crap for handling QueryResults
  */
@@ -300,6 +238,68 @@ class EntityRepository extends Repository {
     }
 }
 
+/**
+ * fromPath
+ * Returns a value from an object by a given path (usually string).
+ *
+ * https://gist.github.com/Raiondesu/759425dede5b7ff38db51ea5a1fb8f11
+ *
+ * @param obj an object to get a value from.
+ * @param path to get a value by.
+ * @param splitter to split the path by. Default is '.' ('obj.path.example')
+ * @returns a value from a given path. If a path is invalid - returns undefined.
+ */
+function NonEnumerable(target, key, desc = {}) {
+    Object.defineProperty(target, key, Object.assign({}, desc, { 
+        // TODO: check to be writable
+        enumerable: false }));
+}
+
+class Entity {
+    constructor(options) {
+        // TODO: check to be writable
+        this.__col__ = [];
+        if (this.__idCol__) {
+            this.__idValue__ = options[this.__idCol__];
+        }
+    }
+    $save() {
+        return Promise.resolve();
+    }
+    $delete() {
+        return Promise.resolve();
+    }
+    static Column(target, key) {
+        target.__col__.push(key);
+    }
+    static ID(target, key) {
+        target.__idCol__ = key;
+    }
+}
+__decorate([
+    NonEnumerable,
+    __metadata("design:type", Array)
+], Entity.prototype, "__col__", void 0);
+__decorate([
+    NonEnumerable,
+    __metadata("design:type", Object)
+], Entity.prototype, "__idCol__", void 0);
+__decorate([
+    NonEnumerable,
+    __metadata("design:type", Object)
+], Entity.prototype, "__idValue__", void 0);
+const Column = Entity.Column;
+const ID = Entity.ID;
+
+class Record {
+    $save() {
+        throw new Error('Method not implemented.');
+    }
+    $delete() {
+        throw new Error('Method not implemented.');
+    }
+}
+
 class RecordRepository extends Repository {
     create(options) {
         return new QueryResult(true, Promise.resolve(new this.Data(options)));
@@ -330,14 +330,13 @@ function makeRepository(name, connection, data) {
 
 class Connection {
     /**
-     * Creates a WebORM connection instance.
+     * Creates a WebRM connection instance.
      * @param name the name of the connection to the storage. Namespaces all respositories invoked from the instance.
      * @param drivers determine a variety of drivers the orm can select from. The first one that fits for the environment is selected.
      * @param repositories sets the relation of a repository name to its contents' prototype.
      * @param apiMap maps the API calls onto the current entity structure
      */
-    constructor(name, drivers, repositories, apiMap // TODO
-    ) {
+    constructor(name, drivers, repositories, apiMap) {
         this.name = name;
         this.drivers = drivers;
         this.apiMap = apiMap;
@@ -397,4 +396,4 @@ class Connection {
 const Connection$1 = Connection;
 
 export { Connection$1 as Connection, Entity, Column, ID, Record };
-//# sourceMappingURL=weborm.es.js.map
+//# sourceMappingURL=webrm.es.js.map

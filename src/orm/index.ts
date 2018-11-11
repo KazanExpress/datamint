@@ -4,7 +4,7 @@ import { Connection as connection, IRepositoryMap, RepoStore } from './connectio
 
 export const Connection = connection as {
   /**
-   * Creates a WebORM connection instance.
+   * Creates a WebRM connection instance.
    * @param name the name of the connection to the storage. Namespaces all respositories invoked from the instance.
    * @param drivers determine a variety of drivers the orm can select from. The first one that fits for the environment is selected.
    * @param repositories sets the relation of a repository name to its contents' prototype.

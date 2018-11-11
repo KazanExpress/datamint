@@ -5,14 +5,13 @@ const fallback_1 = require("../drivers/fallback");
 const repository_1 = require("../repository");
 class Connection {
     /**
-     * Creates a WebORM connection instance.
+     * Creates a WebRM connection instance.
      * @param name the name of the connection to the storage. Namespaces all respositories invoked from the instance.
      * @param drivers determine a variety of drivers the orm can select from. The first one that fits for the environment is selected.
      * @param repositories sets the relation of a repository name to its contents' prototype.
      * @param apiMap maps the API calls onto the current entity structure
      */
-    constructor(name, drivers, repositories, apiMap // TODO
-    ) {
+    constructor(name, drivers, repositories, apiMap) {
         this.name = name;
         this.drivers = drivers;
         this.apiMap = apiMap;

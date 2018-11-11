@@ -8,8 +8,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const _1 = require(".");
-class FallbackDriver extends _1.Driver {
+const base_1 = require("./base");
+class FallbackDriver extends base_1.Driver {
     create(repositoryName, entity) {
         throw new Error('Method not implemented.');
     }

@@ -1,7 +1,10 @@
-var weborm = (function (exports) {
-  'use strict';
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+  typeof define === 'function' && define.amd ? define(['exports'], factory) :
+  (factory((global.webrm = {})));
+}(this, (function (exports) { 'use strict';
 
-  var LOG_PREFIX = function (name) { return name ? "[WebORM:" + name + "]" : "[WebORM]"; };
+  var LOG_PREFIX = function (name) { return name ? "[WebRM:" + name + "]" : "[WebRM]"; };
   var Debug = /** @class */ (function () {
       function Debug() {
       }
@@ -15,7 +18,7 @@ var weborm = (function (exports) {
       });
       Object.defineProperty(Debug, "state", {
           /**
-           * Shows the current debug state of WebORM
+           * Shows the current debug state of WebRM
            *
            * - `enabled` - all the logs and exceptions are enabled
            * - `custom` - custom rules are set via a `debug()` function
@@ -227,62 +230,6 @@ var weborm = (function (exports) {
       return FallbackDriver;
   }(Driver));
 
-  function NonEnumerable(target, key, desc) {
-      if (desc === void 0) { desc = {}; }
-      Object.defineProperty(target, key, __assign({}, desc, { 
-          // TODO: check to be writable
-          enumerable: false }));
-  }
-
-  var Entity = /** @class */ (function () {
-      function Entity(options) {
-          // TODO: check to be writable
-          this.__col__ = [];
-          if (this.__idCol__) {
-              this.__idValue__ = options[this.__idCol__];
-          }
-      }
-      Entity.prototype.$save = function () {
-          return Promise.resolve();
-      };
-      Entity.prototype.$delete = function () {
-          return Promise.resolve();
-      };
-      Entity.Column = function (target, key) {
-          target.__col__.push(key);
-      };
-      Entity.ID = function (target, key) {
-          target.__idCol__ = key;
-      };
-      __decorate([
-          NonEnumerable,
-          __metadata("design:type", Array)
-      ], Entity.prototype, "__col__", void 0);
-      __decorate([
-          NonEnumerable,
-          __metadata("design:type", Object)
-      ], Entity.prototype, "__idCol__", void 0);
-      __decorate([
-          NonEnumerable,
-          __metadata("design:type", Object)
-      ], Entity.prototype, "__idValue__", void 0);
-      return Entity;
-  }());
-  var Column = Entity.Column;
-  var ID = Entity.ID;
-
-  var Record = /** @class */ (function () {
-      function Record() {
-      }
-      Record.prototype.$save = function () {
-          throw new Error('Method not implemented.');
-      };
-      Record.prototype.$delete = function () {
-          throw new Error('Method not implemented.');
-      };
-      return Record;
-  }());
-
   /**
    * @TODO:
    * - Async API MAP crap for handling QueryResults
@@ -392,6 +339,62 @@ var weborm = (function (exports) {
       return EntityRepository;
   }(Repository));
 
+  function NonEnumerable(target, key, desc) {
+      if (desc === void 0) { desc = {}; }
+      Object.defineProperty(target, key, __assign({}, desc, { 
+          // TODO: check to be writable
+          enumerable: false }));
+  }
+
+  var Entity = /** @class */ (function () {
+      function Entity(options) {
+          // TODO: check to be writable
+          this.__col__ = [];
+          if (this.__idCol__) {
+              this.__idValue__ = options[this.__idCol__];
+          }
+      }
+      Entity.prototype.$save = function () {
+          return Promise.resolve();
+      };
+      Entity.prototype.$delete = function () {
+          return Promise.resolve();
+      };
+      Entity.Column = function (target, key) {
+          target.__col__.push(key);
+      };
+      Entity.ID = function (target, key) {
+          target.__idCol__ = key;
+      };
+      __decorate([
+          NonEnumerable,
+          __metadata("design:type", Array)
+      ], Entity.prototype, "__col__", void 0);
+      __decorate([
+          NonEnumerable,
+          __metadata("design:type", Object)
+      ], Entity.prototype, "__idCol__", void 0);
+      __decorate([
+          NonEnumerable,
+          __metadata("design:type", Object)
+      ], Entity.prototype, "__idValue__", void 0);
+      return Entity;
+  }());
+  var Column = Entity.Column;
+  var ID = Entity.ID;
+
+  var Record = /** @class */ (function () {
+      function Record() {
+      }
+      Record.prototype.$save = function () {
+          throw new Error('Method not implemented.');
+      };
+      Record.prototype.$delete = function () {
+          throw new Error('Method not implemented.');
+      };
+      return Record;
+  }());
+
   var RecordRepository = /** @class */ (function (_super) {
       __extends(RecordRepository, _super);
       function RecordRepository() {
@@ -427,14 +430,13 @@ var weborm = (function (exports) {
 
   var Connection = /** @class */ (function () {
       /**
-       * Creates a WebORM connection instance.
+       * Creates a WebRM connection instance.
        * @param name the name of the connection to the storage. Namespaces all respositories invoked from the instance.
        * @param drivers determine a variety of drivers the orm can select from. The first one that fits for the environment is selected.
        * @param repositories sets the relation of a repository name to its contents' prototype.
        * @param apiMap maps the API calls onto the current entity structure
        */
-      function Connection(name, drivers, repositories, apiMap // TODO
-      ) {
+      function Connection(name, drivers, repositories, apiMap) {
           var _this = this;
           this.name = name;
           this.drivers = drivers;
@@ -501,7 +503,7 @@ var weborm = (function (exports) {
   exports.ID = ID;
   exports.Record = Record;
 
-  return exports;
+  Object.defineProperty(exports, '__esModule', { value: true });
 
-}({}));
-//# sourceMappingURL=weborm.iife.js.map
+})));
+//# sourceMappingURL=webrm.umd.js.map

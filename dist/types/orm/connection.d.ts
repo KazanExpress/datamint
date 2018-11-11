@@ -3,6 +3,7 @@ import { Driver, IDriverConstructor } from '../drivers';
 import { EntityRepository, Repository } from '../repository';
 import { RecordRepository } from '../repository/recordRepository';
 import { Entity, IStorableConstructor, Record } from '../storable';
+import { ApiMap } from './apiMap';
 export interface IRepositoryMap {
     [name: string]: IStorableConstructor<any>;
 }
@@ -22,15 +23,15 @@ export declare class Connection<T extends IRepositoryMap> {
      */
     repositories: RepoStore<T>;
     /**
-     * Creates a WebORM connection instance.
+     * Creates a WebRM connection instance.
      * @param name the name of the connection to the storage. Namespaces all respositories invoked from the instance.
      * @param drivers determine a variety of drivers the orm can select from. The first one that fits for the environment is selected.
      * @param repositories sets the relation of a repository name to its contents' prototype.
      * @param apiMap maps the API calls onto the current entity structure
      */
-    constructor(name: string, drivers: IDriverConstructor[], repositories: T, apiMap?: any);
+    constructor(name: string, drivers: IDriverConstructor[], repositories: T, apiMap?: ApiMap<RepoStore<T>> | undefined);
     /**
-     * Enable a certain debug option for WebORM
+     * Enable a certain debug option for WebRM
      *
      * Allows for detailed debug type - exception type mapping.
      */
