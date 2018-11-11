@@ -9,5 +9,9 @@ export type DataMap<S extends IStorable> = {
 };
 
 export type ApiMap<R extends RepoStore<any>> = {
-  [key in keyof R]?: DataMap<R[key] extends EntityRepository<any, infer ES> ? ES : R[key] extends RecordRepository<any, infer RS> ? RS : any>;
+  [key in keyof R]?: DataMap<R[key] extends EntityRepository<any, any, infer ES> ?
+    ES
+  : R[key] extends RecordRepository<any, any, infer RS> ?
+    RS
+  : any>;
 };

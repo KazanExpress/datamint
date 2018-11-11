@@ -8,12 +8,13 @@ import { IStorable, IStorableConstructor } from '../storable';
  */
 
 export class Repository<
+  T extends Connection<any>,
   C extends IStorableConstructor<E>,
   E extends IStorable = InstanceType<C>,
 > {
   constructor(
     public name: string,
-    public readonly connection: Connection<any>,
+    public readonly connection: T,
     protected Data: C
   ) {
     if (

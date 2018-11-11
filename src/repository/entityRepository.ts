@@ -10,18 +10,19 @@ type PartialWithId<T, ID, IDKey extends Key> = Partial<T> & {
 
 export class EntityRepository<
   // TODO: hide most of the generic params from end-user...
+  T extends Connection<any>,
   C extends IStorableConstructor<E>,
   E extends IStorable = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
   ID = E extends Entity<string, infer IdType> ? IdType : any,
   IDKey extends string = E extends Entity<infer IdKey, unknown> ? IdKey : string,
-> extends Repository<C, E> {
+> extends Repository<T, C, E> {
   public readonly columns: Array<string>;
   public readonly primaryKey: string | number;
 
   constructor(
     name: string,
-    connection: Connection<any>,
+    connection: T,
     entity: C
   ) {
     super(name, connection, entity);
@@ -30,7 +31,7 @@ export class EntityRepository<
     delete entity.prototype.__col__;
   }
 
-  public add(options: A): QueryResult<E> {
+  public add(options: A, apiOptions: any): QueryResult<E> {
     return new QueryResult(
       true,
       Promise.resolve(new this.Data(options))

@@ -10,9 +10,9 @@ export interface IRepositoryMap {
   [name: string]: IStorableConstructor<any>;
 }
 
-export type RepoStore<M extends IRepositoryMap> = {
-  [name in keyof M]: InstanceType<M[name]> extends Entity ? EntityRepository<M[name]>
-    : (InstanceType<M[name]> extends Record ? RecordRepository<M[name]> : Repository<M[name]>);
+export type RepoStore<M extends IRepositoryMap, T extends Connection<M> = Connection<M>> = {
+  [name in keyof M]: InstanceType<M[name]> extends Entity ? EntityRepository<T, M[name]>
+    : (InstanceType<M[name]> extends Record ? RecordRepository<T, M[name]> : Repository<T, M[name]>);
 };
 
 export class Connection<T extends IRepositoryMap> {
@@ -34,7 +34,7 @@ export class Connection<T extends IRepositoryMap> {
    * @param name the name of the connection to the storage. Namespaces all respositories invoked from the instance.
    * @param drivers determine a variety of drivers the orm can select from. The first one that fits for the environment is selected.
    * @param repositories sets the relation of a repository name to its contents' prototype.
-   * @param apiMap maps the API calls onto the current entity structure
+   * @param apiMap maps the API calls onto the current data structure
    */
   constructor(
     public name: string,
