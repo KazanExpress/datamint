@@ -4,7 +4,7 @@ import { EntityRepository, RecordRepository } from './repository';
 
 export type Fabric<S> = (...options: any[]) => Promise<S>;
 
-export type DataMap<S extends DataMap<any>> = {
+export type DataMap<S extends IStorable> = {
   [key in 'create' | 'read' | 'update' | 'delete']?: Fabric<S>;
 };
 
