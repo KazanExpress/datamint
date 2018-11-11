@@ -322,9 +322,15 @@
       __extends(EntityRepository, _super);
       function EntityRepository(name, connection, entity) {
           var _this = _super.call(this, name, connection, entity) || this;
+          _this.columns = [];
           _this.primaryKey = entity.prototype.__id__;
-          _this.columns = Object.keys(entity.prototype.__col__);
-          delete entity.prototype.__col__;
+          if (entity.prototype.__col__) {
+              _this.columns = Object.keys(entity.prototype.__col__);
+              delete entity.prototype.__col__;
+          }
+          else {
+              _this.columns = Object.keys(entity.prototype);
+          }
           return _this;
       }
       EntityRepository.prototype.add = function (options, 

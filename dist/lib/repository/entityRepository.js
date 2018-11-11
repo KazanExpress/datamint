@@ -13,9 +13,15 @@ const base_1 = require("./base");
 class EntityRepository extends base_1.Repository {
     constructor(name, connection, entity) {
         super(name, connection, entity);
+        this.columns = [];
         this.primaryKey = entity.prototype.__id__;
-        this.columns = Object.keys(entity.prototype.__col__);
-        delete entity.prototype.__col__;
+        if (entity.prototype.__col__) {
+            this.columns = Object.keys(entity.prototype.__col__);
+            delete entity.prototype.__col__;
+        }
+        else {
+            this.columns = Object.keys(entity.prototype);
+        }
     }
     add(options, 
     // TODO: up to debate - singular arguments always or multiple args inference?
