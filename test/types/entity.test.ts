@@ -44,11 +44,11 @@ describe('types', () => {
       title: 'Cool Podguzninki for cool kids!'
     });
 
-    // orm.Products.updateById(0, product => ({
-    //   url: `/products/${product.id}`
-    // }));
+    orm.Products.updateById(0, product => ({
+      url: `/products/${product.id}`
+    }));
 
-    // orm.Products.delete(0);
+    orm.Products.delete(0);
 
     expect(orm.User.name).toBe('User');
 

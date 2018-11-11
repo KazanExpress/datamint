@@ -76,21 +76,21 @@ export class EntityRepository<
     );
   }
 
-  public update(id: PartialWithId<A, ID, IDKey>): QueryResult<E> {
+  public update(entity: PartialWithId<A, ID, IDKey>): QueryResult<E> {
     return new QueryResult(
       true,
       new this.Data({})
     );
   }
 
-  public updateById(): QueryResult<E> {
+  public updateById(id: ID, query: (entity: E) => Partial<A>): QueryResult<E> {
     return new QueryResult(
       true,
-      new this.Data({})
+      new this.Data(query({} as any))
     );
   }
 
-  public delete(): QueryResult<E> {
+  public delete(entity: PartialWithId<A, ID, IDKey> | ID): QueryResult<E> {
     return new QueryResult(
       true,
       new this.Data({})
