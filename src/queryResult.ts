@@ -7,29 +7,13 @@ type PromiseExecutor<T> = (resolve: (value?: T | PromiseLike<T>) => void, reject
  */
 export class QueryResult<T> {
   private _ok: boolean;
-  private _result: Promise<T>;
+  private _result: T;
   private _error?: Error;
   private handlers: ((error?: Error, result?: T) => any)[] = [];
 
-  constructor(ok: boolean, result: PromiseExecutor<T>, error?: Error);
-  constructor(ok: boolean, result: Promise<T>, error?: Error);
-  constructor(
-    ok: boolean,
-    result: Promise<T> | PromiseExecutor<T>,
-    error?: Error
-  ) {
+  constructor(ok: boolean, result: T, error?: Error) {
     this._ok = ok;
-
-    let promise: Promise<T>;
-
-    if (typeof result === 'function') {
-      promise = new Promise(result);
-    } else {
-      promise = result;
-    }
-
-    this._result = promise;
-
+    this._result = result;
     this._error = error;
   }
 
@@ -42,10 +26,10 @@ export class QueryResult<T> {
    * The resulting data of the query request
    */
   public get result() { return this._result; }
-  public set result(value: Promise<T>) {
+  public set result(value: T) {
     this._ok = true;
     this._result = value;
-    this.handlers.forEach(this.callHandler);
+    this.handlers.forEach(h => h(this.error, this.result));
   }
 
   /**
@@ -55,17 +39,7 @@ export class QueryResult<T> {
   public set error(value) {
     this._ok = false;
     this._error = value;
-    this.handlers.forEach(this.callHandler);
-  }
-
-  private async callHandler(h) {
-    try {
-      const res = await this.result;
-      h(this.error, res);
-    } catch (e) {
-      this._ok = false;
-      h(e);
-    }
+    this.handlers.forEach(h => h(this.error, this.result));
   }
 
   /**

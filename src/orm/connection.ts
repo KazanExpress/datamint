@@ -4,15 +4,16 @@ import { FallbackDriver } from '../drivers/fallback';
 import { EntityRepository, makeRepository, Repository } from '../repository';
 import { RecordRepository } from '../repository/recordRepository';
 import { Entity, IStorableConstructor, Record } from '../storable';
-import { ApiMap } from './apiMap';
+import { ApiMap } from '../apiMap';
+import { ApiDriver } from '../drivers/api';
 
 export interface IRepositoryMap {
   [name: string]: IStorableConstructor<any>;
 }
 
-export type RepoStore<M extends IRepositoryMap, T extends Connection<M> = Connection<M>> = {
-  [name in keyof M]: InstanceType<M[name]> extends Entity ? EntityRepository<T, M[name]>
-    : (InstanceType<M[name]> extends Record ? RecordRepository<T, M[name]> : Repository<T, M[name]>);
+export type RepoStore<M extends IRepositoryMap> = {
+  [name in keyof M]: InstanceType<M[name]> extends Entity ? EntityRepository<M[name]>
+    : (InstanceType<M[name]> extends Record ? RecordRepository<M[name]> : Repository<M[name]>);
 };
 
 export class Connection<T extends IRepositoryMap> {
@@ -23,6 +24,11 @@ export class Connection<T extends IRepositoryMap> {
    * The driver currently used for operations with entities
    */
   public currentDriver: Driver;
+
+  /**
+   * The driver currently used for operations with api requests
+   */
+  public apiDriver?: ApiDriver;
 
   /**
    * A current map of bound repositories
@@ -40,8 +46,14 @@ export class Connection<T extends IRepositoryMap> {
     public name: string,
     public drivers: IDriverConstructor[],
     repositories: T,
-    private apiMap?: ApiMap<RepoStore<T>>
+    public readonly apiMap?: ApiMap<RepoStore<T>>
   ) {
+    if (apiMap) {
+      this.apiDriver = new ApiDriver(this, apiMap);
+    } else {
+      Debug.log(this.name, '*', 'The main webrm functionality is disabled. Are you sure you want to use this without API?');
+    }
+
     // Select the first supported driver from the bunch
     const SupportedDriver = drivers.find(d => d.isSupported);
 

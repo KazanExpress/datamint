@@ -8,20 +8,20 @@ import { IStorable, IStorableConstructor } from '../storable';
  */
 
 export class Repository<
-  T extends Connection<any>,
   C extends IStorableConstructor<E>,
   E extends IStorable = InstanceType<C>,
+  A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
 > {
   constructor(
     public name: string,
-    public readonly connection: T,
+    protected readonly connection: Connection<any>,
     protected Data: C
   ) {
     if (
       // If this class was instantiated directly (without inheritance)
       Repository.prototype === this.constructor.prototype
 
-      // And set debug for db:[name]
+      // And debug for db:[name] is set
       && Debug.map[`db:${name}`]
     ) {
       Debug.warn(connection.name, `db:${name}`, `Using default empty repository for ${name}`);
