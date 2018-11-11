@@ -1,8 +1,6 @@
 import { Debug } from '../debug';
 import { Connection } from '../orm';
-import { Entity, IStorable, IStorableConstructor, Record } from '../storable';
-import { EntityRepository } from './entityRepository';
-import { RecordRepository } from './recordRepository';
+import { IStorable, IStorableConstructor } from '../storable';
 
 /**
  * @TODO:

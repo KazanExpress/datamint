@@ -1,9 +1,9 @@
-import { IStorableConstructor, IStorable, Entity, Record } from '../storable';
+import { Debug } from '../debug';
 import { Connection } from '../orm/connection';
+import { Entity, IStorable, IStorableConstructor, Record } from '../storable';
+import { Repository } from './base';
 import { EntityRepository } from './entityRepository';
 import { RecordRepository } from './recordRepository';
-import { Debug } from '../debug';
-import { Repository } from './base';
 
 export function makeRepository<
   C extends IStorableConstructor<E>,

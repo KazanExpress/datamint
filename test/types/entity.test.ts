@@ -26,7 +26,7 @@ describe('types', () => {
 
     orm.Products.delete(0);
 
-    expect(orm.User.name).toBe('Users');
+    expect(orm.User.name).toBe('User');
 
     orm.User.create({
       name: 'max',

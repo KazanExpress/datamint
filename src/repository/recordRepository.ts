@@ -1,6 +1,6 @@
-import { Repository } from './base';
-import { IStorable, IStorableConstructor } from '../storable';
 import { QueryResult } from '../queryResult';
+import { IStorable, IStorableConstructor } from '../storable';
+import { Repository } from './base';
 
 export class RecordRepository<
   C extends IStorableConstructor<E>,

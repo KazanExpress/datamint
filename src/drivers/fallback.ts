@@ -1,4 +1,4 @@
-import { Driver } from '.';
+import { Driver } from './base';
 
 export class FallbackDriver extends Driver {
   public create<T extends object>(repositoryName: string, entity: T): Promise<T> {
@@ -17,7 +17,6 @@ export class FallbackDriver extends Driver {
     return {};
   }
   public delete<T extends object>(repositoryName: string, id: any): Promise<T>;
-  public delete<T extends object>(repositoryName: string, entity: Partial<T>): Promise<T>;
   public async delete(repositoryName: any, entity: any) {
     throw new Error('Method not implemented.');
 

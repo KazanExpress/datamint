@@ -1,8 +1,8 @@
-import { Repository } from './base';
-import { Entity, IStorable, IStorableConstructor } from '../storable';
 import { Connection } from '../orm/connection';
 import { QueryResult } from '../queryResult';
+import { Entity, IStorable, IStorableConstructor } from '../storable';
 import { Key } from '../util';
+import { Repository } from './base';
 
 type PartialWithId<T, ID, IDKey extends Key> = Partial<T> & {
   [key in IDKey]: ID;
