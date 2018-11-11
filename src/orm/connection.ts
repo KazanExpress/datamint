@@ -17,8 +17,10 @@ export type RepoFromConstructor<
 > = InstanceType<S> extends Entity ? EntityRepository<D, S>
   : (InstanceType<S> extends Record ? RecordRepository<D, S> : Repository<D, S>);
 
+type PropFrom<O, Key> = Key extends keyof O ? O[Key] : any;
+
 export type RepoStore<M extends IRepositoryMap, A extends ApiMap<any>> = {
-  [name in (keyof M | keyof A)]: RepoFromConstructor<name extends keyof M ? M[name] : any, name extends keyof A ? (A[name] extends DataMap<any> ? A[name] : any) : any>;
+  [name in (keyof M | keyof A)]: RepoFromConstructor<PropFrom<M, name>, PropFrom<A, name>>;
 };
 
 export class Connection<
@@ -99,15 +101,16 @@ export class Connection<
     }
 
     for (const repoName in repositories) {
-      const entityConstructor = repositories[repoName];
+      const name: string = repoName;
+      const entityConstructor = repositories[name];
 
-      this.repositories[repoName] = makeRepository(repoName, {
+      this.repositories[name] = makeRepository(name, {
         name: this.name,
         apiDriver: this.apiDriver,
         currentDriver: this.currentDriver
-      }, entityConstructor) as any;
+      }, entityConstructor);
 
-      reProxy && reProxy(repoName);
+      reProxy && reProxy(name);
     }
 
     if (Proxy) {
