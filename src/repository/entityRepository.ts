@@ -22,7 +22,7 @@ export class EntityRepository<
   ID = E extends Entity<string, infer IdType> ? IdType : any,
   IDKey extends string = E extends Entity<infer IdKey, unknown> ? IdKey : string,
 > extends Repository<DM, C, E, A> {
-  public readonly columns: Array<string>;
+  public readonly columns: Array<string> = [];
   public readonly primaryKey: string | number;
 
   constructor(
@@ -36,8 +36,13 @@ export class EntityRepository<
   ) {
     super(name, connection, entity);
     this.primaryKey = entity.prototype.__id__;
-    this.columns = Object.keys(entity.prototype.__col__);
-    delete entity.prototype.__col__;
+
+    if (entity.prototype.__col__) {
+      this.columns = Object.keys(entity.prototype.__col__);
+      delete entity.prototype.__col__;
+    } else {
+      this.columns = Object.keys(entity.prototype);
+    }
   }
 
   public test?: DM;
