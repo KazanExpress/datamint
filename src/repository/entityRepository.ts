@@ -12,9 +12,9 @@ export class EntityRepository<
   // TODO: hide most of the generic params from end-user...
   C extends IStorableConstructor<E>,
   E extends IStorable = InstanceType<C>,
+  A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
   ID = E extends Entity<string, infer IdType> ? IdType : any,
   IDKey extends string = E extends Entity<infer IdKey, unknown> ? IdKey : string,
-  A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]
 > extends Repository<C, E> {
   public readonly columns: Array<string>;
   public readonly primaryKey: string | number;

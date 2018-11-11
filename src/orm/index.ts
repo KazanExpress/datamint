@@ -1,5 +1,6 @@
 import { IDriverConstructor } from '../drivers';
 import { Connection as connection, IRepositoryMap, RepoStore } from './connection';
+import { ApiMap } from '../apiMap';
 
 export const Connection = connection as {
   /**
@@ -13,7 +14,7 @@ export const Connection = connection as {
       name: string,
       drivers: IDriverConstructor[],
       repositories: T,
-      apiMap?: any // TODO
+      apiMap?: ApiMap<RepoStore<T>>
   ): connection<T> & RepoStore<T>;
 } & typeof connection;
 

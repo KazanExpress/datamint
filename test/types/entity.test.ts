@@ -1,5 +1,5 @@
-import { Connection } from '../../src';
-import { Broken, Product, User } from './common';
+import { Connection, ApiMap } from '../../src';
+import { Broken, Product, User, IUser } from './common';
 
 describe('types', () => {
   it('types', () => {
@@ -7,6 +7,16 @@ describe('types', () => {
       Products: Product,
       User,
       Broken
+    }, {
+      User: {
+        create(username, password) {
+          return Promise.resolve(new User({
+            birthDate: new Date(),
+            cart: [],
+            name: username
+          }));
+        }
+      }
     });
 
     orm.Products.add({

@@ -1,4 +1,4 @@
-import { Entity, ID, Column, Record } from '../../src';
+import { Entity, ID, Column, Record, ApiMap, IStorable } from '../../src';
 
 export class Product extends Entity<'id', number> {
   @ID

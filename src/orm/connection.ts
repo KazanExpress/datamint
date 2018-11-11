@@ -1,3 +1,4 @@
+import { ApiMap } from '../apiMap';
 import { Debug, DebugType, ExceptionType } from '../debug';
 import { Driver, IDriverConstructor } from '../drivers';
 import { FallbackDriver } from '../drivers/fallback';
@@ -39,7 +40,7 @@ export class Connection<T extends IRepositoryMap> {
     public name: string,
     public drivers: IDriverConstructor[],
     repositories: T,
-    private apiMap?: any // TODO
+    private apiMap?: ApiMap<RepoStore<T>>
   ) {
     // Select the first supported driver from the bunch
     const SupportedDriver = drivers.find(d => d.isSupported);
