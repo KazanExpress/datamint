@@ -13,7 +13,7 @@ class Repository {
         if (
         // If this class was instantiated directly (without inheritance)
         Repository.prototype === this.constructor.prototype
-            // And set debug for db:[name]
+            // And debug for db:[name] is set
             && debug_1.Debug.map[`db:${name}`]) {
             debug_1.Debug.warn(connection.name, `db:${name}`, `Using default empty repository for ${name}`);
         }

@@ -27,7 +27,7 @@ class Debug {
     }
     static errorType(type) {
         if (this.map['*']) {
-            return true;
+            return this.map['*'];
         }
         const isString = (t) => typeof t === 'string';
         if (isString(type) && this.map[type]) {

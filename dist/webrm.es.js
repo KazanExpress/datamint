@@ -25,7 +25,7 @@ class Debug {
     }
     static errorType(type) {
         if (this.map['*']) {
-            return true;
+            return this.map['*'];
         }
         const isString = (t) => typeof t === 'string';
         if (isString(type) && this.map[type]) {
@@ -157,7 +157,7 @@ class Repository {
         if (
         // If this class was instantiated directly (without inheritance)
         Repository.prototype === this.constructor.prototype
-            // And set debug for db:[name]
+            // And debug for db:[name] is set
             && Debug.map[`db:${name}`]) {
             Debug.warn(connection.name, `db:${name}`, `Using default empty repository for ${name}`);
         }
@@ -171,17 +171,10 @@ class Repository {
  */
 class QueryResult {
     constructor(ok, result, error) {
-        this.error = error;
         this.handlers = [];
         this._ok = ok;
-        let promise;
-        if (typeof result === 'function') {
-            promise = new Promise(result);
-        }
-        else {
-            promise = result;
-        }
-        this._result = promise;
+        this._result = result;
+        this._error = error;
     }
     /**
      * Determines whether the incapsulated data is OK and contains no errors
@@ -192,8 +185,18 @@ class QueryResult {
      */
     get result() { return this._result; }
     set result(value) {
+        this._ok = true;
         this._result = value;
-        this.handlers.forEach((h) => __awaiter(this, void 0, void 0, function* () { return h(); }));
+        this.handlers.forEach(h => h(this.error, this.result));
+    }
+    /**
+     * The error of the query (if any)
+     */
+    get error() { return this._error; }
+    set error(value) {
+        this._ok = false;
+        this._error = value;
+        this.handlers.forEach(h => h(this.error, this.result));
     }
     /**
      * Fires a handler whenever the data in the result has been changed
@@ -221,20 +224,45 @@ class EntityRepository extends Repository {
         this.columns = Object.keys(entity.prototype.__col__);
         delete entity.prototype.__col__;
     }
-    add(options) {
-        return new QueryResult(true, Promise.resolve(new this.Data(options)));
+    add(options, 
+    // TODO: up to debate - singular arguments always or multiple args inference?
+    apiOptions) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const instance = new this.Data(options);
+            try {
+                // Call local driver changes synchronously
+                const queryResult = new QueryResult(true, yield this.connection.currentDriver.create(this.name, instance));
+                // Call api driver asynchronously
+                if (apiOptions && this.connection.apiDriver) {
+                    this.connection.apiDriver.create(this.name, apiOptions).then(res => {
+                        queryResult.result = res;
+                    }).catch(e => {
+                        queryResult.error = e;
+                    });
+                }
+                return queryResult;
+            }
+            catch (e) {
+                // TODO: logs
+                return new QueryResult(false, instance, e);
+            }
+        });
     }
     get(id) {
-        return new QueryResult(true, Promise.resolve(new this.Data({})));
+        return new QueryResult(true, new this.Data({}));
     }
-    update(options) {
-        return new QueryResult(true, Promise.resolve(new this.Data({})));
+    update(entity) {
+        return new QueryResult(true, new this.Data({}));
     }
     updateById(id, query) {
-        return new QueryResult(true, Promise.resolve(new this.Data({})));
+        return new QueryResult(true, new this.Data(query({})));
     }
-    delete(id) {
-        return new QueryResult(true, Promise.resolve(new this.Data({})));
+    delete(entity) {
+        return new QueryResult(true, new this.Data({}));
+    }
+    // TODO: Find, find by, etc...
+    count() {
+        // TODO: count entities
     }
 }
 
@@ -302,29 +330,58 @@ class Record {
 
 class RecordRepository extends Repository {
     create(options) {
-        return new QueryResult(true, Promise.resolve(new this.Data(options)));
+        return new QueryResult(true, new this.Data(options));
     }
     update(options) {
-        return new QueryResult(true, Promise.resolve(new this.Data(options)));
+        return new QueryResult(true, new this.Data(options));
     }
     read() {
-        return new QueryResult(true, Promise.resolve(new this.Data({})));
+        return new QueryResult(true, new this.Data({}));
     }
     delete() {
-        return new QueryResult(true, Promise.resolve(new this.Data({})));
+        return new QueryResult(true, new this.Data({}));
     }
 }
 
 function makeRepository(name, connection, data) {
+    let Constructor;
     if (data.prototype instanceof Entity) {
-        return new EntityRepository(name, connection, data);
+        Constructor = EntityRepository;
     }
     else if (data.prototype instanceof Record) {
-        return new RecordRepository(name, connection, data);
+        Constructor = RecordRepository;
     }
     else {
         Debug.error(connection.name, 'db', `No suitable repository found for ${data.name} when trying to connect with ${name}.`);
-        return new Repository(name, connection, data);
+        Constructor = Repository;
+    }
+    return new Constructor(name, connection, data);
+}
+
+/* TODO */
+class ApiDriver extends Driver {
+    constructor(connection, apiMap) {
+        super(connection);
+        this.apiMap = apiMap;
+    }
+    create(repositoryName, data) {
+        const repo = this.apiMap[repositoryName];
+        if (repo && repo.create) {
+            return repo.create(data);
+        }
+        else {
+            return Promise.reject( /* TODO: error handling */);
+        }
+    }
+    read(repositoryName, id) {
+        throw new Error('Method not implemented.');
+    }
+    update(repositoryName, id, query) {
+        throw new Error('Method not implemented.');
+        return Promise.resolve();
+    }
+    delete(repositoryName, id) {
+        throw new Error('Method not implemented.');
     }
 }
 
@@ -334,7 +391,7 @@ class Connection {
      * @param name the name of the connection to the storage. Namespaces all respositories invoked from the instance.
      * @param drivers determine a variety of drivers the orm can select from. The first one that fits for the environment is selected.
      * @param repositories sets the relation of a repository name to its contents' prototype.
-     * @param apiMap maps the API calls onto the current entity structure
+     * @param apiMap maps the API calls onto the current data structure
      */
     constructor(name, drivers, repositories, apiMap) {
         this.name = name;
@@ -344,6 +401,12 @@ class Connection {
          * A current map of bound repositories
          */
         this.repositories = {};
+        if (apiMap) {
+            this.apiDriver = new ApiDriver(this, apiMap);
+        }
+        else {
+            Debug.log(this.name, '*', 'The main webrm functionality is disabled. Are you sure you want to use this without API?');
+        }
         // Select the first supported driver from the bunch
         const SupportedDriver = drivers.find(d => d.isSupported);
         if (SupportedDriver) {
@@ -364,7 +427,11 @@ class Connection {
         }
         for (const repoName in repositories) {
             const entityConstructor = repositories[repoName];
-            this.repositories[repoName] = makeRepository(repoName, this, entityConstructor);
+            this.repositories[repoName] = makeRepository(repoName, {
+                name: this.name,
+                apiDriver: this.apiDriver,
+                currentDriver: this.currentDriver
+            }, entityConstructor);
             reProxy && reProxy(repoName);
         }
         if (Proxy) {
