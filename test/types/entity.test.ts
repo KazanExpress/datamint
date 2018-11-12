@@ -27,7 +27,8 @@ describe('types', () => {
       Products: {
         async create(options: { title: string; id: number; url: string }) {
           return options;
-        }
+        },
+        cluster: {}
       },
       Broken: undefined
     });
