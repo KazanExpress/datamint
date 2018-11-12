@@ -1,8 +1,7 @@
 import { Debugable, DebugState, DebugType, ExceptionType } from '../debug';
 import { Driver, IDriverConstructor } from '../drivers';
 import { ApiDriver, ApiMap, DataMap } from '../drivers/api';
-import { EntityRepository, Repository } from '../repository';
-import { RecordRepository } from '../repository/recordRepository';
+import { EntityRepository, RecordRepository, Repository } from '../repository';
 import { Entity, IStorableConstructor, Record } from '../storable';
 export interface IRepositoryMap {
     [name: string]: IStorableConstructor<any>;
@@ -16,8 +15,8 @@ export declare class Connection<RM extends IRepositoryMap = IRepositoryMap, AM e
     name: string;
     drivers: IDriverConstructor[];
     readonly apiMap?: AM | undefined;
-    protected debugType: DebugType;
-    protected connectionName: string;
+    protected $debugType: DebugType;
+    protected $connectionName: string;
     /**
      * The driver currently used for operations with entities
      */
@@ -43,11 +42,11 @@ export declare class Connection<RM extends IRepositoryMap = IRepositoryMap, AM e
      *
      * Returns a falsy value if debug is currently disabled
      */
-    static debug(): DebugState;
+    static $debug(): DebugState;
     /**
      * Enable or disable all debug logs
      */
-    static debug(enabled: boolean): void;
+    static $debug(enabled: boolean): void;
     /**
      * Enable or disable all debug logs.
      *
@@ -56,24 +55,11 @@ export declare class Connection<RM extends IRepositoryMap = IRepositoryMap, AM e
      * - `soft` - informative, only logs to console
      * - `hard` - throws exceptions, forcing proper error-handling
      */
-    static debug(enabled: boolean, exceptions: ExceptionType): void;
+    static $debug(enabled: boolean, exceptions: ExceptionType): void;
     /**
      * Enable a certain debug option for WebRM
      */
-    static debug(type: DebugType): void;
-    /**
-     * Enable a certain debug option for WebRM
-     *
-     * Allows specifying different debug types:
-     *
-     * - `soft` - informative, only logs to console
-     * - `hard` - throws exceptions, forcing proper error-handling
-     */
-    static debug(type: DebugType, exceptions: ExceptionType): void;
-    /**
-     * Enable a certain debug option for WebRM
-     */
-    static debug(type: string): void;
+    static $debug(type: DebugType): void;
     /**
      * Enable a certain debug option for WebRM
      *
@@ -82,6 +68,19 @@ export declare class Connection<RM extends IRepositoryMap = IRepositoryMap, AM e
      * - `soft` - informative, only logs to console
      * - `hard` - throws exceptions, forcing proper error-handling
      */
-    static debug(type: string, exceptions: ExceptionType): void;
+    static $debug(type: DebugType, exceptions: ExceptionType): void;
+    /**
+     * Enable a certain debug option for WebRM
+     */
+    static $debug(type: string): void;
+    /**
+     * Enable a certain debug option for WebRM
+     *
+     * Allows specifying different debug types:
+     *
+     * - `soft` - informative, only logs to console
+     * - `hard` - throws exceptions, forcing proper error-handling
+     */
+    static $debug(type: string, exceptions: ExceptionType): void;
 }
 export {};

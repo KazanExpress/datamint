@@ -41,7 +41,7 @@ function print(instanceName, type, message, level) {
                 throw new Error(`${LOG_PREFIX(instanceName)}:${type} - ${message}`);
             }
             else {
-                console[level](`%c${LOG_PREFIX(instanceName)}%c:%c${type}%c - `, message, 'color: purple', 'color: initial', 'color: blue', 'color: initial');
+                console[level](`%c${LOG_PREFIX(instanceName)}%c:%c${type}%c - ${message}`, 'color: purple', 'color: initial', 'color: blue', 'color: initial');
             }
         }
     }

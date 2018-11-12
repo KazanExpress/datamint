@@ -5,8 +5,8 @@ class Storable extends debug_1.Debugable {
     constructor($repository) {
         super();
         this.$repository = $repository;
-        this.debugType = `db:${this.$repository.name}:entity`;
-        this.connectionName = this.$repository.connectionName;
+        this.$debugType = `db:${this.$repository.name}:entity`;
+        this.$connectionName = this.$repository.$connectionName;
     }
 }
 exports.Storable = Storable;

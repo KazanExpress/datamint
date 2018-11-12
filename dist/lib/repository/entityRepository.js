@@ -10,6 +10,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const queryResult_1 = require("../queryResult");
 const base_1 = require("./base");
+/**
+ * A typical multi-entity repository.
+ *
+ * @template `DM` API data map for the repo
+ * @template `C` entity constructor type
+ * @template `E` entity instance type
+ * @template `A` entity constructor parameter options
+ * @template `ID` entity primary key type
+ * @template `IDKey` entity primary key name
+ */
 class EntityRepository extends base_1.Repository {
     constructor(name, connection, entity) {
         super(name, connection, entity);
@@ -20,52 +30,55 @@ class EntityRepository extends base_1.Repository {
             delete entity.prototype.__col__;
         }
         else {
-            this.columns = Object.keys(entity.prototype);
+            this.columns = Object.keys(new entity({}, this));
         }
     }
     add(options, 
     // TODO: up to debate - singular arguments always or multiple args inference?
     apiOptions) {
         return __awaiter(this, void 0, void 0, function* () {
-            const instance = new this.Data(options, this);
+            const result = yield this.connection.currentDriver.create(this.name, options);
             try {
+                const instance = this.makeDataInstance(result);
                 // Call local driver changes synchronously
-                const queryResult = new queryResult_1.QueryResult(true, yield this.connection.currentDriver.create(this.name, instance));
+                const queryResult = new queryResult_1.QueryResult(true, instance);
                 // Call api driver asynchronously
                 if (apiOptions && this.api) {
-                    if (this.debugEnabled) {
-                        this.log(`API handler execution start: ${this.name}.add()`);
-                    }
+                    this.$log(`API handler execution start: ${this.name}.add()`);
                     this.api.create(this.name, apiOptions).then(res => {
-                        queryResult.result = res;
-                        this.log(`API handler execution end: ${this.name}.add()`);
+                        queryResult.result = this.makeDataInstance(result);
+                        this.$log(`API handler execution end: ${this.name}.add()`);
                     }).catch(e => {
                         queryResult.error = e;
-                        this.log(`API handler execution end: ${this.name}.add()`);
+                        this.$log(`API handler execution end: ${this.name}.add()`);
                     });
                 }
-                else if (this.debugEnabled) {
-                    this.log('No API handler detected');
+                else {
+                    this.$log('No API handler detected');
                 }
                 return queryResult;
             }
             catch (e) {
-                this.error(e);
-                return new queryResult_1.QueryResult(false, instance, e);
+                this.$error(e);
+                return new queryResult_1.QueryResult(false, this.makeDataInstance(options), e);
             }
         });
     }
     get(id) {
-        return new queryResult_1.QueryResult(true, new this.Data({}, this));
+        throw new Error('Not implemented');
+        return new queryResult_1.QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }
     update(entity) {
-        return new queryResult_1.QueryResult(true, new this.Data({}, this));
+        throw new Error('Not implemented');
+        return new queryResult_1.QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }
     updateById(id, query) {
-        return new queryResult_1.QueryResult(true, new this.Data(query({}), this));
+        throw new Error('Not implemented');
+        return new queryResult_1.QueryResult(/* TODO: implement this */ true, this.makeDataInstance(query({})));
     }
     delete(entity) {
-        return new queryResult_1.QueryResult(true, new this.Data({}, this));
+        throw new Error('Not implemented');
+        return new queryResult_1.QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }
     // TODO: Find, find by, exists, etc...
     count() {

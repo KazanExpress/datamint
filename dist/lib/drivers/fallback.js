@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const base_1 = require("./base");
+/* TODO: driver that just writes everything to short-term memory */
 class FallbackDriver extends base_1.Driver {
     create(repositoryName, entity) {
         throw new Error('Method not implemented.');

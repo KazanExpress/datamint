@@ -15,7 +15,6 @@ export declare type ExceptionType = 'soft' | 'hard';
  * - `db` - debug all repositories
  * - `db:${name}` - debug a repo with ${name}
  * - `db:${name}:entity` - debug all entities in the repository
- * - `db:${name}:entity:${name}` - debug entity ${name}
  */
 export declare type DebugType = '*' | 'connection' | 'driver' | 'driver:${name}' | 'db' | 'db:${name}' | 'db:${name}:entity';
 export declare type DebugState = 'enabled' | 'disabled' | 'custom';

@@ -1,3 +1,53 @@
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at http://www.apache.org/licenses/LICENSE-2.0
+
+THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+MERCHANTABLITY OR NON-INFRINGEMENT.
+
+See the Apache Version 2.0 License for specific language governing permissions
+and limitations under the License.
+***************************************************************************** */
+
+function __decorate(decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+}
+
+function __metadata(metadataKey, metadataValue) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
+}
+
+function __awaiter(thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+}
+
+/**
+ * fromPath
+ * Returns a value from an object by a given path (usually string).
+ *
+ * @see [gist](https://gist.github.com/Raiondesu/759425dede5b7ff38db51ea5a1fb8f11)
+ *
+ * @param obj an object to get a value from.
+ * @param path to get a value by.
+ * @param splitter to split the path by. Default is '.' ('obj.path.example')
+ * @returns a value from a given path. If a path is invalid - returns undefined.
+ */
+const Enumerable = (enumerable = true) => function (target, key, desc = {}) {
+    desc.enumerable = enumerable;
+};
+
 const LOG_PREFIX = (name) => name ? `[WebRM:${name}]` : `[WebRM]`;
 /**
  * Shows the current debug state of WebRM
@@ -37,7 +87,7 @@ function print(instanceName, type, message, level) {
                 throw new Error(`${LOG_PREFIX(instanceName)}:${type} - ${message}`);
             }
             else {
-                console[level](`%c${LOG_PREFIX(instanceName)}%c:%c${type}%c - `, message, 'color: purple', 'color: initial', 'color: blue', 'color: initial');
+                console[level](`%c${LOG_PREFIX(instanceName)}%c:%c${type}%c - ${message}`, 'color: purple', 'color: initial', 'color: blue', 'color: initial');
             }
         }
     }
@@ -45,23 +95,60 @@ function print(instanceName, type, message, level) {
 
 class Debugable {
     constructor() {
-        this.logFactory = (level) => message => print(this.connectionName, this.debugType, message, level);
-        this.log = this.logFactory('log');
-        this.warn = this.logFactory('warn');
-        this.error = this.logFactory('error');
-        this.debug = this.logFactory('debug');
+        this.$logFactory = (level) => (message, force = false) => {
+            if (this.$debugEnabled || force) {
+                print(this.$connectionName, this.$debugType, message, level);
+            }
+        };
+        this.$log = this.$logFactory('log');
+        this.$warn = this.$logFactory('warn');
+        this.$error = this.$logFactory('error');
+        this.$debug = this.$logFactory('debug');
     }
     /**
      * `true` if the debug is enabled for this class
      */
-    get debugEnabled() { return errorTypeFor(this.debugType); }
+    get $debugEnabled() { return errorTypeFor(this.$debugType); }
 }
+__decorate([
+    Enumerable(false),
+    __metadata("design:type", String)
+], Debugable.prototype, "$debugType", void 0);
+__decorate([
+    Enumerable(false),
+    __metadata("design:type", String)
+], Debugable.prototype, "$connectionName", void 0);
+__decorate([
+    Enumerable(false),
+    __metadata("design:type", Object),
+    __metadata("design:paramtypes", [])
+], Debugable.prototype, "$debugEnabled", null);
+__decorate([
+    Enumerable(false),
+    __metadata("design:type", Object)
+], Debugable.prototype, "$logFactory", void 0);
+__decorate([
+    Enumerable(false),
+    __metadata("design:type", Object)
+], Debugable.prototype, "$log", void 0);
+__decorate([
+    Enumerable(false),
+    __metadata("design:type", Object)
+], Debugable.prototype, "$warn", void 0);
+__decorate([
+    Enumerable(false),
+    __metadata("design:type", Object)
+], Debugable.prototype, "$error", void 0);
+__decorate([
+    Enumerable(false),
+    __metadata("design:type", Object)
+], Debugable.prototype, "$debug", void 0);
 
 class GlobalDebug extends Debugable {
     constructor() {
         super();
-        this.debugType = '*';
-        this.connectionName = '';
+        this.$debugType = '*';
+        this.$connectionName = '';
     }
     get map() {
         return debugMap;
@@ -72,41 +159,6 @@ class GlobalDebug extends Debugable {
 }
 GlobalDebug.instance = new GlobalDebug();
 const Debug = GlobalDebug.instance;
-
-/*! *****************************************************************************
-Copyright (c) Microsoft Corporation. All rights reserved.
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-this file except in compliance with the License. You may obtain a copy of the
-License at http://www.apache.org/licenses/LICENSE-2.0
-
-THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-MERCHANTABLITY OR NON-INFRINGEMENT.
-
-See the Apache Version 2.0 License for specific language governing permissions
-and limitations under the License.
-***************************************************************************** */
-
-function __decorate(decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-}
-
-function __metadata(metadataKey, metadataValue) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
-}
-
-function __awaiter(thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-}
 
 class Driver {
     constructor(connection) {
@@ -166,8 +218,10 @@ class ApiDriver extends Driver {
             return Promise.reject( /* TODO: error handling */);
         }
     }
+    static get isSupported() { return true; }
 }
 
+/* TODO: driver that just writes everything to short-term memory */
 class FallbackDriver extends Driver {
     create(repositoryName, entity) {
         throw new Error('Method not implemented.');
@@ -194,18 +248,21 @@ class Repository extends Debugable {
         super();
         this.name = name;
         this.Data = Data;
-        this.debugType = `db:${this.name}`;
-        this.connectionName = this.connection.name;
+        this.$debugType = `db:${this.name.toLowerCase()}`;
         if ( /* this class was instantiated directly (without inheritance) */Repository.prototype === this.constructor.prototype) {
-            if (this.debugEnabled) {
-                this.warn(`Using default empty repository.`);
+            if (this.$debugEnabled) {
+                this.$warn(`Using default empty repository.`);
             }
             else if (Debug.map.db) {
-                this.warn(`Using default empty repository for ${name}`);
+                this.$warn(`Using default empty repository for ${name}`, true);
             }
         }
         this.connection = connection;
+        this.$connectionName = connection.name;
         this.api = connection.apiDriver;
+    }
+    makeDataInstance(options) {
+        return new this.Data(options, this);
     }
 }
 
@@ -262,6 +319,16 @@ class QueryResult {
     }
 }
 
+/**
+ * A typical multi-entity repository.
+ *
+ * @template `DM` API data map for the repo
+ * @template `C` entity constructor type
+ * @template `E` entity instance type
+ * @template `A` entity constructor parameter options
+ * @template `ID` entity primary key type
+ * @template `IDKey` entity primary key name
+ */
 class EntityRepository extends Repository {
     constructor(name, connection, entity) {
         super(name, connection, entity);
@@ -272,52 +339,55 @@ class EntityRepository extends Repository {
             delete entity.prototype.__col__;
         }
         else {
-            this.columns = Object.keys(entity.prototype);
+            this.columns = Object.keys(new entity({}, this));
         }
     }
     add(options, 
     // TODO: up to debate - singular arguments always or multiple args inference?
     apiOptions) {
         return __awaiter(this, void 0, void 0, function* () {
-            const instance = new this.Data(options, this);
+            const result = yield this.connection.currentDriver.create(this.name, options);
             try {
+                const instance = this.makeDataInstance(result);
                 // Call local driver changes synchronously
-                const queryResult = new QueryResult(true, yield this.connection.currentDriver.create(this.name, instance));
+                const queryResult = new QueryResult(true, instance);
                 // Call api driver asynchronously
                 if (apiOptions && this.api) {
-                    if (this.debugEnabled) {
-                        this.log(`API handler execution start: ${this.name}.add()`);
-                    }
+                    this.$log(`API handler execution start: ${this.name}.add()`);
                     this.api.create(this.name, apiOptions).then(res => {
-                        queryResult.result = res;
-                        this.log(`API handler execution end: ${this.name}.add()`);
+                        queryResult.result = this.makeDataInstance(result);
+                        this.$log(`API handler execution end: ${this.name}.add()`);
                     }).catch(e => {
                         queryResult.error = e;
-                        this.log(`API handler execution end: ${this.name}.add()`);
+                        this.$log(`API handler execution end: ${this.name}.add()`);
                     });
                 }
-                else if (this.debugEnabled) {
-                    this.log('No API handler detected');
+                else {
+                    this.$log('No API handler detected');
                 }
                 return queryResult;
             }
             catch (e) {
-                this.error(e);
-                return new QueryResult(false, instance, e);
+                this.$error(e);
+                return new QueryResult(false, this.makeDataInstance(options), e);
             }
         });
     }
     get(id) {
-        return new QueryResult(true, new this.Data({}, this));
+        throw new Error('Not implemented');
+        return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }
     update(entity) {
-        return new QueryResult(true, new this.Data({}, this));
+        throw new Error('Not implemented');
+        return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }
     updateById(id, query) {
-        return new QueryResult(true, new this.Data(query({}), this));
+        throw new Error('Not implemented');
+        return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance(query({})));
     }
     delete(entity) {
-        return new QueryResult(true, new this.Data({}, this));
+        throw new Error('Not implemented');
+        return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }
     // TODO: Find, find by, exists, etc...
     count() {
@@ -325,29 +395,12 @@ class EntityRepository extends Repository {
     }
 }
 
-/**
- * fromPath
- * Returns a value from an object by a given path (usually string).
- *
- * @see [gist](https://gist.github.com/Raiondesu/759425dede5b7ff38db51ea5a1fb8f11)
- *
- * @param obj an object to get a value from.
- * @param path to get a value by.
- * @param splitter to split the path by. Default is '.' ('obj.path.example')
- * @returns a value from a given path. If a path is invalid - returns undefined.
- */
-function NonEnumerable(target, key, desc = {}) {
-    Object.defineProperty(target, key, Object.assign({}, desc, { 
-        // TODO: check to be writable
-        enumerable: false }));
-}
-
 class Storable extends Debugable {
     constructor($repository) {
         super();
         this.$repository = $repository;
-        this.debugType = `db:${this.$repository.name}:entity`;
-        this.connectionName = this.$repository.connectionName;
+        this.$debugType = `db:${this.$repository.name}:entity`;
+        this.$connectionName = this.$repository.$connectionName;
     }
 }
 
@@ -361,10 +414,12 @@ class Entity extends Storable {
         }
     }
     $save() {
-        return Promise.resolve();
+        /* TODO */
+        throw new Error('Method not implemented.');
     }
     $delete() {
-        return Promise.resolve();
+        /* TODO */
+        throw new Error('Method not implemented.');
     }
     static Column(target, key) {
         target.__col__.push(key);
@@ -374,17 +429,29 @@ class Entity extends Storable {
     }
 }
 __decorate([
-    NonEnumerable,
+    Enumerable(false),
     __metadata("design:type", Array)
 ], Entity.prototype, "__col__", void 0);
 __decorate([
-    NonEnumerable,
+    Enumerable(false),
     __metadata("design:type", Object)
 ], Entity.prototype, "__idCol__", void 0);
 __decorate([
-    NonEnumerable,
+    Enumerable(false),
     __metadata("design:type", Object)
 ], Entity.prototype, "__idValue__", void 0);
+__decorate([
+    Enumerable(false),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], Entity.prototype, "$save", null);
+__decorate([
+    Enumerable(false),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], Entity.prototype, "$delete", null);
 const Column = Entity.Column;
 const ID = Entity.ID;
 
@@ -393,25 +460,51 @@ class Record extends Storable {
         super($repository);
     }
     $save() {
+        /* TODO */
         throw new Error('Method not implemented.');
     }
     $delete() {
+        /* TODO */
         throw new Error('Method not implemented.');
     }
 }
+__decorate([
+    Enumerable(false),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], Record.prototype, "$save", null);
+__decorate([
+    Enumerable(false),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], Record.prototype, "$delete", null);
 
+/**
+ * A single-entity repository.
+ *
+ * @template `DM` API data map for the repo
+ * @template `C` entity constructor type
+ * @template `E` entity instance type
+ * @template `A` entity constructor parameter options
+ */
 class RecordRepository extends Repository {
     create(options) {
-        return new QueryResult(true, new this.Data(options, this));
+        throw new Error('Not implemented');
+        return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }
     update(options) {
-        return new QueryResult(true, new this.Data(options, this));
+        throw new Error('Not implemented');
+        return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }
     read() {
-        return new QueryResult(true, new this.Data({}, this));
+        throw new Error('Not implemented');
+        return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }
     delete() {
-        return new QueryResult(true, new this.Data({}, this));
+        throw new Error('Not implemented');
+        return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }
 }
 
@@ -443,8 +536,8 @@ class Connection extends Debugable {
         this.name = name;
         this.drivers = drivers;
         this.apiMap = apiMap;
-        this.debugType = `connection`;
-        this.connectionName = this.name;
+        this.$debugType = `connection`;
+        this.$connectionName = this.name;
         /**
          * A current map of bound repositories
          */
@@ -453,22 +546,22 @@ class Connection extends Debugable {
             this.apiDriver = new ApiDriver(this, apiMap);
         }
         else {
-            this.log('The main webrm functionality is disabled. Are you sure you want to use this without API?');
+            Debug.$warn('The main webrm functionality is disabled. Are you sure you want to use this without API?', true);
         }
         // Select the first supported driver from the bunch
         const SupportedDriver = drivers.find(d => d.isSupported);
         if (SupportedDriver) {
             // TODO: multi-driver mode
-            this.log(`Using driver "${SupportedDriver.name}" as the first supported driver`);
+            this.$log(`Using driver "${SupportedDriver.name}" as the first supported driver`);
             this.currentDriver = new SupportedDriver(this);
         }
         else {
-            this.warn('No supported driver provided. Using fallback.');
+            this.$warn('No supported driver provided. Using fallback.');
             this.currentDriver = new FallbackDriver(this);
         }
         let reProxy;
         if (!Proxy) {
-            this.warn(`window.Proxy is unavailable. Using insufficient property forwarding.`);
+            this.$warn(`window.Proxy is unavailable. Using insufficient property forwarding.`);
             reProxy = (repoName) => Object.defineProperty(this, repoName, {
                 get: () => this.repositories[repoName],
             });
@@ -484,12 +577,12 @@ class Connection extends Debugable {
             reProxy && reProxy(name);
         }
         if (Proxy) {
-            this.log(`window.Proxy is available. Using modern property forwarding.`);
+            this.$log(`window.Proxy is available. Using modern property forwarding.`);
             return new Proxy(this, {
                 get(target, key) {
                     if (!target.repositories[key]) {
                         if (!target[key]) {
-                            target.log(`Repository "${key}" is not registered upon initialization. No other property with the same name was found.`);
+                            target.$log(`Repository "${key}" is not registered upon initialization. No other property with the same name was found.`);
                         }
                         return target[key];
                     }
@@ -498,7 +591,7 @@ class Connection extends Debugable {
             });
         }
     }
-    static debug(type, exceptions) {
+    static $debug(type, exceptions) {
         if (typeof type === 'undefined') {
             return debugState;
         }

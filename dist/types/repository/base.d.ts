@@ -9,12 +9,13 @@ export interface IRepoConnectionInternal {
 export interface IRepoConnection extends IRepoConnectionInternal {
     apiDriver?: ApiDriver;
 }
-export declare class Repository<DM extends DataMap<E>, C extends IStorableConstructor<E>, E extends Storable = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]> extends Debugable {
+export declare class Repository<DM extends DataMap<C>, C extends IStorableConstructor<E>, E extends Storable = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]> extends Debugable {
     name: string;
-    protected Data: C;
-    protected readonly debugType: DebugType;
+    private Data;
+    protected readonly $debugType: DebugType;
     protected readonly connection: IRepoConnectionInternal;
-    readonly connectionName: string;
+    readonly $connectionName: string;
     constructor(name: string, connection: IRepoConnection, Data: C);
     readonly api?: ApiDriver;
+    makeDataInstance(options: A): E;
 }

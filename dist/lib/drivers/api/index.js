@@ -55,6 +55,7 @@ class ApiDriver extends base_1.Driver {
             return Promise.reject( /* TODO: error handling */);
         }
     }
+    static get isSupported() { return true; }
 }
 exports.ApiDriver = ApiDriver;
 //# sourceMappingURL=index.js.map

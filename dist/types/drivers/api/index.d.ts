@@ -1,5 +1,5 @@
-import { Driver } from '../base';
 import { Connection } from '../../orm/connection';
+import { Driver } from '../base';
 import { ApiMap } from './map';
 export * from './map';
 export declare class ApiDriver extends Driver {
@@ -10,4 +10,5 @@ export declare class ApiDriver extends Driver {
     update(repositoryName: string, id: any, query: (data: any) => any): Promise<any>;
     update(repositoryName: string, data: Partial<any>): Promise<any>;
     delete(repositoryName: string, data: any): Promise<any>;
+    static readonly isSupported: boolean;
 }

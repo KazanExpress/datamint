@@ -8,8 +8,8 @@ const module_1 = require("./module");
 class GlobalDebug extends debugable_1.Debugable {
     constructor() {
         super();
-        this.debugType = '*';
-        this.connectionName = '';
+        this.$debugType = '*';
+        this.$connectionName = '';
     }
     get map() {
         return module_1.debugMap;

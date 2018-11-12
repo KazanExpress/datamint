@@ -17,8 +17,8 @@ class Connection extends debug_1.Debugable {
         this.name = name;
         this.drivers = drivers;
         this.apiMap = apiMap;
-        this.debugType = `connection`;
-        this.connectionName = this.name;
+        this.$debugType = `connection`;
+        this.$connectionName = this.name;
         /**
          * A current map of bound repositories
          */
@@ -27,22 +27,22 @@ class Connection extends debug_1.Debugable {
             this.apiDriver = new api_1.ApiDriver(this, apiMap);
         }
         else {
-            this.log('The main webrm functionality is disabled. Are you sure you want to use this without API?');
+            debug_1.Debug.$warn('The main webrm functionality is disabled. Are you sure you want to use this without API?', true);
         }
         // Select the first supported driver from the bunch
         const SupportedDriver = drivers.find(d => d.isSupported);
         if (SupportedDriver) {
             // TODO: multi-driver mode
-            this.log(`Using driver "${SupportedDriver.name}" as the first supported driver`);
+            this.$log(`Using driver "${SupportedDriver.name}" as the first supported driver`);
             this.currentDriver = new SupportedDriver(this);
         }
         else {
-            this.warn('No supported driver provided. Using fallback.');
+            this.$warn('No supported driver provided. Using fallback.');
             this.currentDriver = new fallback_1.FallbackDriver(this);
         }
         let reProxy;
         if (!Proxy) {
-            this.warn(`window.Proxy is unavailable. Using insufficient property forwarding.`);
+            this.$warn(`window.Proxy is unavailable. Using insufficient property forwarding.`);
             reProxy = (repoName) => Object.defineProperty(this, repoName, {
                 get: () => this.repositories[repoName],
             });
@@ -58,12 +58,12 @@ class Connection extends debug_1.Debugable {
             reProxy && reProxy(name);
         }
         if (Proxy) {
-            this.log(`window.Proxy is available. Using modern property forwarding.`);
+            this.$log(`window.Proxy is available. Using modern property forwarding.`);
             return new Proxy(this, {
                 get(target, key) {
                     if (!target.repositories[key]) {
                         if (!target[key]) {
-                            target.log(`Repository "${key}" is not registered upon initialization. No other property with the same name was found.`);
+                            target.$log(`Repository "${key}" is not registered upon initialization. No other property with the same name was found.`);
                         }
                         return target[key];
                     }
@@ -72,7 +72,7 @@ class Connection extends debug_1.Debugable {
             });
         }
     }
-    static debug(type, exceptions) {
+    static $debug(type, exceptions) {
         if (typeof type === 'undefined') {
             return debug_1.debugState;
         }

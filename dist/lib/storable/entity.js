@@ -21,10 +21,12 @@ class Entity extends storable_1.Storable {
         }
     }
     $save() {
-        return Promise.resolve();
+        /* TODO */
+        throw new Error('Method not implemented.');
     }
     $delete() {
-        return Promise.resolve();
+        /* TODO */
+        throw new Error('Method not implemented.');
     }
     static Column(target, key) {
         target.__col__.push(key);
@@ -34,17 +36,29 @@ class Entity extends storable_1.Storable {
     }
 }
 __decorate([
-    util_1.NonEnumerable,
+    util_1.Enumerable(false),
     __metadata("design:type", Array)
 ], Entity.prototype, "__col__", void 0);
 __decorate([
-    util_1.NonEnumerable,
+    util_1.Enumerable(false),
     __metadata("design:type", Object)
 ], Entity.prototype, "__idCol__", void 0);
 __decorate([
-    util_1.NonEnumerable,
+    util_1.Enumerable(false),
     __metadata("design:type", Object)
 ], Entity.prototype, "__idValue__", void 0);
+__decorate([
+    util_1.Enumerable(false),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], Entity.prototype, "$save", null);
+__decorate([
+    util_1.Enumerable(false),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], Entity.prototype, "$delete", null);
 exports.Entity = Entity;
 exports.Column = Entity.Column;
 exports.ID = Entity.ID;
