@@ -1,5 +1,6 @@
 import { Driver } from './base';
 
+/* TODO: driver that just writes everything to short-term memory */
 export class FallbackDriver extends Driver {
   public create<T extends object>(repositoryName: string, entity: T): Promise<T> {
     throw new Error('Method not implemented.');
