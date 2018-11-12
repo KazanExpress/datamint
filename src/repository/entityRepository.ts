@@ -34,7 +34,7 @@ export class EntityRepository<
       this.columns = Object.keys(entity.prototype.__col__);
       delete entity.prototype.__col__;
     } else {
-      this.columns = Object.keys(entity.prototype);
+      this.columns = Object.keys(new entity({}, this));
     }
   }
 

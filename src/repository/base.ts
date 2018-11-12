@@ -44,5 +44,4 @@ export class Repository<
   }
 
   public readonly api?: ApiDriver;
-
 }

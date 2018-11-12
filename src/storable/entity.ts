@@ -1,5 +1,5 @@
 import { Repository } from '../repository';
-import { Key, NonEnumerable } from '../util';
+import { Enumerable, Key } from '../util';
 import { Storable } from './storable';
 
 export class Entity<
@@ -7,13 +7,13 @@ export class Entity<
   ID = any
 > extends Storable {
   // TODO: check to be writable
-  @NonEnumerable
+  @Enumerable(false)
   private __col__: Array<string> = [];
 
-  @NonEnumerable
+  @Enumerable(false)
   private __idCol__?: IDKey;
 
-  @NonEnumerable
+  @Enumerable(false)
   private __idValue__?: ID;
 
   constructor(
@@ -27,10 +27,12 @@ export class Entity<
     }
   }
 
+  @Enumerable(false)
   public $save() {
     return Promise.resolve();
   }
 
+  @Enumerable(false)
   public $delete() {
     return Promise.resolve();
   }
