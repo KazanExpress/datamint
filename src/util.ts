@@ -20,12 +20,7 @@ export function fromPath(obj, path, splitter = '.') {
 }
 
 export const Enumerable = (enumerable: boolean = true) => function (target: object, key: string, desc: PropertyDescriptor = {}) {
-  Object.defineProperty(target, key, {
-    ...desc,
-
-    // TODO: check to be writable
-    enumerable
-  });
+  desc.enumerable = enumerable;
 };
 
 export type Key = string | number | symbol;
