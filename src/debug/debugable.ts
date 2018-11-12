@@ -1,4 +1,4 @@
-import { DebugType, print, errorTypeFor, LogLevel } from './module';
+import { DebugType, errorTypeFor, LogLevel, print } from './module';
 
 export abstract class Debugable {
   /**

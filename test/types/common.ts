@@ -1,22 +1,22 @@
-import { Column, Entity, ID, Record } from '../../src';
+import { Entity, Record } from '../../src';
 
 export class Product extends Entity<'id', number> {
-  @ID
-  @Column
+  @Entity.ID
+  @Entity.Column
   public id: number;
 
-  @Column
+  @Entity.Column
   public title: string;
 
-  @Column
+  @Entity.Column
   public url: string;
 
   constructor(options: {
     id: number;
     title: string;
     url: string;
-  }) {
-    super(options);
+  }, repo?) {
+    super(options, repo);
     this.id = options.id;
     this.title = options.title;
     this.url = options.url;
@@ -36,8 +36,8 @@ export class User extends Record implements IUser {
 
   public cart: Product[];
 
-  constructor(options: IUser) {
-    super();
+  constructor(options: IUser, repo?) {
+    super(options, repo);
     this.name = options.name;
     this.birthDate = options.birthDate;
     this.cart = options.cart;

@@ -1,5 +1,5 @@
 import { Debugable } from './debugable';
-import { DebugType, debugMap, debugState } from './module';
+import { debugMap, debugState, DebugType } from './module';
 
 class GlobalDebug extends Debugable {
   protected debugType: DebugType = '*';
@@ -26,3 +26,4 @@ export const Debug = GlobalDebug.instance;
 
 export * from './debugable';
 export * from './module';
+
