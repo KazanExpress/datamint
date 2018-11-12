@@ -11,9 +11,10 @@ class GlobalDebug extends Debugable {
 
   public static instance = new GlobalDebug();
 
-  public log(message) { super.log(message); }
-  public warn(message) { super.warn(message); }
-  public error(message) { super.error(message); }
+  public log = super.log;
+  public warn = super.warn;
+  public error = super.error;
+  public debug = super.debug;
 
   public get map() {
     return debugMap;
