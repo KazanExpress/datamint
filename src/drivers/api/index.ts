@@ -48,7 +48,13 @@ export class ApiDriver extends Driver {
 
     return repo.update(data);
   }
-  public delete(repositoryName: string, id: any): Promise<any> {
-    throw new Error('Method not implemented.');
+  public delete(repositoryName: string, data: any): Promise<any> {
+    const repo = this.apiMap[repositoryName];
+
+    if (repo && repo.delete) {
+      return repo.delete(data);
+    } else {
+      return Promise.reject(/* TODO: error handling */);
+    }
   }
 }
