@@ -18,7 +18,6 @@ export type ExceptionType = 'soft' | 'hard';
  * - `db` - debug all repositories
  * - `db:${name}` - debug a repo with ${name}
  * - `db:${name}:entity` - debug all entities in the repository
- * - `db:${name}:entity:${name}` - debug entity ${name}
  */
 export type DebugType = '*'
   | 'connection'
@@ -97,7 +96,7 @@ export function print(instanceName: string, type: any, message: any, level: LogL
       if (errorType === 'hard' && level === 'error') {
         throw new Error(`${LOG_PREFIX(instanceName)}:${type} - ${message}`);
       } else {
-        console[level](`%c${LOG_PREFIX(instanceName)}%c:%c${type}%c - `, message,
+        console[level](`%c${LOG_PREFIX(instanceName)}%c:%c${type}%c - ${message}`,
           'color: purple',
           'color: initial',
           'color: blue',
