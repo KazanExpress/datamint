@@ -1,5 +1,5 @@
 import { Connection } from '../../src';
-import { Broken, Product, User } from './common';
+import { Broken, Product, User, IUser } from './common';
 
 describe('types', () => {
   it('types', () => {
@@ -10,23 +10,23 @@ describe('types', () => {
     }, {
       User: {
         async create({ username }: { username: string; password: string }) {
-          return new User({
+          return {
             birthDate: new Date(),
             cart: [],
             name: username
-          });
+          } as IUser;
         },
         async delete() {
-          return new User({
+          return {
             birthDate: new Date(),
             cart: [],
             name: 'asd'
-          });
+          };
         }
       },
       Products: {
         async create(options: { title: string; id: number; url: string }) {
-          return new Product(options);
+          return options;
         }
       },
       Broken: undefined

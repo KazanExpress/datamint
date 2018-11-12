@@ -13,7 +13,7 @@ export interface IRepoConnection extends IRepoConnectionInternal{
 }
 
 export class Repository<
-  DM extends DataMap<E>,
+  DM extends DataMap<C>,
   C extends IStorableConstructor<E>,
   E extends Storable = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],

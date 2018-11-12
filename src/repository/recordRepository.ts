@@ -12,7 +12,7 @@ import { Repository } from './base';
  * @template `A` entity constructor parameter options
  */
 export class RecordRepository<
-  DM extends DataMap<E>,
+  DM extends DataMap<C>,
   C extends IStorableConstructor<E>,
   E extends Storable = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],

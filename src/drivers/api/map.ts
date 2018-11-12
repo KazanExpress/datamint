@@ -1,12 +1,15 @@
 import { IRepositoryMap } from '../../orm/connection';
-import { Storable } from '../../storable';
+import { IStorableConstructor } from '../../storable';
 
-export type Fabric<S> = (...options: any[]) => Promise<S>;
+export type Fabric<O> = (...options: any[]) => Promise<O>;
 
-export type DataMap<S extends Storable> = {
-  [key in 'create' | 'read' | 'update' | 'delete']?: Fabric<S>;
+export type DataMap<
+  C extends IStorableConstructor<any>,
+  A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]
+> = {
+  [key in 'create' | 'read' | 'update' | 'delete']?: Fabric<A>;
 };
 
 export type ApiMap<R extends IRepositoryMap> = {
-  [key in keyof R]: DataMap<InstanceType<R[key]>> | undefined;
+  [key in keyof R]: DataMap<R[key]> | undefined;
 };

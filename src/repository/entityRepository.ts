@@ -22,7 +22,7 @@ type Arg<T extends undefined | ((arg: any) => any)> = T extends (arg: infer U) =
  */
 export class EntityRepository<
   // TODO: hide most of the generic params from end-user..?
-  DM extends DataMap<E>,
+  DM extends DataMap<C>,
   C extends IStorableConstructor<E>,
   E extends Storable = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
