@@ -2,8 +2,7 @@ import { Debugable, debugMap, DebugState, debugState, DebugType, ExceptionType, 
 import { Driver, IDriverConstructor } from '../drivers';
 import { ApiDriver, ApiMap, DataMap } from '../drivers/api';
 import { FallbackDriver } from '../drivers/fallback';
-import { EntityRepository, makeRepository, Repository } from '../repository';
-import { RecordRepository } from '../repository/recordRepository';
+import { EntityRepository, makeRepository, RecordRepository, Repository } from '../repository';
 import { Entity, IStorableConstructor, Record } from '../storable';
 
 export interface IRepositoryMap {
