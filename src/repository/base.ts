@@ -28,6 +28,11 @@ export class Repository<
     private Data: C
   ) {
     super();
+    this.connection = connection;
+    this.$connectionName = connection.name;
+
+    this.api = connection.apiDriver;
+
     if (/* this class was instantiated directly (without inheritance) */
       Repository.prototype === this.constructor.prototype
     ) {
@@ -38,10 +43,6 @@ export class Repository<
       }
     }
 
-    this.connection = connection;
-    this.$connectionName = connection.name;
-
-    this.api = connection.apiDriver;
   }
 
   public readonly api?: ApiDriver;
