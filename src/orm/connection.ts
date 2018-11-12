@@ -1,4 +1,4 @@
-import { Debug, DebugType, ExceptionType } from '../debug';
+import { Debug, DebugState, DebugType, ExceptionType } from '../debug';
 import { Driver, IDriverConstructor } from '../drivers';
 import { ApiDriver, ApiMap, DataMap } from '../drivers/api';
 import { FallbackDriver } from '../drivers/fallback';
@@ -70,7 +70,7 @@ export class Connection<
       // TODO: multi-driver mode
       Debug.log(
         this.name,
-        'orm',
+        'connection',
         `Using driver "${SupportedDriver.name}" as the first supported driver`
       );
 
@@ -78,7 +78,7 @@ export class Connection<
     } else {
       Debug.warn(
         this.name,
-        'orm',
+        'connection',
         'No supported driver provided. Using fallback.'
       );
 
@@ -90,7 +90,7 @@ export class Connection<
     if (!Proxy) {
       Debug.warn(
         this.name,
-        'orm',
+        'connection',
         `window.Proxy is unavailable. Using insufficient property forwarding.`
       );
 
@@ -115,7 +115,7 @@ export class Connection<
     if (Proxy) {
       Debug.log(
         this.name,
-        'orm',
+        'connection',
         `window.Proxy is available. Using modern property forwarding.`
       );
 
@@ -125,7 +125,7 @@ export class Connection<
             if (!target[key]) {
               Debug.log(
                 target.name,
-                'orm',
+                'connection',
                 `Repository "${key}" is not registered upon initialization. No other property with the same name was found.`
               );
             }
@@ -142,23 +142,65 @@ export class Connection<
   //#region Debug
 
   /**
-   * Enable a certain debug option for WebRM
+   * Returns a truthy value if debug is currently enabled
    *
-   * Allows for detailed debug type - exception type mapping.
+   * Returns a falsy value if debug is currently disabled
+   */
+  public static debug(): DebugState;
+  /**
+   * Enable or disable all debug logs
    */
   public static debug(enabled: boolean): void;
+  /**
+   * Enable or disable all debug logs.
+   *
+   * Allows specifying different debug types:
+   *
+   * - `soft` - informative, only logs to console
+   * - `hard` - throws exceptions, forcing proper error-handling
+   */
+  public static debug(enabled: boolean, exceptions: ExceptionType): void;
+  /**
+   * Enable a certain debug option for WebRM
+   */
   public static debug(type: DebugType): void;
+  /**
+   * Enable a certain debug option for WebRM
+   *
+   * Allows specifying different debug types:
+   *
+   * - `soft` - informative, only logs to console
+   * - `hard` - throws exceptions, forcing proper error-handling
+   */
   public static debug(type: DebugType, exceptions: ExceptionType): void;
+  /**
+   * Enable a certain debug option for WebRM
+   */
   public static debug(type: string): void;
+  /**
+   * Enable a certain debug option for WebRM
+   *
+   * Allows specifying different debug types:
+   *
+   * - `soft` - informative, only logs to console
+   * - `hard` - throws exceptions, forcing proper error-handling
+   */
   public static debug(type: string, exceptions: ExceptionType): void;
-  public static debug(type: boolean | string, exceptions?: ExceptionType) {
+  public static debug(type?: boolean | string, exceptions?: ExceptionType) {
+    if (typeof type === 'undefined') {
+      return Debug.state;
+    }
+
     if (typeof type === 'boolean') {
       Debug.state = (type ? 'enabled' : 'disabled');
+      Debug.map['*'] = exceptions || type;
     } else {
       Debug.state = ('custom');
 
       Debug.map[type] = exceptions || !Debug.map[type];
     }
+
+    return;
   }
 
   //#endregion

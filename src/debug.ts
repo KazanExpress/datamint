@@ -29,6 +29,8 @@ export type DebugType = '*'
   | 'db:[name]:entity'
   | 'db:[name]:entity:[name]';
 
+export type DebugState = 'enabled' | 'disabled' | 'custom';
+
 /**
  * Maps all debug types to all errors types, telling which debug type will throw
  */
@@ -41,7 +43,7 @@ export type LogLevel = 'log' | 'debug' | 'warn' | 'error';
 export abstract class Debug {
   private constructor() {}
 
-  protected static debugState: 'enabled' | 'disabled' | 'custom' = 'disabled';
+  protected static debugState: DebugState = 'disabled';
 
   /**
    * Contains the map for all debug types and their respective error types for the ORM.
