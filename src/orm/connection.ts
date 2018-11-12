@@ -1,4 +1,4 @@
-import { Debugable, debugMap, DebugState, debugState, DebugType, ExceptionType, setDebugState } from '../debug';
+import { Debugable, debugMap, DebugState, debugState, DebugType, ExceptionType, setDebugState, Debug } from '../debug';
 import { Driver, IDriverConstructor } from '../drivers';
 import { ApiDriver, ApiMap, DataMap } from '../drivers/api';
 import { FallbackDriver } from '../drivers/fallback';
@@ -64,7 +64,7 @@ export class Connection<
     if (apiMap) {
       this.apiDriver = new ApiDriver(this, apiMap);
     } else {
-      this.$log('The main webrm functionality is disabled. Are you sure you want to use this without API?');
+      Debug.$warn('The main webrm functionality is disabled. Are you sure you want to use this without API?', true);
     }
 
     // Select the first supported driver from the bunch
