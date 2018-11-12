@@ -25,8 +25,8 @@ export class Connection<
   RM extends IRepositoryMap = IRepositoryMap,
   AM extends ApiMap<RM> = ApiMap<RM>,
 > extends Debugable {
-  protected debugType: DebugType = `connection`;
-  protected connectionName: string = this.name;
+  protected $debugType: DebugType = `connection`;
+  protected $connectionName: string = this.name;
 
   // TODO
   // public static readonly plugins: WebRM.IPlugin[] = [];
@@ -64,7 +64,7 @@ export class Connection<
     if (apiMap) {
       this.apiDriver = new ApiDriver(this, apiMap);
     } else {
-      this.log('The main webrm functionality is disabled. Are you sure you want to use this without API?');
+      this.$log('The main webrm functionality is disabled. Are you sure you want to use this without API?');
     }
 
     // Select the first supported driver from the bunch
@@ -72,11 +72,11 @@ export class Connection<
 
     if (SupportedDriver) {
       // TODO: multi-driver mode
-      this.log(`Using driver "${SupportedDriver.name}" as the first supported driver`);
+      this.$log(`Using driver "${SupportedDriver.name}" as the first supported driver`);
 
       this.currentDriver = new SupportedDriver(this);
     } else {
-      this.warn('No supported driver provided. Using fallback.');
+      this.$warn('No supported driver provided. Using fallback.');
 
       this.currentDriver = new FallbackDriver(this);
     }
@@ -84,7 +84,7 @@ export class Connection<
     let reProxy;
 
     if (!Proxy) {
-      this.warn(`window.Proxy is unavailable. Using insufficient property forwarding.`);
+      this.$warn(`window.Proxy is unavailable. Using insufficient property forwarding.`);
 
       reProxy = (repoName: string) => Object.defineProperty(this, repoName, {
         get: () => this.repositories[repoName],
@@ -105,13 +105,13 @@ export class Connection<
     }
 
     if (Proxy) {
-      this.log(`window.Proxy is available. Using modern property forwarding.`);
+      this.$log(`window.Proxy is available. Using modern property forwarding.`);
 
       return new Proxy(this, {
         get(target, key: string) {
           if (!target.repositories[key]) {
             if (!target[key]) {
-              target.log(
+              target.$log(
                 `Repository "${key}" is not registered upon initialization. No other property with the same name was found.`
               );
             }
@@ -132,11 +132,11 @@ export class Connection<
    *
    * Returns a falsy value if debug is currently disabled
    */
-  public static debug(): DebugState;
+  public static $debug(): DebugState;
   /**
    * Enable or disable all debug logs
    */
-  public static debug(enabled: boolean): void;
+  public static $debug(enabled: boolean): void;
   /**
    * Enable or disable all debug logs.
    *
@@ -145,24 +145,11 @@ export class Connection<
    * - `soft` - informative, only logs to console
    * - `hard` - throws exceptions, forcing proper error-handling
    */
-  public static debug(enabled: boolean, exceptions: ExceptionType): void;
+  public static $debug(enabled: boolean, exceptions: ExceptionType): void;
   /**
    * Enable a certain debug option for WebRM
    */
-  public static debug(type: DebugType): void;
-  /**
-   * Enable a certain debug option for WebRM
-   *
-   * Allows specifying different debug types:
-   *
-   * - `soft` - informative, only logs to console
-   * - `hard` - throws exceptions, forcing proper error-handling
-   */
-  public static debug(type: DebugType, exceptions: ExceptionType): void;
-  /**
-   * Enable a certain debug option for WebRM
-   */
-  public static debug(type: string): void;
+  public static $debug(type: DebugType): void;
   /**
    * Enable a certain debug option for WebRM
    *
@@ -171,8 +158,21 @@ export class Connection<
    * - `soft` - informative, only logs to console
    * - `hard` - throws exceptions, forcing proper error-handling
    */
-  public static debug(type: string, exceptions: ExceptionType): void;
-  public static debug(type?: boolean | string, exceptions?: ExceptionType) {
+  public static $debug(type: DebugType, exceptions: ExceptionType): void;
+  /**
+   * Enable a certain debug option for WebRM
+   */
+  public static $debug(type: string): void;
+  /**
+   * Enable a certain debug option for WebRM
+   *
+   * Allows specifying different debug types:
+   *
+   * - `soft` - informative, only logs to console
+   * - `hard` - throws exceptions, forcing proper error-handling
+   */
+  public static $debug(type: string, exceptions: ExceptionType): void;
+  public static $debug(type?: boolean | string, exceptions?: ExceptionType) {
     if (typeof type === 'undefined') {
       return debugState;
     }

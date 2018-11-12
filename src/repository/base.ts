@@ -18,9 +18,9 @@ export class Repository<
   E extends Storable = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
 > extends Debugable {
-  protected readonly debugType: DebugType = `db:${this.name}` as DebugType;
+  protected readonly $debugType: DebugType = `db:${this.name}` as DebugType;
   protected readonly connection: IRepoConnectionInternal;
-  public readonly connectionName: string = this.connection.name;
+  public readonly $connectionName: string = this.connection.name;
 
   constructor(
     public name: string,
@@ -31,10 +31,10 @@ export class Repository<
     if (/* this class was instantiated directly (without inheritance) */
       Repository.prototype === this.constructor.prototype
     ) {
-      if (this.debugEnabled) {
-        this.warn(`Using default empty repository.`);
+      if (this.$debugEnabled) {
+        this.$warn(`Using default empty repository.`);
       } else if (Debug.map.db) {
-        this.warn(`Using default empty repository for ${name}`, true);
+        this.$warn(`Using default empty repository for ${name}`, true);
       }
     }
 

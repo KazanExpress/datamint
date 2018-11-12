@@ -2,16 +2,16 @@ import { Debugable } from './debugable';
 import { debugMap, debugState, DebugType } from './module';
 
 class GlobalDebug extends Debugable {
-  protected debugType: DebugType = '*';
-  protected connectionName: string = '';
+  protected $debugType: DebugType = '*';
+  protected $connectionName: string = '';
   private constructor() { super(); }
 
   public static instance = new GlobalDebug();
 
-  public log!: Debugable['log'];
-  public warn!: Debugable['warn'];
-  public error!: Debugable['error'];
-  public debug!: Debugable['debug'];
+  public $log!: Debugable['$log'];
+  public $warn!: Debugable['$warn'];
+  public $error!: Debugable['$error'];
+  public $debug!: Debugable['$debug'];
 
   public get map() {
     return debugMap;
