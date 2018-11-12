@@ -13,7 +13,7 @@ This library is not yet ready for usage. So please save this page to bookmarks o
 
 ## What is it?
 
-**WEBALORM** stands for "WEBify ALl ORMs". It's a type of ORM.
+**WEBALORM** stands for "Webify All ORMs". It's a type of ORM.
 
 ORM (Object-relational mapper) - a programming tool for converting data between incompatible type systems using object-oriented paradigms. It often reduces the amount of code that needs to be written in order to access the needed data.
 
