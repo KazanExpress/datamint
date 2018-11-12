@@ -12,12 +12,16 @@ export interface IRepoConnection extends IRepoConnectionInternal{
   apiDriver?: ApiDriver;
 }
 
+export interface IRepoData {
+  name: string;
+}
+
 export class Repository<
   DM extends DataMap<C>,
   C extends IStorableConstructor<E>,
   E extends Storable = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
-> extends Debugable {
+> extends Debugable implements IRepoData {
   protected readonly $debugType: DebugType = `db:${this.name.toLowerCase()}` as DebugType;
   protected readonly connection: IRepoConnectionInternal;
   public readonly $connectionName: string;

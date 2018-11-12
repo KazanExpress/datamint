@@ -1,4 +1,5 @@
 import { Connection } from '../orm';
+import { EntityRepository, RecordRepository, IRepoData } from '../repository';
 
 export interface IDriverConstructor extends Function {
   new (connection: Connection): Driver;
@@ -11,11 +12,30 @@ export abstract class Driver {
     protected connection: Connection
   ) {}
 
-  public abstract create<T extends object>(repositoryName: string, data: T): Promise<T>;
-  public abstract read<T extends object>(repositoryName: string, id: any): Promise<T>;
-  public abstract update<T extends object>(repositoryName: string, id: any, query: (data: T) => Partial<T>): Promise<T>;
-  public abstract update<T extends object>(repositoryName: string, data: Partial<T>): Promise<T>;
-  public abstract delete<T extends object>(repositoryName: string, id: any): Promise<T>;
+  public abstract create<A extends object, R extends IRepoData = IRepoData>(
+    repository: R,
+    data: A
+  ): Promise<A>;
+
+  public abstract read<A extends object, R extends IRepoData = IRepoData>(
+    repository: R,
+    id: any
+  ): Promise<A>;
+
+  public abstract update<A extends object, R extends IRepoData = IRepoData>(
+    repository: R,
+    id: any,
+    query: (data: A) => Partial<A>
+  ): Promise<A>;
+  public abstract update<A extends object, R extends IRepoData = IRepoData>(
+    repository: R,
+    data: Partial<A>
+  ): Promise<A>;
+
+  public abstract delete<A extends object, R extends IRepoData = IRepoData>(
+    repository: R,
+    id: any
+  ): Promise<A>;
 
   /**
    * Determines if the driver is supported in current environment

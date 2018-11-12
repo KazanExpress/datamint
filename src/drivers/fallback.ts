@@ -1,40 +1,43 @@
 import { Driver } from './base';
+import { IRepoData } from '../repository';
 
 /* TODO: driver that just writes everything to short-term memory */
 export class FallbackDriver extends Driver {
-  private repositoryMap: any = {};
+  public async create<A, R extends IRepoData = IRepoData>(repository: R, data: A): Promise<A> {
+    this.repositoryMap[repository.name] = this.repositoryMap[repository.name] || [];
 
-  public async create<T extends object>(repositoryName: string, entity: T): Promise<T> {
-    this.repositoryMap[repositoryName] = this.repositoryMap[repositoryName] || [];
+    this.repositoryMap[repository.name].push(data);
 
-    this.repositoryMap[repositoryName].push(entity);
-
-    return entity;
+    return data;
   }
 
-  public read<T extends object>(repositoryName: string, id: any): Promise<T> {
+  public read<A, R extends IRepoData = IRepoData>(repository: R, id: any): Promise<A> {
     throw new Error('Method not implemented.');
   }
 
-  public update<T extends object>(repositoryName: string, id: any, data: Partial<T>): Promise<T>;
-  public update<T extends object>(repositoryName: string, entity: Partial<T>): Promise<T>;
-  public async update(repositoryName: any, id: any, data?: any) {
+  public update<A, R extends IRepoData = IRepoData>(repository: R, id: any, query: (data: A) => Partial<A>): Promise<A>;
+  public update<A, R extends IRepoData = IRepoData>(repository: R, data: Partial<A>): Promise<A>;
+  public update(repository: any, id: any, query?: any) {
     throw new Error('Method not implemented.');
 
-    return {};
+    return Promise.resolve();
   }
-  public delete<T extends object>(repositoryName: string, id: any): Promise<T>;
-  public async delete(repositoryName: any, entity: any) {
-    const idx = this.repositoryMap[repositoryName].findIndex(e => Object.keys(e).some(key => {
+
+  public delete<A, R extends IRepoData = IRepoData>(repository: R, entity: any): Promise<A> {
+    const idx = this.repositoryMap[repository.name].findIndex(e => Object.keys(e).some(key => {
       return e[key] === entity[key];
     }));
 
-    const res = this.repositoryMap[repositoryName][idx];
+    const res = this.repositoryMap[repository.name][idx];
 
-    this.repositoryMap[repositoryName].splice(idx, 1);
+    this.repositoryMap[repository.name].splice(idx, 1);
 
     return res;
   }
+  private repositoryMap: any = {};
+
+
+
 
 
 }

@@ -2,13 +2,19 @@ import { DataMap } from '../drivers/api';
 import { QueryResult } from '../queryResult';
 import { Entity, IStorableConstructor, Storable } from '../storable';
 import { Key } from '../util';
-import { IRepoConnection, Repository } from './base';
+import { IRepoConnection, Repository, IRepoData } from './base';
 
 type PartialWithId<T, ID, IDKey extends Key> = Partial<T> & {
   [key in IDKey]: ID;
 };
 
 type Arg<T extends undefined | ((arg: any) => any)> = T extends (arg: infer U) => any ? U : undefined;
+
+
+export interface IEntityRepoData<IDKey extends string> extends IRepoData {
+  readonly columns: Array<string>;
+  readonly primaryKey: IDKey;
+}
 
 /**
  * A typical multi-entity repository.
@@ -28,7 +34,7 @@ export class EntityRepository<
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
   ID = E extends Entity<string, infer IdType> ? IdType : any,
   IDKey extends string = E extends Entity<infer IdKey, unknown> ? IdKey : string,
-> extends Repository<DM, C, E, A> {
+> extends Repository<DM, C, E, A> implements IEntityRepoData<IDKey> {
   public readonly columns: Array<string> = [];
   public readonly primaryKey: IDKey;
 
@@ -53,7 +59,11 @@ export class EntityRepository<
     // TODO: up to debate - singular arguments always or multiple args inference?
     apiOptions?: Arg<DM['create']>
   ) {
-    const result = await this.connection.currentDriver.create(this.name, options);
+    const result = await this.connection.currentDriver.create<A, IEntityRepoData<IDKey>>({
+      name: this.name,
+      columns: this.columns,
+      primaryKey: this.primaryKey
+    }, options);
 
     try {
       const instance = this.makeDataInstance(result);
@@ -84,7 +94,7 @@ export class EntityRepository<
     }
   }
 
-  public get(id: ID): QueryResult<E> {
+  public get(id: ID, getApiOptions?: Arg<DM['read']>): QueryResult<E> {
     throw new Error('Not implemented');
 
     return new QueryResult(/* TODO: implement this */
@@ -93,7 +103,7 @@ export class EntityRepository<
     );
   }
 
-  public update(entity: PartialWithId<A, ID, IDKey>): QueryResult<E> {
+  public update(entity: PartialWithId<A, ID, IDKey>, updateApiOptions?: Arg<DM['update']>): QueryResult<E> {
     throw new Error('Not implemented');
 
     return new QueryResult(/* TODO: implement this */
@@ -102,7 +112,8 @@ export class EntityRepository<
     );
   }
 
-  public updateById(id: ID, query: (entity: E) => Partial<A>): QueryResult<E> {
+  /* Do we even need this?.. */
+  public updateById(id: ID, query: (entity: E) => Partial<A>, updateApiOptions?: Arg<DM['update']>): QueryResult<E> {
     throw new Error('Not implemented');
 
     return new QueryResult(/* TODO: implement this */
@@ -111,7 +122,7 @@ export class EntityRepository<
     );
   }
 
-  public delete(entity: PartialWithId<A, ID, IDKey> | ID): QueryResult<E> {
+  public delete(entity: PartialWithId<A, ID, IDKey> | ID, deleteApiOptions?: Arg<DM['delete']>): QueryResult<E> {
     throw new Error('Not implemented');
 
     return new QueryResult(/* TODO: implement this */
