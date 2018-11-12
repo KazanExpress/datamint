@@ -10,8 +10,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const util_1 = require("../util");
-class Entity {
-    constructor(options) {
+const storable_1 = require("./storable");
+class Entity extends storable_1.Storable {
+    constructor(options, $repository) {
+        super($repository);
         // TODO: check to be writable
         this.__col__ = [];
         if (this.__idCol__) {

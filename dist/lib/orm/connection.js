@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const debug_1 = require("../debug");
+const api_1 = require("../drivers/api");
 const fallback_1 = require("../drivers/fallback");
 const repository_1 = require("../repository");
-const api_1 = require("../drivers/api");
-class Connection {
+class Connection extends debug_1.Debugable {
     /**
      * Creates a WebRM connection instance.
      * @param name the name of the connection to the storage. Namespaces all respositories invoked from the instance.
@@ -13,9 +13,12 @@ class Connection {
      * @param apiMap maps the API calls onto the current data structure
      */
     constructor(name, drivers, repositories, apiMap) {
+        super();
         this.name = name;
         this.drivers = drivers;
         this.apiMap = apiMap;
+        this.debugType = `connection`;
+        this.connectionName = this.name;
         /**
          * A current map of bound repositories
          */
@@ -24,42 +27,43 @@ class Connection {
             this.apiDriver = new api_1.ApiDriver(this, apiMap);
         }
         else {
-            debug_1.Debug.log(this.name, '*', 'The main webrm functionality is disabled. Are you sure you want to use this without API?');
+            this.log('The main webrm functionality is disabled. Are you sure you want to use this without API?');
         }
         // Select the first supported driver from the bunch
         const SupportedDriver = drivers.find(d => d.isSupported);
         if (SupportedDriver) {
             // TODO: multi-driver mode
-            debug_1.Debug.log(this.name, 'orm', `Using driver "${SupportedDriver.name}" as the first supported driver`);
+            this.log(`Using driver "${SupportedDriver.name}" as the first supported driver`);
             this.currentDriver = new SupportedDriver(this);
         }
         else {
-            debug_1.Debug.warn(this.name, 'orm', 'No supported driver provided. Using fallback.');
+            this.warn('No supported driver provided. Using fallback.');
             this.currentDriver = new fallback_1.FallbackDriver(this);
         }
         let reProxy;
         if (!Proxy) {
-            debug_1.Debug.warn(this.name, 'orm', `window.Proxy is unavailable. Using insufficient property forwarding.`);
+            this.warn(`window.Proxy is unavailable. Using insufficient property forwarding.`);
             reProxy = (repoName) => Object.defineProperty(this, repoName, {
                 get: () => this.repositories[repoName],
             });
         }
         for (const repoName in repositories) {
-            const entityConstructor = repositories[repoName];
-            this.repositories[repoName] = repository_1.makeRepository(repoName, {
+            const name = repoName;
+            const entityConstructor = repositories[name];
+            this.repositories[name] = repository_1.makeRepository(name, {
                 name: this.name,
-                apiDriver: this.apiDriver,
-                currentDriver: this.currentDriver
+                apiDriver: this.apiMap && this.apiMap[name] && this.apiDriver,
+                currentDriver: this.currentDriver,
             }, entityConstructor);
-            reProxy && reProxy(repoName);
+            reProxy && reProxy(name);
         }
         if (Proxy) {
-            debug_1.Debug.log(this.name, 'orm', `window.Proxy is available. Using modern property forwarding.`);
+            this.log(`window.Proxy is available. Using modern property forwarding.`);
             return new Proxy(this, {
                 get(target, key) {
                     if (!target.repositories[key]) {
                         if (!target[key]) {
-                            debug_1.Debug.log(target.name, 'orm', `Repository "${key}" is not registered upon initialization. No other property with the same name was found.`);
+                            target.log(`Repository "${key}" is not registered upon initialization. No other property with the same name was found.`);
                         }
                         return target[key];
                     }
@@ -69,13 +73,18 @@ class Connection {
         }
     }
     static debug(type, exceptions) {
+        if (typeof type === 'undefined') {
+            return debug_1.debugState;
+        }
         if (typeof type === 'boolean') {
-            debug_1.Debug.state = (type ? 'enabled' : 'disabled');
+            debug_1.setDebugState(type ? 'enabled' : 'disabled');
+            debug_1.debugMap['*'] = exceptions || type;
         }
         else {
-            debug_1.Debug.state = ('custom');
-            debug_1.Debug.map[type] = exceptions || !debug_1.Debug.map[type];
+            debug_1.setDebugState('custom');
+            debug_1.debugMap[type] = exceptions || !debug_1.debugMap[type];
         }
+        return;
     }
 }
 exports.Connection = Connection;

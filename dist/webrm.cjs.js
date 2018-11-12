@@ -2,99 +2,6 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-var LOG_PREFIX = function (name) { return name ? "[WebRM:" + name + "]" : "[WebRM]"; };
-var Debug = /** @class */ (function () {
-    function Debug() {
-    }
-    Object.defineProperty(Debug, "isEnabled", {
-        /**
-         * `true` if any debug is enabled
-         */
-        get: function () { return this.debugState !== 'disabled'; },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Debug, "state", {
-        /**
-         * Shows the current debug state of WebRM
-         *
-         * - `enabled` - all the logs and exceptions are enabled
-         * - `custom` - custom rules are set via a `debug()` function
-         * - `disabled` - all the logs and most exceptions are suppressed
-         */
-        get: function () { return this.debugState; },
-        set: function (v) { this.debugState = v; },
-        enumerable: true,
-        configurable: true
-    });
-    Debug.error = function (instanceName, type, message) {
-        return this.print(instanceName, type, message, 'error');
-    };
-    Debug.log = function (instanceName, type, message) {
-        return this.print(instanceName, type, message, 'log');
-    };
-    Debug.warn = function (instanceName, type, message) {
-        return this.print(instanceName, type, message, 'warn');
-    };
-    Debug.errorType = function (type) {
-        var _this = this;
-        if (this.map['*']) {
-            return this.map['*'];
-        }
-        var isString = function (t) { return typeof t === 'string'; };
-        if (isString(type) && this.map[type]) {
-            return this.map[type];
-        }
-        if (isString(type)) {
-            var matchingType = Object.keys(this.map)
-                .find(function (t) { return !!t && t.includes(type) && !!_this.map[t]; });
-            return matchingType || false;
-        }
-        return Object.keys(this.map).find(function (t) { return type.test(t); }) || false;
-    };
-    Debug.print = function (instanceName, type, message, level) {
-        if (this.debugState !== 'disabled') {
-            var typeOfError = this.errorType(type);
-            if (typeOfError) {
-                if (typeOfError === 'hard' && level === 'error') {
-                    throw new Error(LOG_PREFIX(instanceName) + ":" + type + " - " + message);
-                }
-                else {
-                    console[level]("%c" + LOG_PREFIX(instanceName) + "%c:%c" + type + "%c - " + message, 'color: purple', 'color: initial', 'color: blue', 'color: initial');
-                }
-            }
-        }
-    };
-    Debug.prints = function (message, level, type) {
-        var _this = this;
-        if (level === void 0) { level = 'log'; }
-        if (type === void 0) { type = '*'; }
-        return function (target, key, desc) {
-            Object.defineProperty(_this.decoratedLogs, key, desc || {
-                value: undefined,
-                writable: true,
-                enumerable: true
-            });
-            Object.defineProperty(target, key, {
-                get: function () {
-                    _this.print('', type, message, level);
-                    return _this.decoratedLogs[key];
-                },
-                set: function (v) {
-                    _this.decoratedLogs[key] = v;
-                }
-            });
-        };
-    };
-    Debug.debugState = 'disabled';
-    /**
-     * Contains the map for all debug types and their respective error types for the ORM.
-     */
-    Debug.map = {};
-    Debug.decoratedLogs = {};
-    return Debug;
-}());
-
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation. All rights reserved.
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
@@ -183,6 +90,98 @@ function __generator(thisArg, body) {
     }
 }
 
+var LOG_PREFIX = function (name) { return name ? "[WebRM:" + name + "]" : "[WebRM]"; };
+/**
+ * Shows the current debug state of WebRM
+ *
+ * - `enabled` - all the logs and exceptions are enabled
+ * - `custom` - custom rules are set via a `debug()` function
+ * - `disabled` - all the logs and most exceptions are suppressed
+ */
+var debugState = 'disabled';
+/**
+ * Contains the map for all debug types and their respective error types for the ORM.
+ */
+var debugMap = {};
+function setDebugState(state) {
+    debugState = state;
+}
+function errorTypeFor(type) {
+    if (debugMap['*']) {
+        return debugMap['*'];
+    }
+    var isString = function (t) { return typeof t === 'string'; };
+    if (isString(type) && debugMap[type]) {
+        return debugMap[type];
+    }
+    if (isString(type)) {
+        var matchingType = Object.keys(debugMap)
+            .find(function (t) { return !!t && t.includes(type) && !!debugMap[t]; });
+        return matchingType || false;
+    }
+    return Object.keys(debugMap).find(function (t) { return type.test(t); }) || false;
+}
+function print(instanceName, type, message, level) {
+    if (debugState !== 'disabled') {
+        var errorType = errorTypeFor(type);
+        if (errorType) {
+            if (errorType === 'hard' && level === 'error') {
+                throw new Error(LOG_PREFIX(instanceName) + ":" + type + " - " + message);
+            }
+            else {
+                console[level]("%c" + LOG_PREFIX(instanceName) + "%c:%c" + type + "%c - ", message, 'color: purple', 'color: initial', 'color: blue', 'color: initial');
+            }
+        }
+    }
+}
+
+var Debugable = /** @class */ (function () {
+    function Debugable() {
+        var _this = this;
+        this.logFactory = function (level) { return function (message) { return print(_this.connectionName, _this.debugType, message, level); }; };
+        this.log = this.logFactory('log');
+        this.warn = this.logFactory('warn');
+        this.error = this.logFactory('error');
+        this.debug = this.logFactory('debug');
+    }
+    Object.defineProperty(Debugable.prototype, "debugEnabled", {
+        /**
+         * `true` if the debug is enabled for this class
+         */
+        get: function () { return errorTypeFor(this.debugType); },
+        enumerable: true,
+        configurable: true
+    });
+    return Debugable;
+}());
+
+var GlobalDebug = /** @class */ (function (_super) {
+    __extends(GlobalDebug, _super);
+    function GlobalDebug() {
+        var _this = _super.call(this) || this;
+        _this.debugType = '*';
+        _this.connectionName = '';
+        return _this;
+    }
+    Object.defineProperty(GlobalDebug.prototype, "map", {
+        get: function () {
+            return debugMap;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GlobalDebug.prototype, "state", {
+        get: function () {
+            return debugState;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    GlobalDebug.instance = new GlobalDebug();
+    return GlobalDebug;
+}(Debugable));
+var Debug = GlobalDebug.instance;
+
 var Driver = /** @class */ (function () {
     function Driver(connection) {
         this.connection = connection;
@@ -199,6 +198,64 @@ var Driver = /** @class */ (function () {
     });
     return Driver;
 }());
+
+/* TODO */
+var ApiDriver = /** @class */ (function (_super) {
+    __extends(ApiDriver, _super);
+    function ApiDriver(connection, apiMap) {
+        var _this = _super.call(this, connection) || this;
+        _this.apiMap = apiMap;
+        return _this;
+    }
+    ApiDriver.prototype.create = function (repositoryName, data) {
+        var repo = this.apiMap[repositoryName];
+        if (repo && repo.create) {
+            return repo.create(data);
+        }
+        else {
+            return Promise.reject( /* TODO: error handling */);
+        }
+    };
+    ApiDriver.prototype.read = function (repositoryName, data) {
+        var repo = this.apiMap[repositoryName];
+        if (repo && repo.read) {
+            return repo.read(data);
+        }
+        else {
+            return Promise.reject( /* TODO: error handling */);
+        }
+    };
+    ApiDriver.prototype.update = function (repositoryName, data, query) {
+        return __awaiter(this, void 0, void 0, function () {
+            var repo, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        repo = this.apiMap[repositoryName];
+                        if (!repo || !repo.update) {
+                            return [2 /*return*/, Promise.reject( /* TODO: error handling */)];
+                        }
+                        if (!query) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.read(repositoryName, data)];
+                    case 1:
+                        result = _a.sent();
+                        return [2 /*return*/, repo.update(query(result))];
+                    case 2: return [2 /*return*/, repo.update(data)];
+                }
+            });
+        });
+    };
+    ApiDriver.prototype.delete = function (repositoryName, data) {
+        var repo = this.apiMap[repositoryName];
+        if (repo && repo.delete) {
+            return repo.delete(data);
+        }
+        else {
+            return Promise.reject( /* TODO: error handling */);
+        }
+    };
+    return ApiDriver;
+}(Driver));
 
 var FallbackDriver = /** @class */ (function (_super) {
     __extends(FallbackDriver, _super);
@@ -228,25 +285,28 @@ var FallbackDriver = /** @class */ (function (_super) {
     return FallbackDriver;
 }(Driver));
 
-/**
- * @TODO:
- * - Async API MAP crap for handling QueryResults
- */
-var Repository = /** @class */ (function () {
+var Repository = /** @class */ (function (_super) {
+    __extends(Repository, _super);
     function Repository(name, connection, Data) {
-        this.name = name;
-        this.connection = connection;
-        this.Data = Data;
-        if (
-        // If this class was instantiated directly (without inheritance)
-        Repository.prototype === this.constructor.prototype
-            // And debug for db:[name] is set
-            && Debug.map["db:" + name]) {
-            Debug.warn(connection.name, "db:" + name, "Using default empty repository for " + name);
+        var _this = _super.call(this) || this;
+        _this.name = name;
+        _this.Data = Data;
+        _this.debugType = "db:" + _this.name;
+        _this.connectionName = _this.connection.name;
+        if ( /* this class was instantiated directly (without inheritance) */Repository.prototype === _this.constructor.prototype) {
+            if (_this.debugEnabled) {
+                _this.warn("Using default empty repository.");
+            }
+            else if (Debug.map.db) {
+                _this.warn("Using default empty repository for " + name);
+            }
         }
+        _this.connection = connection;
+        _this.api = connection.apiDriver;
+        return _this;
     }
     return Repository;
-}());
+}(Debugable));
 
 /**
  * Incapsulates the query result data for further manipulation
@@ -336,10 +396,11 @@ var EntityRepository = /** @class */ (function (_super) {
     apiOptions) {
         return __awaiter(this, void 0, void 0, function () {
             var instance, queryResult_1, _a, _b, e_1;
+            var _this = this;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        instance = new this.Data(options);
+                        instance = new this.Data(options, this);
                         _c.label = 1;
                     case 1:
                         _c.trys.push([1, 3, , 4]);
@@ -349,17 +410,25 @@ var EntityRepository = /** @class */ (function (_super) {
                     case 2:
                         queryResult_1 = new (_a.apply(QueryResult, _b.concat([_c.sent()])))();
                         // Call api driver asynchronously
-                        if (apiOptions && this.connection.apiDriver) {
-                            this.connection.apiDriver.create(this.name, apiOptions).then(function (res) {
+                        if (apiOptions && this.api) {
+                            if (this.debugEnabled) {
+                                this.log("API handler execution start: " + this.name + ".add()");
+                            }
+                            this.api.create(this.name, apiOptions).then(function (res) {
                                 queryResult_1.result = res;
+                                _this.log("API handler execution end: " + _this.name + ".add()");
                             }).catch(function (e) {
                                 queryResult_1.error = e;
+                                _this.log("API handler execution end: " + _this.name + ".add()");
                             });
+                        }
+                        else if (this.debugEnabled) {
+                            this.log('No API handler detected');
                         }
                         return [2 /*return*/, queryResult_1];
                     case 3:
                         e_1 = _c.sent();
-                        // TODO: logs
+                        this.error(e_1);
                         return [2 /*return*/, new QueryResult(false, instance, e_1)];
                     case 4: return [2 /*return*/];
                 }
@@ -367,18 +436,18 @@ var EntityRepository = /** @class */ (function (_super) {
         });
     };
     EntityRepository.prototype.get = function (id) {
-        return new QueryResult(true, new this.Data({}));
+        return new QueryResult(true, new this.Data({}, this));
     };
     EntityRepository.prototype.update = function (entity) {
-        return new QueryResult(true, new this.Data({}));
+        return new QueryResult(true, new this.Data({}, this));
     };
     EntityRepository.prototype.updateById = function (id, query) {
-        return new QueryResult(true, new this.Data(query({})));
+        return new QueryResult(true, new this.Data(query({}), this));
     };
     EntityRepository.prototype.delete = function (entity) {
-        return new QueryResult(true, new this.Data({}));
+        return new QueryResult(true, new this.Data({}, this));
     };
-    // TODO: Find, find by, etc...
+    // TODO: Find, find by, exists, etc...
     EntityRepository.prototype.count = function () {
         // TODO: count entities
     };
@@ -392,13 +461,28 @@ function NonEnumerable(target, key, desc) {
         enumerable: false }));
 }
 
-var Entity = /** @class */ (function () {
-    function Entity(options) {
+var Storable = /** @class */ (function (_super) {
+    __extends(Storable, _super);
+    function Storable($repository) {
+        var _this = _super.call(this) || this;
+        _this.$repository = $repository;
+        _this.debugType = "db:" + _this.$repository.name + ":entity";
+        _this.connectionName = _this.$repository.connectionName;
+        return _this;
+    }
+    return Storable;
+}(Debugable));
+
+var Entity = /** @class */ (function (_super) {
+    __extends(Entity, _super);
+    function Entity(options, $repository) {
+        var _this = _super.call(this, $repository) || this;
         // TODO: check to be writable
-        this.__col__ = [];
-        if (this.__idCol__) {
-            this.__idValue__ = options[this.__idCol__];
+        _this.__col__ = [];
+        if (_this.__idCol__) {
+            _this.__idValue__ = options[_this.__idCol__];
         }
+        return _this;
     }
     Entity.prototype.$save = function () {
         return Promise.resolve();
@@ -425,12 +509,14 @@ var Entity = /** @class */ (function () {
         __metadata("design:type", Object)
     ], Entity.prototype, "__idValue__", void 0);
     return Entity;
-}());
+}(Storable));
 var Column = Entity.Column;
 var ID = Entity.ID;
 
-var Record = /** @class */ (function () {
-    function Record() {
+var Record = /** @class */ (function (_super) {
+    __extends(Record, _super);
+    function Record(options, $repository) {
+        return _super.call(this, $repository) || this;
     }
     Record.prototype.$save = function () {
         throw new Error('Method not implemented.');
@@ -439,7 +525,7 @@ var Record = /** @class */ (function () {
         throw new Error('Method not implemented.');
     };
     return Record;
-}());
+}(Storable));
 
 var RecordRepository = /** @class */ (function (_super) {
     __extends(RecordRepository, _super);
@@ -447,16 +533,16 @@ var RecordRepository = /** @class */ (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     RecordRepository.prototype.create = function (options) {
-        return new QueryResult(true, new this.Data(options));
+        return new QueryResult(true, new this.Data(options, this));
     };
     RecordRepository.prototype.update = function (options) {
-        return new QueryResult(true, new this.Data(options));
+        return new QueryResult(true, new this.Data(options, this));
     };
     RecordRepository.prototype.read = function () {
-        return new QueryResult(true, new this.Data({}));
+        return new QueryResult(true, new this.Data({}, this));
     };
     RecordRepository.prototype.delete = function () {
-        return new QueryResult(true, new this.Data({}));
+        return new QueryResult(true, new this.Data({}, this));
     };
     return RecordRepository;
 }(Repository));
@@ -470,43 +556,14 @@ function makeRepository(name, connection, data) {
         Constructor = RecordRepository;
     }
     else {
-        Debug.error(connection.name, 'db', "No suitable repository found for " + data.name + " when trying to connect with " + name + ".");
+        print(connection.name, 'db', "No suitable repository found for " + data.name + " when trying to connect with " + name + ".", 'error');
         Constructor = Repository;
     }
     return new Constructor(name, connection, data);
 }
 
-/* TODO */
-var ApiDriver = /** @class */ (function (_super) {
-    __extends(ApiDriver, _super);
-    function ApiDriver(connection, apiMap) {
-        var _this = _super.call(this, connection) || this;
-        _this.apiMap = apiMap;
-        return _this;
-    }
-    ApiDriver.prototype.create = function (repositoryName, data) {
-        var repo = this.apiMap[repositoryName];
-        if (repo && repo.create) {
-            return repo.create(data);
-        }
-        else {
-            return Promise.reject( /* TODO: error handling */);
-        }
-    };
-    ApiDriver.prototype.read = function (repositoryName, id) {
-        throw new Error('Method not implemented.');
-    };
-    ApiDriver.prototype.update = function (repositoryName, id, query) {
-        throw new Error('Method not implemented.');
-        return Promise.resolve();
-    };
-    ApiDriver.prototype.delete = function (repositoryName, id) {
-        throw new Error('Method not implemented.');
-    };
-    return ApiDriver;
-}(Driver));
-
-var Connection = /** @class */ (function () {
+var Connection = /** @class */ (function (_super) {
+    __extends(Connection, _super);
     /**
      * Creates a WebRM connection instance.
      * @param name the name of the connection to the storage. Namespaces all respositories invoked from the instance.
@@ -515,54 +572,57 @@ var Connection = /** @class */ (function () {
      * @param apiMap maps the API calls onto the current data structure
      */
     function Connection(name, drivers, repositories, apiMap) {
-        var _this = this;
-        this.name = name;
-        this.drivers = drivers;
-        this.apiMap = apiMap;
+        var _this = _super.call(this) || this;
+        _this.name = name;
+        _this.drivers = drivers;
+        _this.apiMap = apiMap;
+        _this.debugType = "connection";
+        _this.connectionName = _this.name;
         /**
          * A current map of bound repositories
          */
-        this.repositories = {};
+        _this.repositories = {};
         if (apiMap) {
-            this.apiDriver = new ApiDriver(this, apiMap);
+            _this.apiDriver = new ApiDriver(_this, apiMap);
         }
         else {
-            Debug.log(this.name, '*', 'The main webrm functionality is disabled. Are you sure you want to use this without API?');
+            _this.log('The main webrm functionality is disabled. Are you sure you want to use this without API?');
         }
         // Select the first supported driver from the bunch
         var SupportedDriver = drivers.find(function (d) { return d.isSupported; });
         if (SupportedDriver) {
             // TODO: multi-driver mode
-            Debug.log(this.name, 'orm', "Using driver \"" + SupportedDriver.name + "\" as the first supported driver");
-            this.currentDriver = new SupportedDriver(this);
+            _this.log("Using driver \"" + SupportedDriver.name + "\" as the first supported driver");
+            _this.currentDriver = new SupportedDriver(_this);
         }
         else {
-            Debug.warn(this.name, 'orm', 'No supported driver provided. Using fallback.');
-            this.currentDriver = new FallbackDriver(this);
+            _this.warn('No supported driver provided. Using fallback.');
+            _this.currentDriver = new FallbackDriver(_this);
         }
         var reProxy;
         if (!Proxy) {
-            Debug.warn(this.name, 'orm', "window.Proxy is unavailable. Using insufficient property forwarding.");
+            _this.warn("window.Proxy is unavailable. Using insufficient property forwarding.");
             reProxy = function (repoName) { return Object.defineProperty(_this, repoName, {
                 get: function () { return _this.repositories[repoName]; },
             }); };
         }
         for (var repoName in repositories) {
-            var entityConstructor = repositories[repoName];
-            this.repositories[repoName] = makeRepository(repoName, {
-                name: this.name,
-                apiDriver: this.apiDriver,
-                currentDriver: this.currentDriver
+            var name_1 = repoName;
+            var entityConstructor = repositories[name_1];
+            _this.repositories[name_1] = makeRepository(name_1, {
+                name: _this.name,
+                apiDriver: _this.apiMap && _this.apiMap[name_1] && _this.apiDriver,
+                currentDriver: _this.currentDriver,
             }, entityConstructor);
-            reProxy && reProxy(repoName);
+            reProxy && reProxy(name_1);
         }
         if (Proxy) {
-            Debug.log(this.name, 'orm', "window.Proxy is available. Using modern property forwarding.");
-            return new Proxy(this, {
+            _this.log("window.Proxy is available. Using modern property forwarding.");
+            return new Proxy(_this, {
                 get: function (target, key) {
                     if (!target.repositories[key]) {
                         if (!target[key]) {
-                            Debug.log(target.name, 'orm', "Repository \"" + key + "\" is not registered upon initialization. No other property with the same name was found.");
+                            target.log("Repository \"" + key + "\" is not registered upon initialization. No other property with the same name was found.");
                         }
                         return target[key];
                     }
@@ -570,18 +630,24 @@ var Connection = /** @class */ (function () {
                 }
             });
         }
+        return _this;
     }
     Connection.debug = function (type, exceptions) {
+        if (typeof type === 'undefined') {
+            return debugState;
+        }
         if (typeof type === 'boolean') {
-            Debug.state = (type ? 'enabled' : 'disabled');
+            setDebugState(type ? 'enabled' : 'disabled');
+            debugMap['*'] = exceptions || type;
         }
         else {
-            Debug.state = ('custom');
-            Debug.map[type] = exceptions || !Debug.map[type];
+            setDebugState('custom');
+            debugMap[type] = exceptions || !debugMap[type];
         }
+        return;
     };
     return Connection;
-}());
+}(Debugable));
 
 var Connection$1 = Connection;
 
@@ -590,4 +656,5 @@ exports.Entity = Entity;
 exports.Column = Column;
 exports.ID = ID;
 exports.Record = Record;
+exports.Storable = Storable;
 //# sourceMappingURL=webrm.cjs.js.map

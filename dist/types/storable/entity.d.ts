@@ -1,10 +1,11 @@
+import { Repository } from '../repository';
 import { Key } from '../util';
-import { IStorable } from './istorable';
-export declare class Entity<IDKey extends Key = string, ID = any> implements IStorable {
+import { Storable } from './storable';
+export declare class Entity<IDKey extends Key = string, ID = any> extends Storable {
     private __col__;
     private __idCol__?;
     private __idValue__?;
-    constructor(options: any);
+    constructor(options: any, $repository: Repository<any, any, any>);
     $save(): Promise<void>;
     $delete(): Promise<void>;
     static Column(target: typeof Entity['prototype'], key: string): void;

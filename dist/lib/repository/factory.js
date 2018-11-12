@@ -14,7 +14,7 @@ function makeRepository(name, connection, data) {
         Constructor = recordRepository_1.RecordRepository;
     }
     else {
-        debug_1.Debug.error(connection.name, 'db', `No suitable repository found for ${data.name} when trying to connect with ${name}.`);
+        debug_1.print(connection.name, 'db', `No suitable repository found for ${data.name} when trying to connect with ${name}.`, 'error');
         Constructor = base_1.Repository;
     }
     return new Constructor(name, connection, data);

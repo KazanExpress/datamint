@@ -27,39 +27,47 @@ class EntityRepository extends base_1.Repository {
     // TODO: up to debate - singular arguments always or multiple args inference?
     apiOptions) {
         return __awaiter(this, void 0, void 0, function* () {
-            const instance = new this.Data(options);
+            const instance = new this.Data(options, this);
             try {
                 // Call local driver changes synchronously
                 const queryResult = new queryResult_1.QueryResult(true, yield this.connection.currentDriver.create(this.name, instance));
                 // Call api driver asynchronously
-                if (apiOptions && this.connection.apiDriver) {
-                    this.connection.apiDriver.create(this.name, apiOptions).then(res => {
+                if (apiOptions && this.api) {
+                    if (this.debugEnabled) {
+                        this.log(`API handler execution start: ${this.name}.add()`);
+                    }
+                    this.api.create(this.name, apiOptions).then(res => {
                         queryResult.result = res;
+                        this.log(`API handler execution end: ${this.name}.add()`);
                     }).catch(e => {
                         queryResult.error = e;
+                        this.log(`API handler execution end: ${this.name}.add()`);
                     });
+                }
+                else if (this.debugEnabled) {
+                    this.log('No API handler detected');
                 }
                 return queryResult;
             }
             catch (e) {
-                // TODO: logs
+                this.error(e);
                 return new queryResult_1.QueryResult(false, instance, e);
             }
         });
     }
     get(id) {
-        return new queryResult_1.QueryResult(true, new this.Data({}));
+        return new queryResult_1.QueryResult(true, new this.Data({}, this));
     }
     update(entity) {
-        return new queryResult_1.QueryResult(true, new this.Data({}));
+        return new queryResult_1.QueryResult(true, new this.Data({}, this));
     }
     updateById(id, query) {
-        return new queryResult_1.QueryResult(true, new this.Data(query({})));
+        return new queryResult_1.QueryResult(true, new this.Data(query({}), this));
     }
     delete(entity) {
-        return new queryResult_1.QueryResult(true, new this.Data({}));
+        return new queryResult_1.QueryResult(true, new this.Data({}, this));
     }
-    // TODO: Find, find by, etc...
+    // TODO: Find, find by, exists, etc...
     count() {
         // TODO: count entities
     }

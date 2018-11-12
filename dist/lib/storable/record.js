@@ -1,6 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-class Record {
+const storable_1 = require("./storable");
+class Record extends storable_1.Storable {
+    constructor(options, $repository) {
+        super($repository);
+    }
     $save() {
         throw new Error('Method not implemented.');
     }

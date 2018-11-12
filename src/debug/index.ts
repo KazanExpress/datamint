@@ -8,10 +8,10 @@ class GlobalDebug extends Debugable {
 
   public static instance = new GlobalDebug();
 
-  public log = super.log;
-  public warn = super.warn;
-  public error = super.error;
-  public debug = super.debug;
+  public log!: Debugable['log'];
+  public warn!: Debugable['warn'];
+  public error!: Debugable['error'];
+  public debug!: Debugable['debug'];
 
   public get map() {
     return debugMap;
