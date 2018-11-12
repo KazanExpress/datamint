@@ -48,6 +48,7 @@ export class ApiDriver extends Driver {
 
     return repo.update(data);
   }
+
   public delete(repositoryName: string, data: any): Promise<any> {
     const repo = this.apiMap[repositoryName];
 
@@ -57,4 +58,6 @@ export class ApiDriver extends Driver {
       return Promise.reject(/* TODO: error handling */);
     }
   }
+
+  public static get isSupported() { return true; }
 }
