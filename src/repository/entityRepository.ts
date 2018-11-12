@@ -10,6 +10,16 @@ type PartialWithId<T, ID, IDKey extends Key> = Partial<T> & {
 
 type Arg<T extends undefined | ((arg: any) => any)> = T extends (arg: infer U) => any ? U : undefined;
 
+/**
+ * A typical multi-entity repository.
+ *
+ * @template `DM` API data map for the repo
+ * @template `C` entity constructor type
+ * @template `E` entity instance type
+ * @template `A` entity constructor parameter options
+ * @template `ID` entity primary key type
+ * @template `IDKey` entity primary key name
+ */
 export class EntityRepository<
   // TODO: hide most of the generic params from end-user..?
   DM extends DataMap<E>,
@@ -73,28 +83,36 @@ export class EntityRepository<
   }
 
   public get(id: ID): QueryResult<E> {
-    return new QueryResult(
+    throw new Error('Not implemented');
+
+    return new QueryResult(/* TODO: implement this */
       true,
       new this.Data({}, this)
     );
   }
 
   public update(entity: PartialWithId<A, ID, IDKey>): QueryResult<E> {
-    return new QueryResult(
+    throw new Error('Not implemented');
+
+    return new QueryResult(/* TODO: implement this */
       true,
       new this.Data({}, this)
     );
   }
 
   public updateById(id: ID, query: (entity: E) => Partial<A>): QueryResult<E> {
-    return new QueryResult(
+    throw new Error('Not implemented');
+
+    return new QueryResult(/* TODO: implement this */
       true,
       new this.Data(query({} as any), this)
     );
   }
 
   public delete(entity: PartialWithId<A, ID, IDKey> | ID): QueryResult<E> {
-    return new QueryResult(
+    throw new Error('Not implemented');
+
+    return new QueryResult(/* TODO: implement this */
       true,
       new this.Data({}, this)
     );

@@ -28,13 +28,15 @@ export class Entity<
   }
 
   @Enumerable(false)
-  public $save() {
-    return Promise.resolve();
+  public $save(): Promise<void> {
+    /* TODO */
+    throw new Error('Method not implemented.');
   }
 
   @Enumerable(false)
-  public $delete() {
-    return Promise.resolve();
+  public $delete(): Promise<void> {
+    /* TODO */
+    throw new Error('Method not implemented.');
   }
 
   public static Column(target: typeof Entity['prototype'], key: string) {

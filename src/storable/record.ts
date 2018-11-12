@@ -12,11 +12,13 @@ export class Record extends Storable {
 
   @Enumerable(false)
   public $save(): Promise<void> {
+    /* TODO */
     throw new Error('Method not implemented.');
   }
 
   @Enumerable(false)
   public $delete(): Promise<void> {
+    /* TODO */
     throw new Error('Method not implemented.');
   }
 }
