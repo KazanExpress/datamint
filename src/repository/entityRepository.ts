@@ -125,4 +125,6 @@ export class EntityRepository<
   public count() {
     // TODO: count entities
   }
+
+  // TODO: Cluster operations
 }
