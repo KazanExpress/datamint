@@ -21,16 +21,32 @@ export class ApiDriver extends Driver {
     }
   }
 
-  public read(repositoryName: string, id: any): Promise<any> {
-    throw new Error('Method not implemented.');
+  public read(repositoryName: string, data: any): Promise<any> {
+    const repo = this.apiMap[repositoryName];
+
+    if (repo && repo.read) {
+      return repo.read(data);
+    } else {
+      return Promise.reject(/* TODO: error handling */);
+    }
   }
 
-  public update(repositoryName: string, id: any, query: (data: any) => Partial<any>): Promise<any>;
+  public update(repositoryName: string, id: any, query: (data: any) => any): Promise<any>;
   public update(repositoryName: string, data: Partial<any>): Promise<any>;
-  public update(repositoryName: any, id: any, query?: any) {
-    throw new Error('Method not implemented.');
+  public async update(repositoryName: any, data: any, query?: any) {
+    const repo = this.apiMap[repositoryName];
 
-    return Promise.resolve();
+    if (!repo || !repo.update) {
+      return Promise.reject(/* TODO: error handling */);
+    }
+
+    if (query) {
+      const result = await this.read(repositoryName, data);
+
+      return repo.update(query(result));
+    }
+
+    return repo.update(data);
   }
   public delete(repositoryName: string, id: any): Promise<any> {
     throw new Error('Method not implemented.');

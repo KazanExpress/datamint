@@ -1,6 +1,6 @@
 import { Debug } from '../debug';
 import { DataMap } from '../drivers/api';
-import { Entity, IStorable, IStorableConstructor, Record } from '../storable';
+import { Entity, Storable, IStorableConstructor, Record } from '../storable';
 import { IRepoConnection, Repository } from './base';
 import { EntityRepository } from './entityRepository';
 import { RecordRepository } from './recordRepository';
@@ -8,7 +8,7 @@ import { RecordRepository } from './recordRepository';
 export function makeRepository<
   DM extends DataMap<any>,
   C extends IStorableConstructor<E>,
-  E extends IStorable = InstanceType<C>,
+  E extends Storable = InstanceType<C>,
 >(
   name: string,
   connection: IRepoConnection,

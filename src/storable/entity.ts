@@ -1,10 +1,12 @@
 import { Key, NonEnumerable } from '../util';
-import { IStorable } from './istorable';
+import { Storable } from './storable';
+import { Debugable } from '../debug';
+import { Repository } from '../repository';
 
 export class Entity<
   IDKey extends Key = string,
   ID = any
-> implements IStorable {
+> extends Storable {
   // TODO: check to be writable
   @NonEnumerable
   private __col__: Array<string> = [];
@@ -15,7 +17,12 @@ export class Entity<
   @NonEnumerable
   private __idValue__?: ID;
 
-  constructor(options) {
+  constructor(
+    options,
+    $repository: Repository<any, any, any>
+  ) {
+    super($repository);
+
     if (this.__idCol__) {
       this.__idValue__ = options[this.__idCol__];
     }

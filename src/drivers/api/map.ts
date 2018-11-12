@@ -1,9 +1,9 @@
 import { IRepositoryMap } from '../../orm/connection';
-import { IStorable } from '../../storable';
+import { Storable } from '../../storable';
 
 export type Fabric<S> = (...options: any[]) => Promise<S>;
 
-export type DataMap<S extends IStorable> = {
+export type DataMap<S extends Storable> = {
   [key in 'create' | 'read' | 'update' | 'delete']?: Fabric<S>;
 };
 

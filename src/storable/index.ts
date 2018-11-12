@@ -1,3 +1,3 @@
 export * from './entity';
-export * from './istorable';
+export * from './storable';
 export * from './record';
