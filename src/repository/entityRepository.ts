@@ -51,9 +51,7 @@ export class EntityRepository<
 
       // Call api driver asynchronously
       if (apiOptions && this.api) {
-        if (this.debugEnabled) {
-          this.log(`API handler execution start: ${this.name}.add()`);
-        }
+        this.log(`API handler execution start: ${this.name}.add()`);
 
         this.api.create(this.name, apiOptions).then(res => {
           queryResult.result = res;
@@ -62,7 +60,7 @@ export class EntityRepository<
           queryResult.error = e;
           this.log(`API handler execution end: ${this.name}.add()`);
         });
-      } else if (this.debugEnabled) {
+      } else {
         this.log('No API handler detected');
       }
 

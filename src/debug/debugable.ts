@@ -16,7 +16,11 @@ export abstract class Debugable {
    */
   public get debugEnabled() { return errorTypeFor(this.debugType); }
 
-  protected readonly logFactory = (level: LogLevel) => message => print(this.connectionName, this.debugType, message, level);
+  protected readonly logFactory = (level: LogLevel) => (message, force: boolean = false) => {
+    if (this.debugEnabled || force) {
+      print(this.connectionName, this.debugType, message, level);
+    }
+  };
 
   protected readonly log = this.logFactory('log');
   protected readonly warn = this.logFactory('warn');

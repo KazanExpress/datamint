@@ -34,7 +34,7 @@ export class Repository<
       if (this.debugEnabled) {
         this.warn(`Using default empty repository.`);
       } else if (Debug.map.db) {
-        this.warn(`Using default empty repository for ${name}`);
+        this.warn(`Using default empty repository for ${name}`, true);
       }
     }
 
