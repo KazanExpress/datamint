@@ -11,7 +11,7 @@ export interface IRepositoryMap {
 
 export type RepoFromConstructor<
   S extends IStorableConstructor<any>,
-  D extends DataMap<any> = any
+  D extends DataMap<InstanceType<S>> = DataMap<InstanceType<S>>
 > = InstanceType<S> extends Entity ? EntityRepository<D, S>
   : (InstanceType<S> extends Record ? RecordRepository<D, S> : Repository<D, S>);
 
@@ -29,7 +29,7 @@ export class Connection<
   protected $connectionName: string = this.name;
 
   // TODO
-  // public static readonly plugins: WebRM.IPlugin[] = [];
+  // public static readonly plugins: WEBALORM.IPlugin[] = [];
 
   /**
    * The driver currently used for operations with entities
@@ -47,7 +47,7 @@ export class Connection<
   public repositories: RepoStore<RM, AM> = {} as any;
 
   /**
-   * Creates a WebRM connection instance.
+   * Creates a WEBALORM connection instance.
    * @param name the name of the connection to the storage. Namespaces all respositories invoked from the instance.
    * @param drivers determine a variety of drivers the orm can select from. The first one that fits for the environment is selected.
    * @param repositories sets the relation of a repository name to its contents' prototype.
@@ -64,7 +64,7 @@ export class Connection<
     if (apiMap) {
       this.apiDriver = new ApiDriver(this, apiMap);
     } else {
-      Debug.$warn('The main webrm functionality is disabled. Are you sure you want to use this without API?', true);
+      Debug.$warn('The main webalorm functionality is disabled. Are you sure you want to use this without API?', true);
     }
 
     // Select the first supported driver from the bunch
@@ -147,11 +147,11 @@ export class Connection<
    */
   public static $debug(enabled: boolean, exceptions: ExceptionType): void;
   /**
-   * Enable a certain debug option for WebRM
+   * Enable a certain debug option for WEBALORM
    */
   public static $debug(type: DebugType): void;
   /**
-   * Enable a certain debug option for WebRM
+   * Enable a certain debug option for WEBALORM
    *
    * Allows specifying different debug types:
    *
@@ -160,11 +160,11 @@ export class Connection<
    */
   public static $debug(type: DebugType, exceptions: ExceptionType): void;
   /**
-   * Enable a certain debug option for WebRM
+   * Enable a certain debug option for WEBALORM
    */
   public static $debug(type: string): void;
   /**
-   * Enable a certain debug option for WebRM
+   * Enable a certain debug option for WEBALORM
    *
    * Allows specifying different debug types:
    *
