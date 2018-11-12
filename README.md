@@ -10,7 +10,6 @@
 
 This library is not yet ready for usage. So please save this page to bookmarks or [give it a star on GitHub](https://github.com/KazanExpress/webalorm) and come here later! 😊
 
-
 ## What is it?
 
 **WEBALORM** stands for "Webify All ORMs". It's a type of ORM.
@@ -23,15 +22,13 @@ ORM (Object-relational mapper) - a programming tool for converting data between 
 
 It would be so big, cumbersome, redundant and inefficient, right?
 
-**WRONG**
+Not necessarily.
 
 Modern web browsers support a couple of database solutions already like IndexedDB or WebSQL. There also exist some libraries that simplify working with these databases. But the pain only begins here: once you have your IndexedDB/WebSQL set up, you also need to polyfill them with localStorage (for older browsers) and make a universal API for your app out of all this while keeping all the data up-to-date with the data you have on your server. Quite a few things to keep track of, huh?
 
 That is exactly the problem `webalorm` aims to solve in just under 10 kilobytes.
 
-So instead of reinventing the wheel each time you need a reliable and sufficient storage for your web application - just use `webalorm`!
-
-Part of the cool stuff is that `webalorm` can also keep your data fresh for you, getting it from your servers right when you need it. You only need to map your CRUD request templates onto your data!
+This means that with `webalorm` you can simply map your api client requests (using [kefetchup](https://github.com/KazanExpress/kefetchup), for example) onto your own data-types without and then forget about the fact that your project even uses back-end APIs!
 
 ## [Documentation](https://github.com/KazanExpress/webalorm/wiki)
 

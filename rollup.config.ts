@@ -8,7 +8,7 @@ import json from 'rollup-plugin-json';
 // const libraryName = pkg.name;
 
 const input = `src/index.ts`;
-const output = format => `dist/webrm.${format}.js`;
+const output = format => `dist/webalorm.${format}.js`;
 const common = target => ({
   // Indicate here external modules you don't wanna include in your bundle (i.e.: 'lodash')
   external: [],
@@ -39,14 +39,14 @@ export default [
     input,
     output: [
       { file: output('cjs'), format: 'cjs', sourcemap: true, exports: 'named' },
-      { file: output('umd'), format: 'umd', sourcemap: true, name: 'webrm', exports: 'named' },
-      { file: output('iife'), format: 'iife', sourcemap: true, name: 'webrm', exports: 'named' },
+      { file: output('umd'), format: 'umd', sourcemap: true, name: 'webalorm', exports: 'named' },
+      { file: output('iife'), format: 'iife', sourcemap: true, name: 'webalorm', exports: 'named' },
     ],
     ...common('es5')
   },
   {
     input,
-    output: { file: 'dist/webrm.es.js', format: 'es', sourcemap: true },
+    output: { file: 'dist/webalorm.es.js', format: 'es', sourcemap: true },
     ...common('es6')
   }
 ];
