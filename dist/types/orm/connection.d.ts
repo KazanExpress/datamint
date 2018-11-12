@@ -6,7 +6,7 @@ import { Entity, IStorableConstructor, Record } from '../storable';
 export interface IRepositoryMap {
     [name: string]: IStorableConstructor<any>;
 }
-export declare type RepoFromConstructor<S extends IStorableConstructor<any>, D extends DataMap<any> = any> = InstanceType<S> extends Entity ? EntityRepository<D, S> : (InstanceType<S> extends Record ? RecordRepository<D, S> : Repository<D, S>);
+export declare type RepoFromConstructor<S extends IStorableConstructor<any>, D extends DataMap<InstanceType<S>> = DataMap<InstanceType<S>>> = InstanceType<S> extends Entity ? EntityRepository<D, S> : (InstanceType<S> extends Record ? RecordRepository<D, S> : Repository<D, S>);
 declare type PropFrom<O, Key> = Key extends keyof O ? O[Key] : any;
 export declare type RepoStore<M extends IRepositoryMap, A extends ApiMap<any>> = {
     [Name in (keyof M | keyof A)]: RepoFromConstructor<PropFrom<M, Name>, PropFrom<A, Name>>;
@@ -30,7 +30,7 @@ export declare class Connection<RM extends IRepositoryMap = IRepositoryMap, AM e
      */
     repositories: RepoStore<RM, AM>;
     /**
-     * Creates a WebRM connection instance.
+     * Creates a WEBALORM connection instance.
      * @param name the name of the connection to the storage. Namespaces all respositories invoked from the instance.
      * @param drivers determine a variety of drivers the orm can select from. The first one that fits for the environment is selected.
      * @param repositories sets the relation of a repository name to its contents' prototype.
@@ -57,11 +57,11 @@ export declare class Connection<RM extends IRepositoryMap = IRepositoryMap, AM e
      */
     static $debug(enabled: boolean, exceptions: ExceptionType): void;
     /**
-     * Enable a certain debug option for WebRM
+     * Enable a certain debug option for WEBALORM
      */
     static $debug(type: DebugType): void;
     /**
-     * Enable a certain debug option for WebRM
+     * Enable a certain debug option for WEBALORM
      *
      * Allows specifying different debug types:
      *
@@ -70,11 +70,11 @@ export declare class Connection<RM extends IRepositoryMap = IRepositoryMap, AM e
      */
     static $debug(type: DebugType, exceptions: ExceptionType): void;
     /**
-     * Enable a certain debug option for WebRM
+     * Enable a certain debug option for WEBALORM
      */
     static $debug(type: string): void;
     /**
-     * Enable a certain debug option for WebRM
+     * Enable a certain debug option for WEBALORM
      *
      * Allows specifying different debug types:
      *

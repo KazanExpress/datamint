@@ -6,7 +6,7 @@ import { EntityRepository } from './entityRepository';
 import { RecordRepository } from './recordRepository';
 
 export function makeRepository<
-  DM extends DataMap<any>,
+  DM extends DataMap<C>,
   C extends IStorableConstructor<E>,
   E extends Storable = InstanceType<C>,
 >(

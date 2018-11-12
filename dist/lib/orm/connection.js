@@ -6,7 +6,7 @@ const fallback_1 = require("../drivers/fallback");
 const repository_1 = require("../repository");
 class Connection extends debug_1.Debugable {
     /**
-     * Creates a WebRM connection instance.
+     * Creates a WEBALORM connection instance.
      * @param name the name of the connection to the storage. Namespaces all respositories invoked from the instance.
      * @param drivers determine a variety of drivers the orm can select from. The first one that fits for the environment is selected.
      * @param repositories sets the relation of a repository name to its contents' prototype.
@@ -27,7 +27,7 @@ class Connection extends debug_1.Debugable {
             this.apiDriver = new api_1.ApiDriver(this, apiMap);
         }
         else {
-            debug_1.Debug.$warn('The main webrm functionality is disabled. Are you sure you want to use this without API?', true);
+            debug_1.Debug.$warn('The main webalorm functionality is disabled. Are you sure you want to use this without API?', true);
         }
         // Select the first supported driver from the bunch
         const SupportedDriver = drivers.find(d => d.isSupported);

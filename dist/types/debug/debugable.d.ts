@@ -5,7 +5,7 @@ export declare abstract class Debugable {
      */
     protected readonly abstract $debugType: DebugType;
     /**
-     * The name of the WebRM connection this class uses
+     * The name of the WEBALORM connection this class uses
      */
     protected readonly abstract $connectionName: string;
     /**

@@ -15,31 +15,27 @@ class FallbackDriver extends base_1.Driver {
         super(...arguments);
         this.repositoryMap = {};
     }
-    create(repositoryName, entity) {
+    create(repository, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            this.repositoryMap[repositoryName] = this.repositoryMap[repositoryName] || [];
-            this.repositoryMap[repositoryName].push(entity);
-            return entity;
+            this.repositoryMap[repository.name] = this.repositoryMap[repository.name] || [];
+            this.repositoryMap[repository.name].push(data);
+            return data;
         });
     }
-    read(repositoryName, id) {
+    read(repository, id) {
         throw new Error('Method not implemented.');
     }
-    update(repositoryName, id, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            throw new Error('Method not implemented.');
-            return {};
-        });
+    update(repository, id, query) {
+        throw new Error('Method not implemented.');
+        return Promise.resolve();
     }
-    delete(repositoryName, entity) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const idx = this.repositoryMap[repositoryName].findIndex(e => Object.keys(e).some(key => {
-                return e[key] === entity[key];
-            }));
-            const res = this.repositoryMap[repositoryName][idx];
-            this.repositoryMap[repositoryName].splice(idx, 1);
-            return res;
-        });
+    delete(repository, entity) {
+        const idx = this.repositoryMap[repository.name].findIndex(e => Object.keys(e).some(key => {
+            return e[key] === entity[key];
+        }));
+        const res = this.repositoryMap[repository.name][idx];
+        this.repositoryMap[repository.name].splice(idx, 1);
+        return res;
     }
 }
 exports.FallbackDriver = FallbackDriver;

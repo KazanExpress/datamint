@@ -1,8 +1,5 @@
-(function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-    typeof define === 'function' && define.amd ? define(['exports'], factory) :
-    (factory((global.webrm = {})));
-}(this, (function (exports) { 'use strict';
+var webalorm = (function (exports) {
+    'use strict';
 
     /*! *****************************************************************************
     Copyright (c) Microsoft Corporation. All rights reserved.
@@ -100,9 +97,9 @@
         };
     };
 
-    var LOG_PREFIX = function (name) { return name ? "[WebRM:" + name + "]" : "[WebRM]"; };
+    var LOG_PREFIX = function (name) { return name ? "[WEBALORM:" + name + "]" : "[WEBALORM]"; };
     /**
-     * Shows the current debug state of WebRM
+     * Shows the current debug state of WEBALORM
      *
      * - `enabled` - all the logs and exceptions are enabled
      * - `custom` - custom rules are set via a `debug()` function
@@ -255,8 +252,8 @@
             _this.apiMap = apiMap;
             return _this;
         }
-        ApiDriver.prototype.create = function (repositoryName, data) {
-            var repo = this.apiMap[repositoryName];
+        ApiDriver.prototype.create = function (repository, data) {
+            var repo = this.apiMap[repository.name];
             if (repo && repo.create) {
                 return repo.create(data);
             }
@@ -264,8 +261,8 @@
                 return Promise.reject( /* TODO: error handling */);
             }
         };
-        ApiDriver.prototype.read = function (repositoryName, data) {
-            var repo = this.apiMap[repositoryName];
+        ApiDriver.prototype.read = function (repository, data) {
+            var repo = this.apiMap[repository.name];
             if (repo && repo.read) {
                 return repo.read(data);
             }
@@ -273,18 +270,18 @@
                 return Promise.reject( /* TODO: error handling */);
             }
         };
-        ApiDriver.prototype.update = function (repositoryName, data, query) {
+        ApiDriver.prototype.update = function (repository, data, query) {
             return __awaiter(this, void 0, void 0, function () {
                 var repo, result;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            repo = this.apiMap[repositoryName];
+                            repo = this.apiMap[repository.name];
                             if (!repo || !repo.update) {
                                 return [2 /*return*/, Promise.reject( /* TODO: error handling */)];
                             }
                             if (!query) return [3 /*break*/, 2];
-                            return [4 /*yield*/, this.read(repositoryName, data)];
+                            return [4 /*yield*/, this.read(repository, data)];
                         case 1:
                             result = _a.sent();
                             return [2 /*return*/, repo.update(query(result))];
@@ -293,8 +290,8 @@
                 });
             });
         };
-        ApiDriver.prototype.delete = function (repositoryName, data) {
-            var repo = this.apiMap[repositoryName];
+        ApiDriver.prototype.delete = function (repository, data) {
+            var repo = this.apiMap[repository.name];
             if (repo && repo.delete) {
                 return repo.delete(data);
             }
@@ -318,37 +315,29 @@
             _this.repositoryMap = {};
             return _this;
         }
-        FallbackDriver.prototype.create = function (repositoryName, entity) {
+        FallbackDriver.prototype.create = function (repository, data) {
             return __awaiter(this, void 0, void 0, function () {
                 return __generator(this, function (_a) {
-                    this.repositoryMap[repositoryName] = this.repositoryMap[repositoryName] || [];
-                    this.repositoryMap[repositoryName].push(entity);
-                    return [2 /*return*/, entity];
+                    this.repositoryMap[repository.name] = this.repositoryMap[repository.name] || [];
+                    this.repositoryMap[repository.name].push(data);
+                    return [2 /*return*/, data];
                 });
             });
         };
-        FallbackDriver.prototype.read = function (repositoryName, id) {
+        FallbackDriver.prototype.read = function (repository, id) {
             throw new Error('Method not implemented.');
         };
-        FallbackDriver.prototype.update = function (repositoryName, id, data) {
-            return __awaiter(this, void 0, void 0, function () {
-                return __generator(this, function (_a) {
-                    throw new Error('Method not implemented.');
-                });
-            });
+        FallbackDriver.prototype.update = function (repository, id, query) {
+            throw new Error('Method not implemented.');
+            return Promise.resolve();
         };
-        FallbackDriver.prototype.delete = function (repositoryName, entity) {
-            return __awaiter(this, void 0, void 0, function () {
-                var idx, res;
-                return __generator(this, function (_a) {
-                    idx = this.repositoryMap[repositoryName].findIndex(function (e) { return Object.keys(e).some(function (key) {
-                        return e[key] === entity[key];
-                    }); });
-                    res = this.repositoryMap[repositoryName][idx];
-                    this.repositoryMap[repositoryName].splice(idx, 1);
-                    return [2 /*return*/, res];
-                });
-            });
+        FallbackDriver.prototype.delete = function (repository, entity) {
+            var idx = this.repositoryMap[repository.name].findIndex(function (e) { return Object.keys(e).some(function (key) {
+                return e[key] === entity[key];
+            }); });
+            var res = this.repositoryMap[repository.name][idx];
+            this.repositoryMap[repository.name].splice(idx, 1);
+            return res;
         };
         return FallbackDriver;
     }(Driver));
@@ -472,6 +461,17 @@
             }
             return _this;
         }
+        Object.defineProperty(EntityRepository.prototype, "driverOptions", {
+            get: function () {
+                return {
+                    name: this.name,
+                    columns: this.columns,
+                    primaryKey: this.primaryKey
+                };
+            },
+            enumerable: true,
+            configurable: true
+        });
         EntityRepository.prototype.add = function (options, 
         // TODO: up to debate - singular arguments always or multiple args inference?
         apiOptions) {
@@ -480,7 +480,7 @@
                 var _this = this;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, this.connection.currentDriver.create(this.name, options)];
+                        case 0: return [4 /*yield*/, this.connection.currentDriver.create(this.driverOptions, options)];
                         case 1:
                             result = _a.sent();
                             try {
@@ -489,7 +489,7 @@
                                 // Call api driver asynchronously
                                 if (apiOptions && this.api) {
                                     this.$log("API handler execution start: " + this.name + ".add()");
-                                    this.api.create(this.name, apiOptions).then(function (res) {
+                                    this.api.create(this.driverOptions, apiOptions).then(function (res) {
                                         queryResult_1.result = _this.makeDataInstance(result);
                                         _this.$log("API handler execution end: " + _this.name + ".add()");
                                     }).catch(function (e) {
@@ -511,19 +511,20 @@
                 });
             });
         };
-        EntityRepository.prototype.get = function (id) {
+        EntityRepository.prototype.get = function (id, getApiOptions) {
             throw new Error('Not implemented');
             return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
         };
-        EntityRepository.prototype.update = function (entity) {
+        EntityRepository.prototype.update = function (entity, updateApiOptions) {
             throw new Error('Not implemented');
             return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
         };
-        EntityRepository.prototype.updateById = function (id, query) {
+        /* Do we even need this?.. */
+        EntityRepository.prototype.updateById = function (id, query, updateApiOptions) {
             throw new Error('Not implemented');
             return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance(query({})));
         };
-        EntityRepository.prototype.delete = function (entity) {
+        EntityRepository.prototype.delete = function (entity, deleteApiOptions) {
             throw new Error('Not implemented');
             return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
         };
@@ -678,7 +679,7 @@
     var Connection = /** @class */ (function (_super) {
         __extends(Connection, _super);
         /**
-         * Creates a WebRM connection instance.
+         * Creates a WEBALORM connection instance.
          * @param name the name of the connection to the storage. Namespaces all respositories invoked from the instance.
          * @param drivers determine a variety of drivers the orm can select from. The first one that fits for the environment is selected.
          * @param repositories sets the relation of a repository name to its contents' prototype.
@@ -699,7 +700,7 @@
                 _this.apiDriver = new ApiDriver(_this, apiMap);
             }
             else {
-                Debug.$warn('The main webrm functionality is disabled. Are you sure you want to use this without API?', true);
+                Debug.$warn('The main webalorm functionality is disabled. Are you sure you want to use this without API?', true);
             }
             // Select the first supported driver from the bunch
             var SupportedDriver = drivers.find(function (d) { return d.isSupported; });
@@ -771,7 +772,7 @@
     exports.Record = Record;
     exports.Storable = Storable;
 
-    Object.defineProperty(exports, '__esModule', { value: true });
+    return exports;
 
-})));
-//# sourceMappingURL=webrm.umd.js.map
+}({}));
+//# sourceMappingURL=webalorm.iife.js.map

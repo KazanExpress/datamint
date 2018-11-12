@@ -33,11 +33,18 @@ class EntityRepository extends base_1.Repository {
             this.columns = Object.keys(new entity({}, this));
         }
     }
+    get driverOptions() {
+        return {
+            name: this.name,
+            columns: this.columns,
+            primaryKey: this.primaryKey
+        };
+    }
     add(options, 
     // TODO: up to debate - singular arguments always or multiple args inference?
     apiOptions) {
         return __awaiter(this, void 0, void 0, function* () {
-            const result = yield this.connection.currentDriver.create(this.name, options);
+            const result = yield this.connection.currentDriver.create(this.driverOptions, options);
             try {
                 const instance = this.makeDataInstance(result);
                 // Call local driver changes synchronously
@@ -45,7 +52,7 @@ class EntityRepository extends base_1.Repository {
                 // Call api driver asynchronously
                 if (apiOptions && this.api) {
                     this.$log(`API handler execution start: ${this.name}.add()`);
-                    this.api.create(this.name, apiOptions).then(res => {
+                    this.api.create(this.driverOptions, apiOptions).then(res => {
                         queryResult.result = this.makeDataInstance(result);
                         this.$log(`API handler execution end: ${this.name}.add()`);
                     }).catch(e => {
@@ -64,19 +71,20 @@ class EntityRepository extends base_1.Repository {
             }
         });
     }
-    get(id) {
+    get(id, getApiOptions) {
         throw new Error('Not implemented');
         return new queryResult_1.QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }
-    update(entity) {
+    update(entity, updateApiOptions) {
         throw new Error('Not implemented');
         return new queryResult_1.QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }
-    updateById(id, query) {
+    /* Do we even need this?.. */
+    updateById(id, query, updateApiOptions) {
         throw new Error('Not implemented');
         return new queryResult_1.QueryResult(/* TODO: implement this */ true, this.makeDataInstance(query({})));
     }
-    delete(entity) {
+    delete(entity, deleteApiOptions) {
         throw new Error('Not implemented');
         return new queryResult_1.QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }

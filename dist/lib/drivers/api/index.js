@@ -15,8 +15,8 @@ class ApiDriver extends base_1.Driver {
         super(connection);
         this.apiMap = apiMap;
     }
-    create(repositoryName, data) {
-        const repo = this.apiMap[repositoryName];
+    create(repository, data) {
+        const repo = this.apiMap[repository.name];
         if (repo && repo.create) {
             return repo.create(data);
         }
@@ -24,8 +24,8 @@ class ApiDriver extends base_1.Driver {
             return Promise.reject( /* TODO: error handling */);
         }
     }
-    read(repositoryName, data) {
-        const repo = this.apiMap[repositoryName];
+    read(repository, data) {
+        const repo = this.apiMap[repository.name];
         if (repo && repo.read) {
             return repo.read(data);
         }
@@ -33,21 +33,21 @@ class ApiDriver extends base_1.Driver {
             return Promise.reject( /* TODO: error handling */);
         }
     }
-    update(repositoryName, data, query) {
+    update(repository, data, query) {
         return __awaiter(this, void 0, void 0, function* () {
-            const repo = this.apiMap[repositoryName];
+            const repo = this.apiMap[repository.name];
             if (!repo || !repo.update) {
                 return Promise.reject( /* TODO: error handling */);
             }
             if (query) {
-                const result = yield this.read(repositoryName, data);
+                const result = yield this.read(repository, data);
                 return repo.update(query(result));
             }
             return repo.update(data);
         });
     }
-    delete(repositoryName, data) {
-        const repo = this.apiMap[repositoryName];
+    delete(repository, data) {
+        const repo = this.apiMap[repository.name];
         if (repo && repo.delete) {
             return repo.delete(data);
         }

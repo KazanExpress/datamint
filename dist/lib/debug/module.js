@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const LOG_PREFIX = (name) => name ? `[WebRM:${name}]` : `[WebRM]`;
+const LOG_PREFIX = (name) => name ? `[WEBALORM:${name}]` : `[WEBALORM]`;
 /**
- * Shows the current debug state of WebRM
+ * Shows the current debug state of WEBALORM
  *
  * - `enabled` - all the logs and exceptions are enabled
  * - `custom` - custom rules are set via a `debug()` function

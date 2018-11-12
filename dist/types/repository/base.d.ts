@@ -9,7 +9,10 @@ export interface IRepoConnectionInternal {
 export interface IRepoConnection extends IRepoConnectionInternal {
     apiDriver?: ApiDriver;
 }
-export declare class Repository<DM extends DataMap<C>, C extends IStorableConstructor<E>, E extends Storable = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]> extends Debugable {
+export interface IRepoData {
+    name: string;
+}
+export declare class Repository<DM extends DataMap<C>, C extends IStorableConstructor<E>, E extends Storable = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]> extends Debugable implements IRepoData {
     name: string;
     private Data;
     protected readonly $debugType: DebugType;

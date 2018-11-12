@@ -26,7 +26,7 @@ export declare type DebugMap = Partial<{
 }>;
 export declare type LogLevel = 'log' | 'debug' | 'warn' | 'error';
 /**
- * Shows the current debug state of WebRM
+ * Shows the current debug state of WEBALORM
  *
  * - `enabled` - all the logs and exceptions are enabled
  * - `custom` - custom rules are set via a `debug()` function

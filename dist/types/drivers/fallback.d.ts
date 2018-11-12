@@ -1,9 +1,10 @@
 import { Driver } from './base';
+import { IRepoData } from '../repository';
 export declare class FallbackDriver extends Driver {
+    create<A, R extends IRepoData = IRepoData>(repository: R, data: A): Promise<A>;
+    read<A, R extends IRepoData = IRepoData>(repository: R, id: any): Promise<A>;
+    update<A, R extends IRepoData = IRepoData>(repository: R, id: any, query: (data: A) => Partial<A>): Promise<A>;
+    update<A, R extends IRepoData = IRepoData>(repository: R, data: Partial<A>): Promise<A>;
+    delete<A, R extends IRepoData = IRepoData>(repository: R, entity: any): Promise<A>;
     private repositoryMap;
-    create<T extends object>(repositoryName: string, entity: T): Promise<T>;
-    read<T extends object>(repositoryName: string, id: any): Promise<T>;
-    update<T extends object>(repositoryName: string, id: any, data: Partial<T>): Promise<T>;
-    update<T extends object>(repositoryName: string, entity: Partial<T>): Promise<T>;
-    delete<T extends object>(repositoryName: string, id: any): Promise<T>;
 }

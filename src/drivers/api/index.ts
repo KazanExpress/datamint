@@ -1,6 +1,7 @@
 import { Connection } from '../../orm/connection';
 import { Driver } from '../base';
 import { ApiMap } from './map';
+import { IRepoData } from '../../repository';
 
 export * from './map';
 
@@ -11,8 +12,8 @@ export class ApiDriver extends Driver {
     protected apiMap: ApiMap<any>
   ) { super(connection); }
 
-  public create(repositoryName: string, data: any): Promise<any> {
-    const repo = this.apiMap[repositoryName];
+  public create(repository: IRepoData, data: any): Promise<any> {
+    const repo = this.apiMap[repository.name];
 
     if (repo && repo.create) {
       return repo.create(data);
@@ -21,8 +22,8 @@ export class ApiDriver extends Driver {
     }
   }
 
-  public read(repositoryName: string, data: any): Promise<any> {
-    const repo = this.apiMap[repositoryName];
+  public read(repository: IRepoData, data: any): Promise<any> {
+    const repo = this.apiMap[repository.name];
 
     if (repo && repo.read) {
       return repo.read(data);
@@ -31,17 +32,17 @@ export class ApiDriver extends Driver {
     }
   }
 
-  public update(repositoryName: string, id: any, query: (data: any) => any): Promise<any>;
-  public update(repositoryName: string, data: Partial<any>): Promise<any>;
-  public async update(repositoryName: any, data: any, query?: any) {
-    const repo = this.apiMap[repositoryName];
+  public update(repository: IRepoData, id: any, query: (data: any) => any): Promise<any>;
+  public update(repository: IRepoData, data: Partial<any>): Promise<any>;
+  public async update(repository: any, data: any, query?: any) {
+    const repo = this.apiMap[repository.name];
 
     if (!repo || !repo.update) {
       return Promise.reject(/* TODO: error handling */);
     }
 
     if (query) {
-      const result = await this.read(repositoryName, data);
+      const result = await this.read(repository, data);
 
       return repo.update(query(result));
     }
@@ -49,8 +50,8 @@ export class ApiDriver extends Driver {
     return repo.update(data);
   }
 
-  public delete(repositoryName: string, data: any): Promise<any> {
-    const repo = this.apiMap[repositoryName];
+  public delete(repository: IRepoData, data: any): Promise<any> {
+    const repo = this.apiMap[repository.name];
 
     if (repo && repo.delete) {
       return repo.delete(data);

@@ -48,9 +48,9 @@ const Enumerable = (enumerable = true) => function (target, key, desc = {}) {
     desc.enumerable = enumerable;
 };
 
-const LOG_PREFIX = (name) => name ? `[WebRM:${name}]` : `[WebRM]`;
+const LOG_PREFIX = (name) => name ? `[WEBALORM:${name}]` : `[WEBALORM]`;
 /**
- * Shows the current debug state of WebRM
+ * Shows the current debug state of WEBALORM
  *
  * - `enabled` - all the logs and exceptions are enabled
  * - `custom` - custom rules are set via a `debug()` function
@@ -178,8 +178,8 @@ class ApiDriver extends Driver {
         super(connection);
         this.apiMap = apiMap;
     }
-    create(repositoryName, data) {
-        const repo = this.apiMap[repositoryName];
+    create(repository, data) {
+        const repo = this.apiMap[repository.name];
         if (repo && repo.create) {
             return repo.create(data);
         }
@@ -187,8 +187,8 @@ class ApiDriver extends Driver {
             return Promise.reject( /* TODO: error handling */);
         }
     }
-    read(repositoryName, data) {
-        const repo = this.apiMap[repositoryName];
+    read(repository, data) {
+        const repo = this.apiMap[repository.name];
         if (repo && repo.read) {
             return repo.read(data);
         }
@@ -196,21 +196,21 @@ class ApiDriver extends Driver {
             return Promise.reject( /* TODO: error handling */);
         }
     }
-    update(repositoryName, data, query) {
+    update(repository, data, query) {
         return __awaiter(this, void 0, void 0, function* () {
-            const repo = this.apiMap[repositoryName];
+            const repo = this.apiMap[repository.name];
             if (!repo || !repo.update) {
                 return Promise.reject( /* TODO: error handling */);
             }
             if (query) {
-                const result = yield this.read(repositoryName, data);
+                const result = yield this.read(repository, data);
                 return repo.update(query(result));
             }
             return repo.update(data);
         });
     }
-    delete(repositoryName, data) {
-        const repo = this.apiMap[repositoryName];
+    delete(repository, data) {
+        const repo = this.apiMap[repository.name];
         if (repo && repo.delete) {
             return repo.delete(data);
         }
@@ -227,31 +227,27 @@ class FallbackDriver extends Driver {
         super(...arguments);
         this.repositoryMap = {};
     }
-    create(repositoryName, entity) {
+    create(repository, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            this.repositoryMap[repositoryName] = this.repositoryMap[repositoryName] || [];
-            this.repositoryMap[repositoryName].push(entity);
-            return entity;
+            this.repositoryMap[repository.name] = this.repositoryMap[repository.name] || [];
+            this.repositoryMap[repository.name].push(data);
+            return data;
         });
     }
-    read(repositoryName, id) {
+    read(repository, id) {
         throw new Error('Method not implemented.');
     }
-    update(repositoryName, id, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            throw new Error('Method not implemented.');
-            return {};
-        });
+    update(repository, id, query) {
+        throw new Error('Method not implemented.');
+        return Promise.resolve();
     }
-    delete(repositoryName, entity) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const idx = this.repositoryMap[repositoryName].findIndex(e => Object.keys(e).some(key => {
-                return e[key] === entity[key];
-            }));
-            const res = this.repositoryMap[repositoryName][idx];
-            this.repositoryMap[repositoryName].splice(idx, 1);
-            return res;
-        });
+    delete(repository, entity) {
+        const idx = this.repositoryMap[repository.name].findIndex(e => Object.keys(e).some(key => {
+            return e[key] === entity[key];
+        }));
+        const res = this.repositoryMap[repository.name][idx];
+        this.repositoryMap[repository.name].splice(idx, 1);
+        return res;
     }
 }
 
@@ -354,11 +350,18 @@ class EntityRepository extends Repository {
             this.columns = Object.keys(new entity({}, this));
         }
     }
+    get driverOptions() {
+        return {
+            name: this.name,
+            columns: this.columns,
+            primaryKey: this.primaryKey
+        };
+    }
     add(options, 
     // TODO: up to debate - singular arguments always or multiple args inference?
     apiOptions) {
         return __awaiter(this, void 0, void 0, function* () {
-            const result = yield this.connection.currentDriver.create(this.name, options);
+            const result = yield this.connection.currentDriver.create(this.driverOptions, options);
             try {
                 const instance = this.makeDataInstance(result);
                 // Call local driver changes synchronously
@@ -366,7 +369,7 @@ class EntityRepository extends Repository {
                 // Call api driver asynchronously
                 if (apiOptions && this.api) {
                     this.$log(`API handler execution start: ${this.name}.add()`);
-                    this.api.create(this.name, apiOptions).then(res => {
+                    this.api.create(this.driverOptions, apiOptions).then(res => {
                         queryResult.result = this.makeDataInstance(result);
                         this.$log(`API handler execution end: ${this.name}.add()`);
                     }).catch(e => {
@@ -385,19 +388,20 @@ class EntityRepository extends Repository {
             }
         });
     }
-    get(id) {
+    get(id, getApiOptions) {
         throw new Error('Not implemented');
         return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }
-    update(entity) {
+    update(entity, updateApiOptions) {
         throw new Error('Not implemented');
         return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }
-    updateById(id, query) {
+    /* Do we even need this?.. */
+    updateById(id, query, updateApiOptions) {
         throw new Error('Not implemented');
         return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance(query({})));
     }
-    delete(entity) {
+    delete(entity, deleteApiOptions) {
         throw new Error('Not implemented');
         return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }
@@ -537,7 +541,7 @@ function makeRepository(name, connection, data) {
 
 class Connection extends Debugable {
     /**
-     * Creates a WebRM connection instance.
+     * Creates a WEBALORM connection instance.
      * @param name the name of the connection to the storage. Namespaces all respositories invoked from the instance.
      * @param drivers determine a variety of drivers the orm can select from. The first one that fits for the environment is selected.
      * @param repositories sets the relation of a repository name to its contents' prototype.
@@ -558,7 +562,7 @@ class Connection extends Debugable {
             this.apiDriver = new ApiDriver(this, apiMap);
         }
         else {
-            Debug.$warn('The main webrm functionality is disabled. Are you sure you want to use this without API?', true);
+            Debug.$warn('The main webalorm functionality is disabled. Are you sure you want to use this without API?', true);
         }
         // Select the first supported driver from the bunch
         const SupportedDriver = drivers.find(d => d.isSupported);
@@ -622,4 +626,4 @@ class Connection extends Debugable {
 const Connection$1 = Connection;
 
 export { Connection$1 as Connection, Entity, Column, ID, Record, Storable };
-//# sourceMappingURL=webrm.es.js.map
+//# sourceMappingURL=webalorm.es.js.map

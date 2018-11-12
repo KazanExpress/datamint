@@ -54,16 +54,20 @@ export class EntityRepository<
     }
   }
 
+  private get driverOptions(): IEntityRepoData<IDKey> {
+    return {
+      name: this.name,
+      columns: this.columns,
+      primaryKey: this.primaryKey
+    };
+  }
+
   public async add(
     options: A,
     // TODO: up to debate - singular arguments always or multiple args inference?
     apiOptions?: Arg<DM['create']>
   ) {
-    const result = await this.connection.currentDriver.create<A, IEntityRepoData<IDKey>>({
-      name: this.name,
-      columns: this.columns,
-      primaryKey: this.primaryKey
-    }, options);
+    const result = await this.connection.currentDriver.create<A, IEntityRepoData<IDKey>>(this.driverOptions, options);
 
     try {
       const instance = this.makeDataInstance(result);
@@ -75,7 +79,7 @@ export class EntityRepository<
       if (apiOptions && this.api) {
         this.$log(`API handler execution start: ${this.name}.add()`);
 
-        this.api.create(this.name, apiOptions).then(res => {
+        this.api.create(this.driverOptions, apiOptions).then(res => {
           queryResult.result = this.makeDataInstance(result);
           this.$log(`API handler execution end: ${this.name}.add()`);
         }).catch(e => {
