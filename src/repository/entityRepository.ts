@@ -1,6 +1,6 @@
 import { DataMap } from '../drivers/api';
 import { QueryResult } from '../queryResult';
-import { Entity, Storable, IStorableConstructor } from '../storable';
+import { Entity, IStorableConstructor, Storable } from '../storable';
 import { Key } from '../util';
 import { IRepoConnection, Repository } from './base';
 

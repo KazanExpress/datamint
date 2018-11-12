@@ -1,6 +1,6 @@
-import { Debug } from '../debug';
+import { print } from '../debug';
 import { DataMap } from '../drivers/api';
-import { Entity, Storable, IStorableConstructor, Record } from '../storable';
+import { Entity, IStorableConstructor, Record, Storable } from '../storable';
 import { IRepoConnection, Repository } from './base';
 import { EntityRepository } from './entityRepository';
 import { RecordRepository } from './recordRepository';
@@ -21,7 +21,12 @@ export function makeRepository<
   } else if (data.prototype instanceof Record) {
     Constructor = RecordRepository;
   } else {
-    Debug.error(connection.name, 'db', `No suitable repository found for ${data.name} when trying to connect with ${name}.`);
+    print(
+      connection.name,
+      'db',
+      `No suitable repository found for ${data.name} when trying to connect with ${name}.`,
+      'error'
+    );
 
     Constructor = Repository;
   }

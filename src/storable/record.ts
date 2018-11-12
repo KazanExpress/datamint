@@ -1,5 +1,5 @@
-import { Storable } from './storable';
 import { Repository } from '../repository';
+import { Storable } from './storable';
 
 export class Record extends Storable {
   constructor(

@@ -1,7 +1,7 @@
-import { QueryResult } from '../queryResult';
-import { Storable, IStorableConstructor } from '../storable';
-import { Repository } from './base';
 import { DataMap } from '../drivers/api';
+import { QueryResult } from '../queryResult';
+import { IStorableConstructor, Storable } from '../storable';
+import { Repository } from './base';
 
 export class RecordRepository<
   DM extends DataMap<E>,

@@ -1,7 +1,7 @@
 import { Debug, Debugable, DebugType } from '../debug';
 import { Driver } from '../drivers';
 import { ApiDriver, DataMap } from '../drivers/api';
-import { Storable, IStorableConstructor } from '../storable';
+import { IStorableConstructor, Storable } from '../storable';
 
 export interface IRepoConnectionInternal {
   name: string;

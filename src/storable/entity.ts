@@ -1,7 +1,6 @@
+import { Repository } from '../repository';
 import { Key, NonEnumerable } from '../util';
 import { Storable } from './storable';
-import { Debugable } from '../debug';
-import { Repository } from '../repository';
 
 export class Entity<
   IDKey extends Key = string,

@@ -1,4 +1,4 @@
-import { Debug, DebugState, DebugType, ExceptionType, Debugable, debugState, setDebugState, debugMap } from '../debug';
+import { Debugable, debugMap, DebugState, debugState, DebugType, ExceptionType, setDebugState } from '../debug';
 import { Driver, IDriverConstructor } from '../drivers';
 import { ApiDriver, ApiMap, DataMap } from '../drivers/api';
 import { FallbackDriver } from '../drivers/fallback';
