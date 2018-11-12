@@ -133,7 +133,10 @@ export abstract class Debug {
 
   private static decoratedLogs: any = {};
 
-  public static prints(message: string, level: LogLevel = 'log', type: DebugType = '*') {
+  public static prints(message: string, level?: LogLevel, type?: string);
+  public static prints(message: string, level?: LogLevel, type?: DebugType);
+  public static prints(message: string, level?: LogLevel, type?: RegExp);
+  public static prints(message: string, level: LogLevel = 'log', type: any = '*') {
     return (target, key: string, desc: PropertyDescriptor) => {
       Object.defineProperty(this.decoratedLogs, key, desc || {
         value: undefined,

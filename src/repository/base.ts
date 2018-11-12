@@ -37,4 +37,6 @@ export class Repository<
   }
 
   public readonly api?: ApiDriver = this.connection.apiDriver;
+
+  public get hasApiMap() { return !!this.api; }
 }

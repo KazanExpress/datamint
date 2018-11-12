@@ -1,4 +1,4 @@
-import { Driver } from '..';
+import { Driver } from '../base';
 import { Connection } from '../../orm/connection';
 import { ApiMap } from './map';
 

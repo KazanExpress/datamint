@@ -8,5 +8,5 @@ export type DataMap<S extends IStorable> = {
 };
 
 export type ApiMap<R extends IRepositoryMap> = {
-  [key in keyof R]: DataMap<InstanceType<R[key]>> | false;
+  [key in keyof R]: DataMap<InstanceType<R[key]>> | undefined;
 };

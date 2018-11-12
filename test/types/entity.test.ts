@@ -29,7 +29,7 @@ describe('types', () => {
           return new Product(options);
         }
       },
-      Broken: false
+      Broken: undefined
     });
 
     const podguzniki = {
