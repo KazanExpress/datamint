@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img width="1024" height="268" style="object-fit:cover" src="logo/logo-color-text.svg" alt="webalorm">
+  <img style="object-fit:cover" src="logo/logo-color-text.svg" alt="webalorm">
 </h1>
 
 <p align="center">
