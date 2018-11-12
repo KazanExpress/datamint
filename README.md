@@ -1,13 +1,19 @@
-# webrm
-> An ORM that works over Web 💪
+<h1 align="center">
+  <img width="1024" height="268" style="object-fit:cover" src="logo/logo-color-text.svg" alt="webalorm">
+</h1>
+
+<p align="center">
+  ORM that works over Web 💪
+<p>
 
 # WORK IN PROGRESS
 
 This library is not yet ready for usage. So please save this page to bookmarks or [give it a star on GitHub](https://github.com/KazanExpress/webrm) and come here later! 😊
 
+
 ## What is it?
 
-**WebRM** stands for "over Web Relational Mapper". It's a type of ORM.
+**WEBALORM** stands for "WEBify ALl ORMs". It's a type of ORM.
 
 ORM (Object-relational mapper) - a programming tool for converting data between incompatible type systems using object-oriented paradigms. It often reduces the amount of code that needs to be written in order to access the needed data.
 
@@ -21,7 +27,7 @@ It would be so big, cumbersome, redundant and inefficient, right?
 
 Modern web browsers support a couple of database solutions already like IndexedDB or WebSQL. There also exist some libraries that simplify working with these databases. But the pain only begins here: once you have your IndexedDB/WebSQL set up, you also need to polyfill them with localStorage (for older browsers) and make a universal API for your app out of all this while keeping all the data up-to-date with the data you have on your server. Quite a few things to keep track of, huh?
 
-That is exactly the problem `webrm` aims to solve.
+That is exactly the problem `webrm` aims to solve in just under 10 kilobytes.
 
 So instead of reinventing the wheel each time you need a reliable and sufficient storage for your web application - just use `webrm`!
 
