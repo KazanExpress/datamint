@@ -53,18 +53,20 @@ export class EntityRepository<
     // TODO: up to debate - singular arguments always or multiple args inference?
     apiOptions?: Arg<DM['create']>
   ) {
-    const instance = new this.Data(options, this);
+    const result = await this.connection.currentDriver.create(this.name, options);
 
     try {
+      const instance = this.makeDataInstance(result);
+
       // Call local driver changes synchronously
-      const queryResult = new QueryResult<E>(true, await this.connection.currentDriver.create(this.name, instance));
+      const queryResult = new QueryResult<E>(true, instance);
 
       // Call api driver asynchronously
       if (apiOptions && this.api) {
         this.$log(`API handler execution start: ${this.name}.add()`);
 
         this.api.create(this.name, apiOptions).then(res => {
-          queryResult.result = res;
+          queryResult.result = this.makeDataInstance(result);
           this.$log(`API handler execution end: ${this.name}.add()`);
         }).catch(e => {
           queryResult.error = e;
@@ -78,7 +80,7 @@ export class EntityRepository<
     } catch (e) {
       this.$error(e);
 
-      return new QueryResult<E>(false, instance, e);
+      return new QueryResult<E>(false, this.makeDataInstance(options), e);
     }
   }
 
@@ -87,7 +89,7 @@ export class EntityRepository<
 
     return new QueryResult(/* TODO: implement this */
       true,
-      new this.Data({}, this)
+      this.makeDataInstance({} as any)
     );
   }
 
@@ -96,7 +98,7 @@ export class EntityRepository<
 
     return new QueryResult(/* TODO: implement this */
       true,
-      new this.Data({}, this)
+      this.makeDataInstance({} as any)
     );
   }
 
@@ -105,7 +107,7 @@ export class EntityRepository<
 
     return new QueryResult(/* TODO: implement this */
       true,
-      new this.Data(query({} as any), this)
+      this.makeDataInstance(query({} as any) as any)
     );
   }
 
@@ -114,7 +116,7 @@ export class EntityRepository<
 
     return new QueryResult(/* TODO: implement this */
       true,
-      new this.Data({}, this)
+      this.makeDataInstance({} as any)
     );
   }
 

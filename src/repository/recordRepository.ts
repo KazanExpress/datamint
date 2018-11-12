@@ -22,7 +22,7 @@ export class RecordRepository<
 
     return new QueryResult(/* TODO: implement this */
       true,
-      new this.Data(options, this)
+      this.makeDataInstance({} as any)
     );
   }
 
@@ -31,7 +31,7 @@ export class RecordRepository<
 
     return new QueryResult(/* TODO: implement this */
       true,
-      new this.Data(options, this)
+      this.makeDataInstance({} as any)
     );
   }
 
@@ -40,7 +40,7 @@ export class RecordRepository<
 
     return new QueryResult(/* TODO: implement this */
       true,
-      new this.Data({}, this)
+      this.makeDataInstance({} as any)
     );
   }
 
@@ -49,7 +49,7 @@ export class RecordRepository<
 
     return new QueryResult(/* TODO: implement this */
       true,
-      new this.Data({}, this)
+      this.makeDataInstance({} as any)
     );
   }
 }

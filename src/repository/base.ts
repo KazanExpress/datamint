@@ -20,12 +20,12 @@ export class Repository<
 > extends Debugable {
   protected readonly $debugType: DebugType = `db:${this.name.toLowerCase()}` as DebugType;
   protected readonly connection: IRepoConnectionInternal;
-  public readonly $connectionName: string = this.connection.name;
+  public readonly $connectionName: string;
 
   constructor(
     public name: string,
     connection: IRepoConnection,
-    protected Data: C
+    private Data: C
   ) {
     super();
     if (/* this class was instantiated directly (without inheritance) */
@@ -39,9 +39,14 @@ export class Repository<
     }
 
     this.connection = connection;
+    this.$connectionName = connection.name;
 
     this.api = connection.apiDriver;
   }
 
   public readonly api?: ApiDriver;
+
+  public makeDataInstance(options: A) {
+    return new this.Data(options, this);
+  }
 }
