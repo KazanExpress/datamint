@@ -311,10 +311,18 @@ var webrm = (function (exports) {
     var FallbackDriver = /** @class */ (function (_super) {
         __extends(FallbackDriver, _super);
         function FallbackDriver() {
-            return _super !== null && _super.apply(this, arguments) || this;
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.repositoryMap = {};
+            return _this;
         }
         FallbackDriver.prototype.create = function (repositoryName, entity) {
-            throw new Error('Method not implemented.');
+            return __awaiter(this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    this.repositoryMap[repositoryName] = this.repositoryMap[repositoryName] || [];
+                    this.repositoryMap[repositoryName].push(entity);
+                    return [2 /*return*/, entity];
+                });
+            });
         };
         FallbackDriver.prototype.read = function (repositoryName, id) {
             throw new Error('Method not implemented.');
@@ -328,8 +336,14 @@ var webrm = (function (exports) {
         };
         FallbackDriver.prototype.delete = function (repositoryName, entity) {
             return __awaiter(this, void 0, void 0, function () {
+                var idx, res;
                 return __generator(this, function (_a) {
-                    throw new Error('Method not implemented.');
+                    idx = this.repositoryMap[repositoryName].findIndex(function (e) { return Object.keys(e).some(function (key) {
+                        return e[key] === entity[key];
+                    }); });
+                    res = this.repositoryMap[repositoryName][idx];
+                    this.repositoryMap[repositoryName].splice(idx, 1);
+                    return [2 /*return*/, res];
                 });
             });
         };
@@ -343,6 +357,9 @@ var webrm = (function (exports) {
             _this.name = name;
             _this.Data = Data;
             _this.$debugType = "db:" + _this.name.toLowerCase();
+            _this.connection = connection;
+            _this.$connectionName = connection.name;
+            _this.api = connection.apiDriver;
             if ( /* this class was instantiated directly (without inheritance) */Repository.prototype === _this.constructor.prototype) {
                 if (_this.$debugEnabled) {
                     _this.$warn("Using default empty repository.");
@@ -351,9 +368,6 @@ var webrm = (function (exports) {
                     _this.$warn("Using default empty repository for " + name, true);
                 }
             }
-            _this.connection = connection;
-            _this.$connectionName = connection.name;
-            _this.api = connection.apiDriver;
             return _this;
         }
         Repository.prototype.makeDataInstance = function (options) {

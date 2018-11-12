@@ -223,8 +223,16 @@ class ApiDriver extends Driver {
 
 /* TODO: driver that just writes everything to short-term memory */
 class FallbackDriver extends Driver {
+    constructor() {
+        super(...arguments);
+        this.repositoryMap = {};
+    }
     create(repositoryName, entity) {
-        throw new Error('Method not implemented.');
+        return __awaiter(this, void 0, void 0, function* () {
+            this.repositoryMap[repositoryName] = this.repositoryMap[repositoryName] || [];
+            this.repositoryMap[repositoryName].push(entity);
+            return entity;
+        });
     }
     read(repositoryName, id) {
         throw new Error('Method not implemented.');
@@ -237,8 +245,12 @@ class FallbackDriver extends Driver {
     }
     delete(repositoryName, entity) {
         return __awaiter(this, void 0, void 0, function* () {
-            throw new Error('Method not implemented.');
-            return {};
+            const idx = this.repositoryMap[repositoryName].findIndex(e => Object.keys(e).some(key => {
+                return e[key] === entity[key];
+            }));
+            const res = this.repositoryMap[repositoryName][idx];
+            this.repositoryMap[repositoryName].splice(idx, 1);
+            return res;
         });
     }
 }
@@ -249,6 +261,9 @@ class Repository extends Debugable {
         this.name = name;
         this.Data = Data;
         this.$debugType = `db:${this.name.toLowerCase()}`;
+        this.connection = connection;
+        this.$connectionName = connection.name;
+        this.api = connection.apiDriver;
         if ( /* this class was instantiated directly (without inheritance) */Repository.prototype === this.constructor.prototype) {
             if (this.$debugEnabled) {
                 this.$warn(`Using default empty repository.`);
@@ -257,9 +272,6 @@ class Repository extends Debugable {
                 this.$warn(`Using default empty repository for ${name}`, true);
             }
         }
-        this.connection = connection;
-        this.$connectionName = connection.name;
-        this.api = connection.apiDriver;
     }
     makeDataInstance(options) {
         return new this.Data(options, this);

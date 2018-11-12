@@ -11,8 +11,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const base_1 = require("./base");
 /* TODO: driver that just writes everything to short-term memory */
 class FallbackDriver extends base_1.Driver {
+    constructor() {
+        super(...arguments);
+        this.repositoryMap = {};
+    }
     create(repositoryName, entity) {
-        throw new Error('Method not implemented.');
+        return __awaiter(this, void 0, void 0, function* () {
+            this.repositoryMap[repositoryName] = this.repositoryMap[repositoryName] || [];
+            this.repositoryMap[repositoryName].push(entity);
+            return entity;
+        });
     }
     read(repositoryName, id) {
         throw new Error('Method not implemented.');
@@ -25,8 +33,12 @@ class FallbackDriver extends base_1.Driver {
     }
     delete(repositoryName, entity) {
         return __awaiter(this, void 0, void 0, function* () {
-            throw new Error('Method not implemented.');
-            return {};
+            const idx = this.repositoryMap[repositoryName].findIndex(e => Object.keys(e).some(key => {
+                return e[key] === entity[key];
+            }));
+            const res = this.repositoryMap[repositoryName][idx];
+            this.repositoryMap[repositoryName].splice(idx, 1);
+            return res;
         });
     }
 }
