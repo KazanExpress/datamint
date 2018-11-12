@@ -1,4 +1,4 @@
-import { Debug, DebugState, DebugType, ExceptionType } from '../debug';
+import { Debug, DebugState, DebugType, ExceptionType, Debugable, debugState, setDebugState, debugMap } from '../debug';
 import { Driver, IDriverConstructor } from '../drivers';
 import { ApiDriver, ApiMap, DataMap } from '../drivers/api';
 import { FallbackDriver } from '../drivers/fallback';
@@ -25,7 +25,10 @@ export type RepoStore<M extends IRepositoryMap, A extends ApiMap<any>> = {
 export class Connection<
   RM extends IRepositoryMap = IRepositoryMap,
   AM extends ApiMap<RM> = ApiMap<RM>,
-> {
+> extends Debugable {
+  protected debugType: DebugType = `connection`;
+  protected connectionName: string = this.name;
+
   // TODO
   // public static readonly plugins: WebRM.IPlugin[] = [];
 
@@ -57,10 +60,12 @@ export class Connection<
     repositories: RM,
     public readonly apiMap?: AM
   ) {
+    super();
+
     if (apiMap) {
       this.apiDriver = new ApiDriver(this, apiMap);
     } else {
-      Debug.log(this.name, '*', 'The main webrm functionality is disabled. Are you sure you want to use this without API?');
+      this.log('The main webrm functionality is disabled. Are you sure you want to use this without API?');
     }
 
     // Select the first supported driver from the bunch
@@ -68,19 +73,11 @@ export class Connection<
 
     if (SupportedDriver) {
       // TODO: multi-driver mode
-      Debug.log(
-        this.name,
-        'connection',
-        `Using driver "${SupportedDriver.name}" as the first supported driver`
-      );
+      this.log(`Using driver "${SupportedDriver.name}" as the first supported driver`);
 
       this.currentDriver = new SupportedDriver(this);
     } else {
-      Debug.warn(
-        this.name,
-        'connection',
-        'No supported driver provided. Using fallback.'
-      );
+      this.warn('No supported driver provided. Using fallback.');
 
       this.currentDriver = new FallbackDriver(this);
     }
@@ -88,11 +85,7 @@ export class Connection<
     let reProxy;
 
     if (!Proxy) {
-      Debug.warn(
-        this.name,
-        'connection',
-        `window.Proxy is unavailable. Using insufficient property forwarding.`
-      );
+      this.warn(`window.Proxy is unavailable. Using insufficient property forwarding.`);
 
       reProxy = (repoName: string) => Object.defineProperty(this, repoName, {
         get: () => this.repositories[repoName],
@@ -113,19 +106,13 @@ export class Connection<
     }
 
     if (Proxy) {
-      Debug.log(
-        this.name,
-        'connection',
-        `window.Proxy is available. Using modern property forwarding.`
-      );
+      this.log(`window.Proxy is available. Using modern property forwarding.`);
 
       return new Proxy(this, {
         get(target, key: string) {
           if (!target.repositories[key]) {
             if (!target[key]) {
-              Debug.log(
-                target.name,
-                'connection',
+              target.log(
                 `Repository "${key}" is not registered upon initialization. No other property with the same name was found.`
               );
             }
@@ -188,16 +175,16 @@ export class Connection<
   public static debug(type: string, exceptions: ExceptionType): void;
   public static debug(type?: boolean | string, exceptions?: ExceptionType) {
     if (typeof type === 'undefined') {
-      return Debug.state;
+      return debugState;
     }
 
     if (typeof type === 'boolean') {
-      Debug.state = (type ? 'enabled' : 'disabled');
-      Debug.map['*'] = exceptions || type;
+      setDebugState(type ? 'enabled' : 'disabled');
+      debugMap['*'] = exceptions || type;
     } else {
-      Debug.state = ('custom');
+      setDebugState('custom');
 
-      Debug.map[type] = exceptions || !Debug.map[type];
+      debugMap[type] = exceptions || !debugMap[type];
     }
 
     return;

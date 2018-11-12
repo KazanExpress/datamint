@@ -20,7 +20,7 @@ export class EntityRepository<
   IDKey extends string = E extends Entity<infer IdKey, unknown> ? IdKey : string,
 > extends Repository<DM, C, E, A> {
   public readonly columns: Array<string> = [];
-  public readonly primaryKey: string | number;
+  public readonly primaryKey: IDKey;
 
   constructor(
     name: string,
