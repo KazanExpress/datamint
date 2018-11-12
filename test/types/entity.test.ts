@@ -9,26 +9,27 @@ describe('types', () => {
       Broken
     }, {
       User: {
-        create({ username }: { username: string; password: string }) {
-          return Promise.resolve(new User({
+        async create({ username }: { username: string; password: string }) {
+          return new User({
             birthDate: new Date(),
             cart: [],
             name: username
-          }));
+          });
         },
-        delete() {
-          return Promise.resolve(new User({
+        async delete() {
+          return new User({
             birthDate: new Date(),
             cart: [],
             name: 'asd'
-          }));
+          });
         }
       },
       Products: {
-        create(options: { title: string; id: number; url: string }) {
-          return Promise.resolve(new Product(options));
+        async create(options: { title: string; id: number; url: string }) {
+          return new Product(options);
         }
-      }
+      },
+      Broken: false
     });
 
     const podguzniki = {

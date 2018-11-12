@@ -1,10 +1,8 @@
-import { DataMap } from '../apiMap';
-import { Driver } from '../drivers';
-import { ApiDriver } from '../drivers/api';
+import { DataMap } from '../drivers/api';
 import { QueryResult } from '../queryResult';
 import { Entity, IStorable, IStorableConstructor } from '../storable';
 import { Key } from '../util';
-import { Repository } from './base';
+import { IRepoConnection, Repository } from './base';
 
 type PartialWithId<T, ID, IDKey extends Key> = Partial<T> & {
   [key in IDKey]: ID;
@@ -14,7 +12,7 @@ type Arg<T extends undefined | ((arg: any) => any)> = T extends (arg: infer U) =
 
 export class EntityRepository<
   // TODO: hide most of the generic params from end-user..?
-  DM extends DataMap<any>,
+  DM extends DataMap<E>,
   C extends IStorableConstructor<E>,
   E extends IStorable = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
@@ -26,11 +24,7 @@ export class EntityRepository<
 
   constructor(
     name: string,
-    connection: {
-      name: string;
-      currentDriver: Driver;
-      apiDriver?: ApiDriver;
-    },
+    connection: IRepoConnection,
     entity: C
   ) {
     super(name, connection, entity);
@@ -43,8 +37,6 @@ export class EntityRepository<
       this.columns = Object.keys(entity.prototype);
     }
   }
-
-  public test?: DM;
 
   public async add(
     options: A,

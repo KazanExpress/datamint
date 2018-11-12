@@ -1,7 +1,6 @@
-import { DataMap } from '../apiMap';
 import { Debug } from '../debug';
 import { Driver } from '../drivers';
-import { ApiDriver } from '../drivers/api';
+import { ApiDriver, DataMap } from '../drivers/api';
 import { IStorable, IStorableConstructor } from '../storable';
 
 /**
@@ -9,19 +8,21 @@ import { IStorable, IStorableConstructor } from '../storable';
  * - Async API MAP crap for handling QueryResults
  */
 
+export interface IRepoConnection {
+  name: string;
+  currentDriver: Driver;
+  apiDriver?: ApiDriver;
+}
+
 export class Repository<
-  DM extends DataMap<any>,
+  DM extends DataMap<E>,
   C extends IStorableConstructor<E>,
   E extends IStorable = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
 > {
   constructor(
     public name: string,
-    protected readonly connection: {
-      name: string;
-      currentDriver: Driver;
-      apiDriver?: ApiDriver;
-    },
+    protected readonly connection: IRepoConnection,
     protected Data: C
   ) {
     if (
@@ -34,4 +35,6 @@ export class Repository<
       Debug.warn(connection.name, `db:${name}`, `Using default empty repository for ${name}`);
     }
   }
+
+  public readonly api?: ApiDriver = this.connection.apiDriver;
 }

@@ -1,9 +1,7 @@
-import { DataMap } from '../apiMap';
 import { Debug } from '../debug';
-import { Driver } from '../drivers';
-import { ApiDriver } from '../drivers/api';
+import { DataMap } from '../drivers/api';
 import { Entity, IStorable, IStorableConstructor, Record } from '../storable';
-import { Repository } from './base';
+import { IRepoConnection, Repository } from './base';
 import { EntityRepository } from './entityRepository';
 import { RecordRepository } from './recordRepository';
 
@@ -13,11 +11,7 @@ export function makeRepository<
   E extends IStorable = InstanceType<C>,
 >(
   name: string,
-  connection: {
-    name: string;
-    currentDriver: Driver;
-    apiDriver?: ApiDriver;
-  },
+  connection: IRepoConnection,
   data: C
 ): E extends Entity ? EntityRepository<DM, C, E> : E extends Record ? RecordRepository<DM, C, E> : Repository<DM, C, E> {
   let Constructor: any;

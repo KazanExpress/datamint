@@ -1,6 +1,8 @@
-import { Driver } from './base';
-import { Connection } from '../orm/connection';
-import { ApiMap } from '../apiMap';
+import { Driver } from '..';
+import { Connection } from '../../orm/connection';
+import { ApiMap } from './map';
+
+export * from './map';
 
 /* TODO */
 export class ApiDriver extends Driver {
@@ -33,6 +35,4 @@ export class ApiDriver extends Driver {
   public delete(repositoryName: string, id: any): Promise<any> {
     throw new Error('Method not implemented.');
   }
-
-
 }

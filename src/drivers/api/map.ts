@@ -1,5 +1,5 @@
-import { IRepositoryMap } from './orm/connection';
-import { IStorable } from './storable';
+import { IRepositoryMap } from '../../orm/connection';
+import { IStorable } from '../../storable';
 
 export type Fabric<S> = (...options: any[]) => Promise<S>;
 
@@ -8,5 +8,5 @@ export type DataMap<S extends IStorable> = {
 };
 
 export type ApiMap<R extends IRepositoryMap> = {
-  [key in keyof R]?: DataMap<InstanceType<R[key]>>;
+  [key in keyof R]: DataMap<InstanceType<R[key]>> | false;
 };

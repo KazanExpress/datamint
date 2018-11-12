@@ -1,7 +1,6 @@
-import { ApiMap, DataMap } from '../apiMap';
 import { Debug, DebugType, ExceptionType } from '../debug';
 import { Driver, IDriverConstructor } from '../drivers';
-import { ApiDriver } from '../drivers/api';
+import { ApiDriver, ApiMap, DataMap } from '../drivers/api';
 import { FallbackDriver } from '../drivers/fallback';
 import { EntityRepository, makeRepository, Repository } from '../repository';
 import { RecordRepository } from '../repository/recordRepository';
@@ -20,12 +19,12 @@ export type RepoFromConstructor<
 type PropFrom<O, Key> = Key extends keyof O ? O[Key] : any;
 
 export type RepoStore<M extends IRepositoryMap, A extends ApiMap<any>> = {
-  [name in (keyof M | keyof A)]: RepoFromConstructor<PropFrom<M, name>, PropFrom<A, name>>;
+  [Name in (keyof M | keyof A)]: RepoFromConstructor<PropFrom<M, Name>, PropFrom<A, Name>>;
 };
 
 export class Connection<
   RM extends IRepositoryMap = IRepositoryMap,
-  AM extends ApiMap<any> = ApiMap<RM>,
+  AM extends ApiMap<RM> = ApiMap<RM>,
 > {
   // TODO
   // public static readonly plugins: WebRM.IPlugin[] = [];
@@ -107,7 +106,7 @@ export class Connection<
       this.repositories[name] = makeRepository(name, {
         name: this.name,
         apiDriver: this.apiDriver,
-        currentDriver: this.currentDriver
+        currentDriver: this.currentDriver,
       }, entityConstructor);
 
       reProxy && reProxy(name);
