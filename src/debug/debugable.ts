@@ -1,4 +1,4 @@
-import { DebugType, print, errorTypeFor } from './module';
+import { DebugType, print, errorTypeFor, LogLevel } from './module';
 
 export abstract class Debugable {
   /**
@@ -16,39 +16,10 @@ export abstract class Debugable {
    */
   public get debugEnabled() { return errorTypeFor(this.debugType); }
 
-  protected error(message: any);
-  protected error(message: any);
-  protected error(message: any);
-  protected error(message: any) {
-    return print(
-      this.connectionName,
-      this.debugType,
-      message,
-      'error'
-    );
-  }
+  private readonly logFactory = (level: LogLevel) => message => print(this.connectionName, this.debugType, message, level);
 
-  protected log(message: any);
-  protected log(message: any);
-  protected log(message: any);
-  protected log(message: any) {
-    return print(
-      this.connectionName,
-      this.debugType,
-      message,
-      'log'
-    );
-  }
-
-  protected warn(message: any);
-  protected warn(message: any);
-  protected warn(message: any);
-  protected warn(message: any) {
-    return print(
-      this.connectionName,
-      this.debugType,
-      message,
-      'warn'
-    );
-  }
+  protected log = this.logFactory('log');
+  protected warn = this.logFactory('warn');
+  protected error = this.logFactory('error');
+  protected debug = this.logFactory('debug');
 }
