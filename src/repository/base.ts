@@ -18,7 +18,7 @@ export class Repository<
   E extends Storable = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
 > extends Debugable {
-  protected readonly $debugType: DebugType = `db:${this.name}` as DebugType;
+  protected readonly $debugType: DebugType = `db:${this.name.toLowerCase()}` as DebugType;
   protected readonly connection: IRepoConnectionInternal;
   public readonly $connectionName: string = this.connection.name;
 
