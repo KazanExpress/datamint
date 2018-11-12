@@ -26,3 +26,7 @@ That is exactly the problem `webrm` aims to solve.
 So instead of reinventing the wheel each time you need a reliable and sufficient storage for your web application - just use `webrm`!
 
 Part of the cool stuff is that `webrm` can also keep your data fresh for you, getting it from your servers right when you need it. You only need to map your CRUD request templates onto your data!
+
+## [Documentation](https://github.com/KazanExpress/webrm/wiki)
+
+See project's [wiki](https://github.com/KazanExpress/webrm/wiki).
