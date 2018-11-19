@@ -30,6 +30,10 @@ That is exactly the problem `webalorm` aims to solve in just under 10 kilobytes.
 
 This means that with `webalorm` you can simply map your api client requests (using [kefetchup](https://github.com/KazanExpress/kefetchup), for example) onto your own data-types without and then forget about the fact that your project even uses back-end APIs!
 
+And also...
+
+`webalorm` supports tree-shaking!
+
 ## [Documentation](https://github.com/KazanExpress/webalorm/wiki)
 
 See project's [wiki](https://github.com/KazanExpress/webalorm/wiki).
