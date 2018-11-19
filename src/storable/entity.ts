@@ -1,19 +1,20 @@
 import { Repository } from '../repository';
-import { Enumerable, Key } from '../util';
+import { Key } from '../util';
 import { Storable } from './storable';
+import { enumerable } from '../decorators';
 
 export class Entity<
   IDKey extends Key = string,
   ID = any
 > extends Storable {
   // TODO: check to be writable
-  @Enumerable(false)
+  @enumerable(false)
   private __col__: Array<string> = [];
 
-  @Enumerable(false)
+  @enumerable(false)
   private __idCol__?: IDKey;
 
-  @Enumerable(false)
+  @enumerable(false)
   private __idValue__?: ID;
 
   constructor(
@@ -27,13 +28,13 @@ export class Entity<
     }
   }
 
-  @Enumerable(false)
+  @enumerable(false)
   public $save(): Promise<void> {
     /* TODO */
     throw new Error('Method not implemented.');
   }
 
-  @Enumerable(false)
+  @enumerable(false)
   public $delete(): Promise<void> {
     /* TODO */
     throw new Error('Method not implemented.');
