@@ -1,38 +1,35 @@
-import { Enumerable } from '../util';
+import { enumerable } from '../decorators';
 import { DebugType, errorTypeFor, LogLevel, print } from './module';
 
 export abstract class Debugable {
   /**
    * The debug type for this class' actions
    */
-  @Enumerable(false)
+  @enumerable(false)
   protected readonly abstract $debugType: DebugType;
 
   /**
    * The name of the WEBALORM connection this class uses
    */
-  @Enumerable(false)
+  @enumerable(false)
   protected readonly abstract $connectionName: string;
 
   /**
    * `true` if the debug is enabled for this class
    */
-  @Enumerable(false)
+  @enumerable(false)
   public get $debugEnabled() { return errorTypeFor(this.$debugType); }
 
-  @Enumerable(false)
-  protected readonly $logFactory = (level: LogLevel) => (message, force: boolean = false) => {
-    if (this.$debugEnabled || force) {
-      print(this.$connectionName, this.$debugType, message, level);
-    }
-  };
+  @enumerable(false)
+  private readonly $logFactory = (level: LogLevel) => (message, force: boolean = false) =>
+      print(this.$connectionName, this.$debugType, message, level, force);
 
-  @Enumerable(false)
+  @enumerable(false)
   protected readonly $log = this.$logFactory('log');
-  @Enumerable(false)
+  @enumerable(false)
   protected readonly $warn = this.$logFactory('warn');
-  @Enumerable(false)
+  @enumerable(false)
   protected readonly $error = this.$logFactory('error');
-  @Enumerable(false)
+  @enumerable(false)
   protected readonly $debug = this.$logFactory('debug');
 }

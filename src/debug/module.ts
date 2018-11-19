@@ -89,8 +89,8 @@ export function errorTypeFor(type: string | RegExp | DebugType): boolean | Excep
 }
 
 
-export function print(instanceName: string, type: any, message: any, level: LogLevel) {
-  if (debugState !== 'disabled') {
+export function print(instanceName: string, type: any, message: any, level: LogLevel, force: boolean = false) {
+  if ((debugState !== 'disabled') || force) {
     const errorType = errorTypeFor(type);
     if (errorType) {
       if (errorType === 'hard' && level === 'error') {
@@ -105,29 +105,4 @@ export function print(instanceName: string, type: any, message: any, level: LogL
       }
     }
   }
-}
-
-const decoratedLogs: any = {};
-
-export function prints(message: any, level?: LogLevel, type?: string);
-export function prints(message: any, level?: LogLevel, type?: DebugType);
-export function prints(message: any, level?: LogLevel, type?: RegExp);
-export function prints(message: any, level: LogLevel = 'log', type: any = '*') {
-  return (target, key: string, desc: PropertyDescriptor) => {
-    Object.defineProperty(decoratedLogs, key, desc || {
-      value: undefined,
-      writable: true,
-      enumerable: true
-    });
-    Object.defineProperty(target, key, {
-      get: () => {
-        print('', type, message, level);
-
-        return decoratedLogs[key];
-      },
-      set: v => {
-        decoratedLogs[key] = v;
-      }
-    });
-  };
 }

@@ -1,5 +1,5 @@
 import { Repository } from '../repository';
-import { Enumerable } from '../util';
+import { enumerable } from '../decorators';
 import { Storable } from './storable';
 
 export class Record extends Storable {
@@ -10,13 +10,13 @@ export class Record extends Storable {
     super($repository);
   }
 
-  @Enumerable(false)
+  @enumerable(false)
   public $save(): Promise<void> {
     /* TODO */
     throw new Error('Method not implemented.');
   }
 
-  @Enumerable(false)
+  @enumerable(false)
   public $delete(): Promise<void> {
     /* TODO */
     throw new Error('Method not implemented.');

@@ -19,8 +19,4 @@ export function fromPath(obj, path, splitter = '.') {
   return path.split(splitter).reduce((o, i) => (o === Object(o) ? o[i] : o), obj);
 }
 
-export const Enumerable = (enumerable: boolean = true) => function (target: object, key: string, desc: PropertyDescriptor = {}) {
-  desc.enumerable = enumerable;
-};
-
 export type Key = string | number | symbol;
