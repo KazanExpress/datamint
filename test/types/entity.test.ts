@@ -9,14 +9,14 @@ describe('types', () => {
       Broken
     }, {
       User: {
-        async create({ username }: { username: string; password: string }) {
+        'create': async function ({ username }: { username: string; password: string }) {
           return {
             birthDate: new Date(),
             cart: [],
             name: username
           } as IUser;
         },
-        async delete() {
+        'delete': async function () {
           return {
             birthDate: new Date(),
             cart: [],
@@ -25,7 +25,10 @@ describe('types', () => {
         }
       },
       Products: {
-        async create(options: { title: string; id: number; url: string }) {
+        async add(options: { title: string; id: number; url: string }) {
+          return options;
+        },
+        async get(options: { title: string; id: number; url: string }) {
           return options;
         },
         cluster: {}
@@ -33,13 +36,14 @@ describe('types', () => {
       Broken: undefined
     });
 
-    const podguzniki = {
+    const podguznik = {
       id: 0,
-      title: 'podguzniki',
+      title: 'podguznik',
       url: '/products'
     };
 
-    orm.Products.add(podguzniki, podguzniki);
+    orm.Products.add(podguznik, podguznik);
+    orm.Products.get(0, podguznik);
 
     orm.Products.update({
       id: 0,

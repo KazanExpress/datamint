@@ -28,9 +28,9 @@ export interface IEntityRepoData<IDKey extends string> extends IRepoData {
  */
 export class EntityRepository<
   // TODO: hide most of the generic params from end-user..?
-  DM extends DataMap<C>,
+  DM extends DataMap<C, E, A>,
   C extends IStorableConstructor<E>,
-  E extends Storable = InstanceType<C>,
+  E extends Entity = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
   ID = E extends Entity<string, infer IdType> ? IdType : any,
   IDKey extends string = E extends Entity<infer IdKey, unknown> ? IdKey : string,
@@ -65,7 +65,7 @@ export class EntityRepository<
   public async add(
     options: A,
     // TODO: up to debate - singular arguments always or multiple args inference?
-    apiOptions?: Arg<DM['create']>
+    apiOptions?: Arg<DM['add']>
   ) {
     const result = await this.connection.currentDriver.create<A, IEntityRepoData<IDKey>>(this.driverOptions, options);
 
@@ -98,7 +98,7 @@ export class EntityRepository<
     }
   }
 
-  public get(id: ID, getApiOptions?: Arg<DM['read']>): QueryResult<E> {
+  public get(id: ID, getApiOptions?: Arg<DM['get']>): QueryResult<E> {
     throw new Error('Not implemented');
 
     return new QueryResult(/* TODO: implement this */

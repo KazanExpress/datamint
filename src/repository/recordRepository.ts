@@ -1,6 +1,6 @@
 import { DataMap } from '../drivers/api';
 import { QueryResult } from '../queryResult';
-import { IStorableConstructor, Storable } from '../storable';
+import { IStorableConstructor, Record } from '../storable';
 import { Repository } from './base';
 
 /**
@@ -12,9 +12,9 @@ import { Repository } from './base';
  * @template `A` entity constructor parameter options
  */
 export class RecordRepository<
-  DM extends DataMap<C>,
+  DM extends DataMap<C, E, A>,
   C extends IStorableConstructor<E>,
-  E extends Storable = InstanceType<C>,
+  E extends Record = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
 > extends Repository<DM, C, E, A> {
   public create(options: A): QueryResult<E> {
