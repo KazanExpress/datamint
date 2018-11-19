@@ -51,7 +51,7 @@ export class Repository<
 
   public readonly api?: ApiDriver;
 
-  public makeDataInstance(options: A) {
+  protected makeDataInstance(options: A) {
     return new this.Data(options, this);
   }
 }

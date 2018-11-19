@@ -22,8 +22,8 @@ export const Connection = connection as {
 } & typeof connection;
 
 export type Connection<
-RM extends IRepositoryMap = any,
-AM extends ApiMap<RM> = any
+  RM extends IRepositoryMap = any,
+  AM extends ApiMap<RM> = any
 > = connection<RM, AM>;
 
 export * from './namespace';

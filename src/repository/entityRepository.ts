@@ -73,7 +73,7 @@ export class EntityRepository<
       const instance = this.makeDataInstance(result);
 
       // Call local driver changes synchronously
-      const queryResult = new QueryResult<E>(true, instance);
+      const queryResult = new QueryResult(true, instance);
 
       // Call api driver asynchronously
       if (apiOptions && this.api) {

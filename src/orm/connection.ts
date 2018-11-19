@@ -4,6 +4,7 @@ import { ApiDriver, ApiMap, DataMap } from '../drivers/api';
 import { FallbackDriver } from '../drivers/fallback';
 import { EntityRepository, makeRepository, RecordRepository, Repository } from '../repository';
 import { Entity, IStorableConstructor, Record } from '../storable';
+import { MultiDriver } from '../drivers/multiDriver';
 
 export interface IRepositoryMap {
   [name: string]: IStorableConstructor<any>;
@@ -55,7 +56,7 @@ export class Connection<
    */
   constructor(
     public name: string,
-    public drivers: IDriverConstructor[],
+    public drivers: IDriverConstructor[] | MultiDriver,
     repositories: RM,
     public readonly apiMap?: AM
   ) {
@@ -67,16 +68,24 @@ export class Connection<
       Debug.$warn('The main webalorm functionality is disabled. Are you sure you want to use this without API?', true);
     }
 
-    // Select the first supported driver from the bunch
-    const SupportedDriver = drivers.find(d => d.isSupported);
+    try {
+      if (Array.isArray(drivers)) {
+        // Select the first supported driver from the bunch
+        const SupportedDrivers = drivers.filter(d => d.isSupported);
+        if (SupportedDrivers.length > 0) {
+          this.currentDriver = new SupportedDrivers[0](this);
+        } else {
+          throw new TypeError('No supported driver provided. Using fallback.');
+        }
+      } else if (drivers instanceof MultiDriver) {
+        this.currentDriver = drivers;
+      } else {
+        throw new TypeError('No supported driver provided. Using fallback.');
+      }
 
-    if (SupportedDriver) {
-      // TODO: multi-driver mode
-      this.$log(`Using driver "${SupportedDriver.name}" as the first supported driver`);
-
-      this.currentDriver = new SupportedDriver(this);
-    } else {
-      this.$warn('No supported driver provided. Using fallback.');
+      this.$log(`Using driver "${this.currentDriver.constructor.name}"`);
+    } catch (e) {
+      this.$error(e.message, true);
 
       this.currentDriver = new FallbackDriver(this);
     }
