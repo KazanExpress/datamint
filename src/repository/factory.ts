@@ -30,7 +30,7 @@ export function makeRepository<
     print(
       connection.name,
       'db',
-      `No suitable repository found for ${data.name} when trying to connect with ${name}.`,
+      `No suitable repository found for "${data.name}".`,
       'error'
     );
   }
