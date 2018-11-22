@@ -1,5 +1,5 @@
 import { Connection } from '../../src';
-import { Broken, Product, User, IUser, IProduct } from './common';
+import { IProductOptions, Product, User, Broken, IUserOptions } from '../common/models';
 
 describe('types', () => {
   it('types', () => {
@@ -9,7 +9,7 @@ describe('types', () => {
       Broken
     }, {
       User: {
-        async create(ormOptions: IUser, { username }: { username: string; password: string }): Promise<IUser> {
+        async create(ormOptions: IUserOptions, { username }: { username: string; password: string }): Promise<IUserOptions> {
           return {
             birthDate: new Date(),
             cart: [],
@@ -27,10 +27,10 @@ describe('types', () => {
         read: undefined
       },
       Products: {
-        async add(options: IProduct, apiKey: string) {
+        async add(options: IProductOptions, apiKey: string) {
           return options;
         },
-        async get(options: IProduct) {
+        async get(options: IProductOptions) {
           return options;
         },
         update: undefined,
