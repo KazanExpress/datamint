@@ -95,9 +95,3 @@ export function prints(messageHandler: any, level: LogLevel = 'log', type: any =
     }
   };
 }
-
-
-class Test {
-  @prints((key, value, newValue) => newValue ? `set property` : `accessed prop ${key} with value ${value}`)
-  public prop = 'test';
-}
