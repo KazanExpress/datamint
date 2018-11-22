@@ -1,4 +1,4 @@
-import { IUserOptions } from './models';
+import { IUserOptions, Product } from './models';
 
 export const Max: IUserOptions = {
   name: 'max',
@@ -7,14 +7,34 @@ export const Max: IUserOptions = {
   cart: []
 };
 
+const DB = {
+  USER: null as IUserOptions | null,
+  PRODUCTS: [] as Product[],
+};
+
 export const API = {
   user: {
     async createUser(username: string, password: string): Promise<IUserOptions> {
-      return Max;
+      DB.USER = Max;
+      DB.USER.name = username;
+
+      return DB.USER;
     },
 
-    async setUserData(data: IUserOptions): Promise<boolean> {
-      return true;
+    async setUserData(data: Partial<IUserOptions>): Promise<boolean> {
+      if (DB.USER) {
+        for (const key in DB.USER) if (data[key]) {
+          DB.USER[key] = data[key];
+        }
+
+        return true;
+      }
+
+      return false;
+    },
+
+    async getUser() {
+      return Promise.resolve(DB.USER);
     }
   }
 };
