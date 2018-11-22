@@ -2,7 +2,7 @@ import { Connection } from '../../src';
 import { IProductOptions, Product, User, Broken, IUserOptions } from '../common/models';
 
 describe('types', () => {
-  it('types', () => {
+  it('types', async () => {
     const orm = new Connection('asd', [], {
       Products: Product,
       User,
@@ -40,13 +40,13 @@ describe('types', () => {
       },
       Broken: {
         async create() {
-          return new Broken();
+          return Promise.resolve(new Broken());
         },
         async delete() {
-          return new Broken();
+          return Promise.resolve(new Broken());
         },
         async update() {
-          return new Broken();
+          return Promise.resolve(new Broken());
         },
       }
     });
@@ -58,43 +58,56 @@ describe('types', () => {
     };
 
     orm.Products.add(podguznik, 'asdasd');
-    orm.Products.get(0);
 
-    orm.Products.update({
-      id: 0,
-      title: 'Cool Podguzninki for cool kids!'
-    });
+    try {
+      orm.Products.get(0);
+    } catch (e) { }
 
-    orm.Products.updateById(0, product => ({
-      url: `/products/${product.id}`
-    }));
+    try {
+      orm.Products.update({
+        id: 0,
+        title: 'Cool Podguzninki for cool kids!'
+      });
+    } catch (e) { }
 
-    orm.Products.delete(0);
+    try {
+      orm.Products.updateById(0, product => ({
+        url: `/products/${product.id}`
+      }));
+    } catch (e) { }
+
+    try {
+      orm.Products.delete(0);
+    } catch (e) { }
 
     expect(orm.User.name).toBe('User');
 
-    orm.User.create({
-      name: 'max',
-      birthDate: new Date,
-      cart: []
-    }, {
-      username: 'max',
-      password: 'sadasdasd'
-    });
+    try {
+      orm.User.create({
+        name: 'max',
+        birthDate: new Date,
+        cart: []
+      }, {
+        username: 'max',
+        password: 'sadasdasd'
+      });
+    } catch (e) { }
 
-    (async () =>
+    try {
       orm.User.update({
         cart: [
           await orm.Products.get(0).result
         ]
-      })
-    )();
+      });
+    } catch (e) { }
 
-    orm.User.delete();
+    try {
+      orm.User.delete();
+    } catch (e) { }
 
     expect(typeof orm.Broken.name).toBe('string');
     expect(orm.Broken.name).toBe('Broken');
 
-    expect(orm.Broken.API!.create()).toMatchObject(new Broken());
+    expect(await orm.Broken.API!.create()).toMatchObject(new Broken());
   });
 });

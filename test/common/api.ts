@@ -1,13 +1,20 @@
 import { IUserOptions } from './models';
 
-export const API = {
-  async createUser(username: string, password: string): Promise<IUserOptions> {
-    return {
-      birthDate: new Date(),
-      cart: [],
-      name: username
-    };
-  },
+export const Max: IUserOptions = {
+  name: 'max',
+  // tslint:disable-next-line:no-magic-numbers
+  birthDate: new Date(Date.UTC(1997, 8, 9)),
+  cart: []
+};
 
-  async setUserData(data: IUserOptions): Promise<void> {}
+export const API = {
+  user: {
+    async createUser(username: string, password: string): Promise<IUserOptions> {
+      return Max;
+    },
+
+    async setUserData(data: IUserOptions): Promise<boolean> {
+      return true;
+    }
+  }
 };
