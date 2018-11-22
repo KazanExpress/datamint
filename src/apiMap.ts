@@ -34,8 +34,6 @@ export type BrokenDataMap<
   [key in Keys]?: BrokenFabric<InstanceType<C>>;
 };
 
-declare const t: FunctionKeys<RecordRepository<any, any> & EntityRepository<any, any>>;
-
 export type RepoFromDataMap<
   C extends IStorableConstructor<any>,
   DM extends DataMap<C>,
