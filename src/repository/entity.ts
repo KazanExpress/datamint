@@ -77,7 +77,7 @@ export class EntityRepository<
 
         this.api.add(options, apiOptions).then(res => {
           queryResult.result = this.makeDataInstance(result);
-          this.$log(`API handler execution end: ${this.name}.add() => ${JSON.stringify(res)}`);
+          this.$log(`API handler execution end: ${this.name}.add() => ${JSON.stringify(res, undefined, '  ')}`);
         }).catch(e => {
           queryResult.error = e;
           this.$error(`API handler execution end: ${this.name}.add() => ${e}`);
