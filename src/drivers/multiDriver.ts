@@ -16,7 +16,8 @@ export class MultiDriver extends Driver {
 
   private request(type: 'create' | 'update' | 'read' | 'delete') {
     return function (this: MultiDriver) {
-      const allResponses = Promise.all(this.drivers.map(d => d[type].apply(d, arguments)));
+      const args = arguments;
+      const allResponses = Promise.all(this.drivers.map(d => d[type].apply(d, args)));
 
       return allResponses[0];
     }.bind(this);
