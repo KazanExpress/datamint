@@ -93,7 +93,7 @@ export class Connection<
 
       this.repositories[name] = makeRepository(name, {
         name: this.name,
-        apiMap: this.apiMap && this.apiMap[name],
+        apiMap: this.apiMap && this.apiMap[name] as any,
         currentDriver: this.currentDriver,
       }, entityConstructor);
 

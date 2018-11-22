@@ -39,5 +39,5 @@ export class MultiDriver extends Driver {
     <A, R extends IRepoData = IRepoData>(repository: R, id: any): Promise<A>;
   } = this.request('delete');
 
-  public static readonly isSupported = true;
+  public static get isSupported() { return true; }
 }

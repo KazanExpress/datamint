@@ -38,7 +38,17 @@ describe('types', () => {
         updateById: undefined,
         count: undefined
       },
-      Broken: undefined
+      Broken: {
+        async create() {
+          return new Broken();
+        },
+        async delete() {
+          return new Broken();
+        },
+        async update() {
+          return new Broken();
+        },
+      }
     });
 
     const podguznik = {
@@ -82,6 +92,9 @@ describe('types', () => {
 
     orm.User.delete();
 
-    typeof orm.Broken.name === 'string';
+    expect(typeof orm.Broken.name).toBe('string');
+    expect(orm.Broken.name).toBe('Broken');
+
+    expect(orm.Broken.API!.create()).toMatchObject(new Broken());
   });
 });
