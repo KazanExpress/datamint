@@ -60,6 +60,7 @@ describe('types', () => {
     };
 
     orm.Products.add(podguznik, 'asdasd');
+    orm.Products.add(podguznik, false);
 
     try {
       orm.Products.get(0);

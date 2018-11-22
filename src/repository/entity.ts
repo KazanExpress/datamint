@@ -61,7 +61,7 @@ export class EntityRepository<
   public async add(
     options: A,
     // TODO: up to debate - singular arguments always or multiple args inference?
-    apiOptions?: FromSecArg<DM['add']>
+    apiOptions?: FromSecArg<DM['add']> | false // Pass false to disable the api call
   ) {
     const result = await this.connection.currentDriver.create<A, IEntityRepoData<IDKey>>(this.driverOptions, options);
 
@@ -72,7 +72,7 @@ export class EntityRepository<
       const queryResult = new QueryResult(true, instance);
 
       // Call api driver asynchronously
-      if (this.api && this.api.add) {
+      if (this.api && this.api.add && apiOptions !== false) {
         this.$log(`API handler execution start: ${this.name}.add()`);
 
         this.api.add(options, apiOptions).then(res => {
