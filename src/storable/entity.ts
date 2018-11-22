@@ -47,6 +47,9 @@ export class Entity<
   }
 
   public static Column(target: typeof Entity['prototype'], key: string) {
+    if (!target.__col__)
+      target.__col__ = [];
+
     target.__col__.push(key);
   }
 
