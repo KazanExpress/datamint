@@ -67,6 +67,9 @@ describe('types', () => {
       name: 'max',
       birthDate: new Date,
       cart: []
+    }, {
+      username: 'max',
+      password: 'sadasdasd'
     });
 
     (async () =>

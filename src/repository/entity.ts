@@ -1,16 +1,11 @@
 import { EntityDataMap } from '../apiMap';
 import { QueryResult } from '../queryResult';
 import { Entity, IStorableConstructor } from '../storable';
-import { IRepoConnection, IRepoData, Repository } from './base';
+import { IRepoConnection, IRepoData, Repository, FromSecArg } from './base';
 
 type PartialWithId<T, ID, IDKey extends PropertyKey> = Partial<T> & {
   [key in IDKey]: ID;
 };
-
-type FromSecArg<
-  T extends undefined | ((arg: any, ...args: any[]) => any)
-> = T extends ((arg: any, other: infer U) => any) ? U : undefined;
-
 
 export interface IEntityRepoData<IDKey extends PropertyKey> extends IRepoData {
   readonly columns: Array<string>;

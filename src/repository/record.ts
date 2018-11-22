@@ -1,7 +1,7 @@
 import { RecordDataMap } from '../apiMap';
 import { QueryResult } from '../queryResult';
 import { IStorableConstructor, Record } from '../storable';
-import { Repository } from './base';
+import { Repository, FromSecArg } from './base';
 
 /**
  * A single-entity repository.
@@ -17,7 +17,10 @@ export class RecordRepository<
   E extends Record = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
 > extends Repository<DM, C, E, A> {
-  public create(options: A): QueryResult<E> {
+  public create(
+    options: A,
+    apiOptions?: FromSecArg<DM['create']>
+  ): QueryResult<E> {
     throw new Error('Not implemented');
 
     return new QueryResult(/* TODO: implement this */
@@ -26,7 +29,10 @@ export class RecordRepository<
     );
   }
 
-  public update(options: Partial<A>): QueryResult<E> {
+  public update(
+    options: Partial<A>,
+    apiOptions?: FromSecArg<DM['update']>
+  ): QueryResult<E> {
     throw new Error('Not implemented');
 
     return new QueryResult(/* TODO: implement this */
@@ -35,7 +41,7 @@ export class RecordRepository<
     );
   }
 
-  public read(): QueryResult<E> {
+  public read(apiOptions?: FromSecArg<DM['read']>): QueryResult<E> {
     throw new Error('Not implemented');
 
     return new QueryResult(/* TODO: implement this */
@@ -44,7 +50,7 @@ export class RecordRepository<
     );
   }
 
-  public delete(): QueryResult<E> {
+  public delete(apiOptions?: FromSecArg<DM['delete']>): QueryResult<E> {
     throw new Error('Not implemented');
 
     return new QueryResult(/* TODO: implement this */

@@ -16,6 +16,10 @@ export interface IRepoData {
   name: string;
 }
 
+export type FromSecArg<
+  T extends undefined | ((arg: any, ...args: any[]) => any)
+> = T extends ((arg: any, other: infer U) => any) ? U : undefined;
+
 export abstract class Repository<
   DM extends DataMap<C>,
   C extends IStorableConstructor<E>,
