@@ -6,7 +6,7 @@ type FunctionKeys<T> = Exclude<{
   [K in keyof T]: T[K] extends Function ? K : never
 }[keyof T], undefined>;
 
-type Fabric<A> = ((options: A, ...apiOptions: any[]) => Promise<A>);
+type Fabric<A> = ((options: A, apiOptions?: any) => Promise<A>);
 
 export type DataMap<
   C extends IStorableConstructor<any>

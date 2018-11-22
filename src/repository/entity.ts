@@ -76,17 +76,16 @@ export class EntityRepository<
       // Call local driver changes synchronously
       const queryResult = new QueryResult(true, instance);
 
-      // @ts-ignore Call api driver asynchronously
-      if (apiOptions && this.api) {
+      // Call api driver asynchronously
+      if (this.api && this.api.add) {
         this.$log(`API handler execution start: ${this.name}.add()`);
 
-        // @ts-ignore
-        this.api.create(this.driverOptions, apiOptions).then(res => {
+        this.api.add(options, apiOptions).then(res => {
           queryResult.result = this.makeDataInstance(result);
-          this.$log(`API handler execution end: ${this.name}.add()`);
+          this.$log(`API handler execution end: ${this.name}.add() => ${res}`);
         }).catch(e => {
           queryResult.error = e;
-          this.$log(`API handler execution end: ${this.name}.add()`);
+          this.$error(`API handler execution end: ${this.name}.add() => ${e}`);
         });
       } else {
         this.$log('No API handler detected');
@@ -102,7 +101,7 @@ export class EntityRepository<
 
   public get(
     id: ID,
-    // getApiOptions?: SecArg<DM['get']>
+    getApiOptions?: FromSecArg<DM['get']>
   ): QueryResult<E> {
     throw new Error('Not implemented');
 
@@ -114,7 +113,7 @@ export class EntityRepository<
 
   public update(
     entity: PartialWithId<A, ID, IDKey>,
-    // updateApiOptions?: SecArg<DM['update']>
+    updateApiOptions?: FromSecArg<DM['update']>
   ): QueryResult<E> {
     throw new Error('Not implemented');
 
@@ -128,7 +127,7 @@ export class EntityRepository<
   public updateById(
     id: ID,
     query: (entity: E) => Partial<A>,
-    // updateApiOptions?: SecArg<DM['updateById']>
+    // updateApiOptions?: FromSecArg<DM['updateById']>
   ): QueryResult<E> {
     throw new Error('Not implemented');
 
@@ -140,7 +139,7 @@ export class EntityRepository<
 
   public delete(
     entity: PartialWithId<A, ID, IDKey> | ID,
-    // deleteApiOptions?: SecArg<DM['delete']>
+    deleteApiOptions?: FromSecArg<DM['delete']>
   ): QueryResult<E> {
     throw new Error('Not implemented');
 
