@@ -2,7 +2,7 @@ import { EntityDataMap, RecordDataMap } from '../apiMap';
 import { print } from '../debug';
 import { Entity, IStorableConstructor, Record, Storable } from '../storable';
 import { IRepoConnection } from './base';
-import { DefaultRepository } from './default';
+import { BrokenRepository } from './default';
 import { EntityRepository } from './entity';
 import { RecordRepository } from './record';
 
@@ -16,11 +16,11 @@ export function makeRepository<
   connection: IRepoConnection<DM>,
   data: C
 ): DM extends EntityDataMap<C> ? (
-  E extends Entity ? EntityRepository<DM, C, E, A> : DefaultRepository
+  E extends Entity ? EntityRepository<DM, C, E, A> : BrokenRepository<DM>
 ) : DM extends RecordDataMap<C> ? (
-  E extends Record ? RecordRepository<DM, C, E, A> : DefaultRepository
-) : DefaultRepository {
-  let Repo: any = DefaultRepository;
+  E extends Record ? RecordRepository<DM, C, E, A> : BrokenRepository<DM>
+) : BrokenRepository<DM> {
+  let Repo: any = BrokenRepository;
 
   if (data.prototype instanceof Entity) {
     Repo = EntityRepository;

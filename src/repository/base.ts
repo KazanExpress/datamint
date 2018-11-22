@@ -17,7 +17,7 @@ export interface IRepoData {
 }
 
 export type FromSecArg<
-  T extends undefined | ((arg: any, ...args: any[]) => any)
+  T extends undefined | ((arg: any, other: any) => any)
 > = T extends ((arg: any, other: infer U) => any) ? U : undefined;
 
 export abstract class Repository<
