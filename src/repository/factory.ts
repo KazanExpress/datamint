@@ -2,7 +2,7 @@ import { EntityDataMap, RecordDataMap } from '../apiMap';
 import { print } from '../debug';
 import { Entity, IStorableConstructor, Record, Storable } from '../storable';
 import { IRepoConnection } from './base';
-import { BrokenRepository } from './default';
+import { BrokenRepository } from './broken';
 import { EntityRepository } from './entity';
 import { RecordRepository } from './record';
 
