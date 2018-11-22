@@ -108,6 +108,6 @@ describe('types', () => {
     expect(typeof orm.Broken.name).toBe('string');
     expect(orm.Broken.name).toBe('Broken');
 
-    expect(await orm.Broken.API!.create()).toMatchObject(new Broken());
+    expect(await orm.Broken.API.create()).toMatchObject(new Broken());
   });
 });

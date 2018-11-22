@@ -9,7 +9,7 @@ export interface IRepoConnectionInternal {
 }
 
 export interface IRepoConnection<DM> extends IRepoConnectionInternal {
-  apiMap?: DM;
+  apiMap: DM;
 }
 
 export interface IRepoData {
@@ -21,7 +21,7 @@ export type FromSecArg<
 > = T extends ((arg: any, other: infer U) => any) ? U : undefined;
 
 export abstract class Repository<
-  DM extends DataMap<C>,
+  DM extends DataMap<C> | undefined,
   C extends IStorableConstructor<E>,
   E extends Storable = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
@@ -53,7 +53,7 @@ export abstract class Repository<
 
   }
 
-  protected readonly api?: DM;
+  protected readonly api: DM;
 
   protected makeDataInstance(options: A) {
     return new this.Data(options, this);
