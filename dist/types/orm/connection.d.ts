@@ -1,19 +1,18 @@
+import { ApiMap, RepoFromDataMap } from '../apiMap';
 import { Debugable, DebugState, DebugType, ExceptionType } from '../debug';
 import { Driver, IDriverConstructor } from '../drivers';
-import { ApiDriver, ApiMap, DataMap } from '../drivers/api';
-import { EntityRepository, RecordRepository, Repository } from '../repository';
-import { Entity, IStorableConstructor, Record } from '../storable';
+import { MultiDriver } from '../drivers/multiDriver';
+import { IStorableConstructor } from '../storable';
 export interface IRepositoryMap {
     [name: string]: IStorableConstructor<any>;
 }
-export declare type RepoFromConstructor<S extends IStorableConstructor<any>, D extends DataMap<InstanceType<S>> = DataMap<InstanceType<S>>> = InstanceType<S> extends Entity ? EntityRepository<D, S> : (InstanceType<S> extends Record ? RecordRepository<D, S> : Repository<D, S>);
 declare type PropFrom<O, Key> = Key extends keyof O ? O[Key] : any;
-export declare type RepoStore<M extends IRepositoryMap, A extends ApiMap<any>> = {
-    [Name in (keyof M | keyof A)]: RepoFromConstructor<PropFrom<M, Name>, PropFrom<A, Name>>;
+export declare type RepoStore<M extends IRepositoryMap, A extends ApiMap<M>> = {
+    [Name in (keyof M | keyof A)]: RepoFromDataMap<PropFrom<M, Name>, PropFrom<A, Name>>;
 };
 export declare class Connection<RM extends IRepositoryMap = IRepositoryMap, AM extends ApiMap<RM> = ApiMap<RM>> extends Debugable {
     name: string;
-    drivers: IDriverConstructor[];
+    drivers: IDriverConstructor[] | MultiDriver;
     readonly apiMap?: AM | undefined;
     protected $debugType: DebugType;
     protected $connectionName: string;
@@ -21,10 +20,6 @@ export declare class Connection<RM extends IRepositoryMap = IRepositoryMap, AM e
      * The driver currently used for operations with entities
      */
     currentDriver: Driver;
-    /**
-     * The driver currently used for operations with api requests
-     */
-    apiDriver?: ApiDriver;
     /**
      * A current map of bound repositories
      */
@@ -36,7 +31,7 @@ export declare class Connection<RM extends IRepositoryMap = IRepositoryMap, AM e
      * @param repositories sets the relation of a repository name to its contents' prototype.
      * @param apiMap maps the API calls onto the current data structure
      */
-    constructor(name: string, drivers: IDriverConstructor[], repositories: RM, apiMap?: AM | undefined);
+    constructor(name: string, drivers: IDriverConstructor[] | MultiDriver, repositories: RM, apiMap?: AM | undefined);
     /**
      * Returns a truthy value if debug is currently enabled
      *

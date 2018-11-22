@@ -9,13 +9,13 @@ class Repository extends debug_1.Debugable {
         this.$debugType = `db:${this.name.toLowerCase()}`;
         this.connection = connection;
         this.$connectionName = connection.name;
-        this.api = connection.apiDriver;
+        this.api = connection.apiMap;
         if ( /* this class was instantiated directly (without inheritance) */Repository.prototype === this.constructor.prototype) {
             if (this.$debugEnabled) {
                 this.$warn(`Using default empty repository.`);
             }
-            else if (debug_1.Debug.map.db) {
-                this.$warn(`Using default empty repository for ${name}`, true);
+            else {
+                debug_1.Debug.$warn(`Using default empty repository for ${name}`, true);
             }
         }
     }

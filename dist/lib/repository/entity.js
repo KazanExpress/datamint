@@ -50,14 +50,14 @@ class EntityRepository extends base_1.Repository {
                 // Call local driver changes synchronously
                 const queryResult = new queryResult_1.QueryResult(true, instance);
                 // Call api driver asynchronously
-                if (apiOptions && this.api) {
+                if (this.api && this.api.add) {
                     this.$log(`API handler execution start: ${this.name}.add()`);
-                    this.api.create(this.driverOptions, apiOptions).then(res => {
+                    this.api.add(options, apiOptions).then(res => {
                         queryResult.result = this.makeDataInstance(result);
-                        this.$log(`API handler execution end: ${this.name}.add()`);
+                        this.$log(`API handler execution end: ${this.name}.add() => ${res}`);
                     }).catch(e => {
                         queryResult.error = e;
-                        this.$log(`API handler execution end: ${this.name}.add()`);
+                        this.$error(`API handler execution end: ${this.name}.add() => ${e}`);
                     });
                 }
                 else {
@@ -80,7 +80,7 @@ class EntityRepository extends base_1.Repository {
         return new queryResult_1.QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }
     /* Do we even need this?.. */
-    updateById(id, query, updateApiOptions) {
+    updateById(id, query) {
         throw new Error('Not implemented');
         return new queryResult_1.QueryResult(/* TODO: implement this */ true, this.makeDataInstance(query({})));
     }
@@ -94,4 +94,4 @@ class EntityRepository extends base_1.Repository {
     }
 }
 exports.EntityRepository = EntityRepository;
-//# sourceMappingURL=entityRepository.js.map
+//# sourceMappingURL=entity.js.map

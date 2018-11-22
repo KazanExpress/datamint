@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const util_1 = require("../util");
+const decorators_1 = require("../decorators");
 const storable_1 = require("./storable");
 class Record extends storable_1.Storable {
     constructor(options, $repository) {
@@ -25,13 +25,13 @@ class Record extends storable_1.Storable {
     }
 }
 __decorate([
-    util_1.Enumerable(false),
+    decorators_1.enumerable(false),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], Record.prototype, "$save", null);
 __decorate([
-    util_1.Enumerable(false),
+    decorators_1.enumerable(false),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)

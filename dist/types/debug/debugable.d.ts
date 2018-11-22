@@ -1,4 +1,4 @@
-import { DebugType, LogLevel } from './module';
+import { DebugType } from './module';
 export declare abstract class Debugable {
     /**
      * The debug type for this class' actions
@@ -12,7 +12,7 @@ export declare abstract class Debugable {
      * `true` if the debug is enabled for this class
      */
     readonly $debugEnabled: boolean | "soft" | "hard";
-    protected readonly $logFactory: (level: LogLevel) => (message: any, force?: boolean) => void;
+    private readonly $logFactory;
     protected readonly $log: (message: any, force?: boolean) => void;
     protected readonly $warn: (message: any, force?: boolean) => void;
     protected readonly $error: (message: any, force?: boolean) => void;

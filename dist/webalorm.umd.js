@@ -81,22 +81,11 @@
         }
     }
 
-    /**
-     * fromPath
-     * Returns a value from an object by a given path (usually string).
-     *
-     * @see [gist](https://gist.github.com/Raiondesu/759425dede5b7ff38db51ea5a1fb8f11)
-     *
-     * @param obj an object to get a value from.
-     * @param path to get a value by.
-     * @param splitter to split the path by. Default is '.' ('obj.path.example')
-     * @returns a value from a given path. If a path is invalid - returns undefined.
-     */
-    var Enumerable = function (enumerable) {
-        if (enumerable === void 0) { enumerable = true; }
+    var enumerable = function (isEnumerable) {
+        if (isEnumerable === void 0) { isEnumerable = true; }
         return function (target, key, desc) {
             if (desc === void 0) { desc = {}; }
-            desc.enumerable = enumerable;
+            desc.enumerable = isEnumerable;
         };
     };
 
@@ -131,8 +120,9 @@
         }
         return Object.keys(debugMap).find(function (t) { return type.test(t); }) || false;
     }
-    function print(instanceName, type, message, level) {
-        if (debugState !== 'disabled') {
+    function print(instanceName, type, message, level, force) {
+        if (force === void 0) { force = false; }
+        if ((debugState !== 'disabled') || force) {
             var errorType = errorTypeFor(type);
             if (errorType) {
                 if (errorType === 'hard' && level === 'error') {
@@ -150,9 +140,7 @@
             var _this = this;
             this.$logFactory = function (level) { return function (message, force) {
                 if (force === void 0) { force = false; }
-                if (_this.$debugEnabled || force) {
-                    print(_this.$connectionName, _this.$debugType, message, level);
-                }
+                return print(_this.$connectionName, _this.$debugType, message, level, force);
             }; };
             this.$log = this.$logFactory('log');
             this.$warn = this.$logFactory('warn');
@@ -168,36 +156,36 @@
             configurable: true
         });
         __decorate([
-            Enumerable(false),
+            enumerable(false),
             __metadata("design:type", String)
         ], Debugable.prototype, "$debugType", void 0);
         __decorate([
-            Enumerable(false),
+            enumerable(false),
             __metadata("design:type", String)
         ], Debugable.prototype, "$connectionName", void 0);
         __decorate([
-            Enumerable(false),
+            enumerable(false),
             __metadata("design:type", Object),
             __metadata("design:paramtypes", [])
         ], Debugable.prototype, "$debugEnabled", null);
         __decorate([
-            Enumerable(false),
+            enumerable(false),
             __metadata("design:type", Object)
         ], Debugable.prototype, "$logFactory", void 0);
         __decorate([
-            Enumerable(false),
+            enumerable(false),
             __metadata("design:type", Object)
         ], Debugable.prototype, "$log", void 0);
         __decorate([
-            Enumerable(false),
+            enumerable(false),
             __metadata("design:type", Object)
         ], Debugable.prototype, "$warn", void 0);
         __decorate([
-            Enumerable(false),
+            enumerable(false),
             __metadata("design:type", Object)
         ], Debugable.prototype, "$error", void 0);
         __decorate([
-            Enumerable(false),
+            enumerable(false),
             __metadata("design:type", Object)
         ], Debugable.prototype, "$debug", void 0);
         return Debugable;
@@ -247,69 +235,6 @@
         return Driver;
     }());
 
-    /* TODO */
-    var ApiDriver = /** @class */ (function (_super) {
-        __extends(ApiDriver, _super);
-        function ApiDriver(connection, apiMap) {
-            var _this = _super.call(this, connection) || this;
-            _this.apiMap = apiMap;
-            return _this;
-        }
-        ApiDriver.prototype.create = function (repository, data) {
-            var repo = this.apiMap[repository.name];
-            if (repo && repo.create) {
-                return repo.create(data);
-            }
-            else {
-                return Promise.reject( /* TODO: error handling */);
-            }
-        };
-        ApiDriver.prototype.read = function (repository, data) {
-            var repo = this.apiMap[repository.name];
-            if (repo && repo.read) {
-                return repo.read(data);
-            }
-            else {
-                return Promise.reject( /* TODO: error handling */);
-            }
-        };
-        ApiDriver.prototype.update = function (repository, data, query) {
-            return __awaiter(this, void 0, void 0, function () {
-                var repo, result;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            repo = this.apiMap[repository.name];
-                            if (!repo || !repo.update) {
-                                return [2 /*return*/, Promise.reject( /* TODO: error handling */)];
-                            }
-                            if (!query) return [3 /*break*/, 2];
-                            return [4 /*yield*/, this.read(repository, data)];
-                        case 1:
-                            result = _a.sent();
-                            return [2 /*return*/, repo.update(query(result))];
-                        case 2: return [2 /*return*/, repo.update(data)];
-                    }
-                });
-            });
-        };
-        ApiDriver.prototype.delete = function (repository, data) {
-            var repo = this.apiMap[repository.name];
-            if (repo && repo.delete) {
-                return repo.delete(data);
-            }
-            else {
-                return Promise.reject( /* TODO: error handling */);
-            }
-        };
-        Object.defineProperty(ApiDriver, "isSupported", {
-            get: function () { return true; },
-            enumerable: true,
-            configurable: true
-        });
-        return ApiDriver;
-    }(Driver));
-
     /* TODO: driver that just writes everything to short-term memory */
     var FallbackDriver = /** @class */ (function (_super) {
         __extends(FallbackDriver, _super);
@@ -345,6 +270,32 @@
         return FallbackDriver;
     }(Driver));
 
+    var MultiDriver = /** @class */ (function (_super) {
+        __extends(MultiDriver, _super);
+        function MultiDriver(connection, drivers) {
+            var _this = _super.call(this, connection) || this;
+            _this.create = _this.request('create');
+            _this.read = _this.request('read');
+            _this.update = _this.request('update');
+            _this.delete = _this.request('delete');
+            _this.drivers = drivers.filter(function (d) { return d.isSupported; }).map(function (D) { return new D(connection); });
+            return _this;
+        }
+        MultiDriver.prototype.request = function (type) {
+            return function () {
+                var args = arguments;
+                var allResponses = Promise.all(this.drivers.map(function (d) { return d[type].apply(d, args); }));
+                return allResponses[0];
+            }.bind(this);
+        };
+        Object.defineProperty(MultiDriver, "isSupported", {
+            get: function () { return true; },
+            enumerable: true,
+            configurable: true
+        });
+        return MultiDriver;
+    }(Driver));
+
     var Repository = /** @class */ (function (_super) {
         __extends(Repository, _super);
         function Repository(name, connection, Data) {
@@ -354,13 +305,13 @@
             _this.$debugType = "db:" + _this.name.toLowerCase();
             _this.connection = connection;
             _this.$connectionName = connection.name;
-            _this.api = connection.apiDriver;
+            _this.api = connection.apiMap;
             if ( /* this class was instantiated directly (without inheritance) */Repository.prototype === _this.constructor.prototype) {
                 if (_this.$debugEnabled) {
                     _this.$warn("Using default empty repository.");
                 }
-                else if (Debug.map.db) {
-                    _this.$warn("Using default empty repository for " + name, true);
+                else {
+                    Debug.$warn("Using default empty repository for " + name, true);
                 }
             }
             return _this;
@@ -370,6 +321,21 @@
         };
         return Repository;
     }(Debugable));
+
+    var BrokenRepository = /** @class */ (function (_super) {
+        __extends(BrokenRepository, _super);
+        function BrokenRepository() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        Object.defineProperty(BrokenRepository.prototype, "API", {
+            get: function () {
+                return this.api;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        return BrokenRepository;
+    }(Repository));
 
     /**
      * Incapsulates the query result data for further manipulation
@@ -490,14 +456,14 @@
                                 instance = this.makeDataInstance(result);
                                 queryResult_1 = new QueryResult(true, instance);
                                 // Call api driver asynchronously
-                                if (apiOptions && this.api) {
+                                if (this.api && this.api.add) {
                                     this.$log("API handler execution start: " + this.name + ".add()");
-                                    this.api.create(this.driverOptions, apiOptions).then(function (res) {
+                                    this.api.add(options, apiOptions).then(function (res) {
                                         queryResult_1.result = _this.makeDataInstance(result);
-                                        _this.$log("API handler execution end: " + _this.name + ".add()");
+                                        _this.$log("API handler execution end: " + _this.name + ".add() => " + res);
                                     }).catch(function (e) {
                                         queryResult_1.error = e;
-                                        _this.$log("API handler execution end: " + _this.name + ".add()");
+                                        _this.$error("API handler execution end: " + _this.name + ".add() => " + e);
                                     });
                                 }
                                 else {
@@ -523,7 +489,7 @@
             return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
         };
         /* Do we even need this?.. */
-        EntityRepository.prototype.updateById = function (id, query, updateApiOptions) {
+        EntityRepository.prototype.updateById = function (id, query) {
             throw new Error('Not implemented');
             return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance(query({})));
         };
@@ -558,6 +524,12 @@
             _this.__col__ = [];
             if (_this.__idCol__) {
                 _this.__idValue__ = options[_this.__idCol__];
+                Reflect.deleteProperty(_this, _this.__idCol__);
+                Reflect.defineProperty(_this, _this.__idCol__, {
+                    get: function () { return _this.__idValue__; },
+                    set: function (v) { return _this.__idValue__ = v; },
+                    enumerable: true
+                });
             }
             return _this;
         }
@@ -570,31 +542,33 @@
             throw new Error('Method not implemented.');
         };
         Entity.Column = function (target, key) {
+            if (!target.__col__)
+                target.__col__ = [];
             target.__col__.push(key);
         };
         Entity.ID = function (target, key) {
             target.__idCol__ = key;
         };
         __decorate([
-            Enumerable(false),
+            enumerable(false),
             __metadata("design:type", Array)
         ], Entity.prototype, "__col__", void 0);
         __decorate([
-            Enumerable(false),
+            enumerable(false),
             __metadata("design:type", Object)
         ], Entity.prototype, "__idCol__", void 0);
         __decorate([
-            Enumerable(false),
+            enumerable(false),
             __metadata("design:type", Object)
         ], Entity.prototype, "__idValue__", void 0);
         __decorate([
-            Enumerable(false),
+            enumerable(false),
             __metadata("design:type", Function),
             __metadata("design:paramtypes", []),
             __metadata("design:returntype", Promise)
         ], Entity.prototype, "$save", null);
         __decorate([
-            Enumerable(false),
+            enumerable(false),
             __metadata("design:type", Function),
             __metadata("design:paramtypes", []),
             __metadata("design:returntype", Promise)
@@ -618,13 +592,13 @@
             throw new Error('Method not implemented.');
         };
         __decorate([
-            Enumerable(false),
+            enumerable(false),
             __metadata("design:type", Function),
             __metadata("design:paramtypes", []),
             __metadata("design:returntype", Promise)
         ], Record.prototype, "$save", null);
         __decorate([
-            Enumerable(false),
+            enumerable(false),
             __metadata("design:type", Function),
             __metadata("design:paramtypes", []),
             __metadata("design:returntype", Promise)
@@ -645,19 +619,19 @@
         function RecordRepository() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        RecordRepository.prototype.create = function (options) {
+        RecordRepository.prototype.create = function (options, apiOptions) {
             throw new Error('Not implemented');
             return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
         };
-        RecordRepository.prototype.update = function (options) {
+        RecordRepository.prototype.update = function (options, apiOptions) {
             throw new Error('Not implemented');
             return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
         };
-        RecordRepository.prototype.read = function () {
+        RecordRepository.prototype.read = function (apiOptions) {
             throw new Error('Not implemented');
             return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
         };
-        RecordRepository.prototype.delete = function () {
+        RecordRepository.prototype.delete = function (apiOptions) {
             throw new Error('Not implemented');
             return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
         };
@@ -665,18 +639,17 @@
     }(Repository));
 
     function makeRepository(name, connection, data) {
-        var Constructor;
+        var Repo = BrokenRepository;
         if (data.prototype instanceof Entity) {
-            Constructor = EntityRepository;
+            Repo = EntityRepository;
         }
         else if (data.prototype instanceof Record) {
-            Constructor = RecordRepository;
+            Repo = RecordRepository;
         }
         else {
             print(connection.name, 'db', "No suitable repository found for " + data.name + " when trying to connect with " + name + ".", 'error');
-            Constructor = Repository;
         }
-        return new Constructor(name, connection, data);
+        return new Repo(name, connection, data);
     }
 
     var Connection = /** @class */ (function (_super) {
@@ -699,21 +672,30 @@
              * A current map of bound repositories
              */
             _this.repositories = {};
-            if (apiMap) {
-                _this.apiDriver = new ApiDriver(_this, apiMap);
-            }
-            else {
+            if (!apiMap) {
                 Debug.$warn('The main webalorm functionality is disabled. Are you sure you want to use this without API?', true);
             }
-            // Select the first supported driver from the bunch
-            var SupportedDriver = drivers.find(function (d) { return d.isSupported; });
-            if (SupportedDriver) {
-                // TODO: multi-driver mode
-                _this.$log("Using driver \"" + SupportedDriver.name + "\" as the first supported driver");
-                _this.currentDriver = new SupportedDriver(_this);
+            try {
+                if (Array.isArray(drivers)) {
+                    // Select the first supported driver from the bunch
+                    var SupportedDrivers = drivers.filter(function (d) { return d.isSupported; });
+                    if (SupportedDrivers.length > 0) {
+                        _this.currentDriver = new SupportedDrivers[0](_this);
+                    }
+                    else {
+                        throw new TypeError('No supported driver provided. Using fallback.');
+                    }
+                }
+                else if (drivers instanceof MultiDriver) {
+                    _this.currentDriver = drivers;
+                }
+                else {
+                    throw new TypeError('No supported driver provided. Using fallback.');
+                }
+                _this.$log("Using driver \"" + _this.currentDriver.constructor.name + "\"");
             }
-            else {
-                _this.$warn('No supported driver provided. Using fallback.');
+            catch (e) {
+                _this.$error(e.message, true);
                 _this.currentDriver = new FallbackDriver(_this);
             }
             var reProxy;
@@ -728,7 +710,7 @@
                 var entityConstructor = repositories[name_1];
                 _this.repositories[name_1] = makeRepository(name_1, {
                     name: _this.name,
-                    apiDriver: _this.apiMap && _this.apiMap[name_1] && _this.apiDriver,
+                    apiMap: _this.apiMap && _this.apiMap[name_1],
                     currentDriver: _this.currentDriver,
                 }, entityConstructor);
                 reProxy && reProxy(name_1);
@@ -768,12 +750,81 @@
 
     var Connection$1 = Connection;
 
+    function prints(messageHandler, level, type, force) {
+        if (level === void 0) { level = 'log'; }
+        if (type === void 0) { type = '*'; }
+        if (force === void 0) { force = false; }
+        return function (target, key, desc) {
+            var _print = function () {
+                var _this = this;
+                var p = function (_) {
+                    var context = '';
+                    if (target.constructor && target.constructor.name) {
+                        context = target.constructor.name + ":" + String(key);
+                    }
+                    else if (target.name) {
+                        context = target.name + ":" + String(key);
+                    }
+                    else if (_this.name) {
+                        context = _this.name + ":" + String(key);
+                    }
+                    print(context, type, _, level, force);
+                };
+                if (typeof messageHandler === 'function') {
+                    p(messageHandler.apply(this, arguments));
+                }
+                else {
+                    p(messageHandler);
+                }
+            };
+            var assignDescValue = function (d) {
+                var original = d.value;
+                d.get = function () {
+                    _print.apply(this, [key, original]);
+                    return original;
+                };
+                d.set = function (v) {
+                    _print.apply(this, [key, original, v]);
+                    original = v;
+                };
+            };
+            if (desc) {
+                if (typeof desc.value === 'function') {
+                    var original_1 = desc.value;
+                    desc.value = function () {
+                        _print.apply(this, arguments);
+                        return original_1.apply(this, arguments);
+                    };
+                }
+                else if (typeof desc.value !== 'undefined' || desc.set) {
+                    assignDescValue(desc);
+                }
+            }
+            else {
+                var d = {};
+                if (d.get) {
+                    var original_2 = d.get;
+                    d.get = function () {
+                        _print.apply(this);
+                        return original_2.apply(this);
+                    };
+                }
+                else {
+                    assignDescValue(d);
+                }
+                Reflect.deleteProperty(target, key);
+                Reflect.defineProperty(target, key, d);
+            }
+        };
+    }
+
     exports.Connection = Connection$1;
     exports.Entity = Entity;
     exports.Column = Column;
     exports.ID = ID;
     exports.Record = Record;
     exports.Storable = Storable;
+    exports.prints = prints;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 

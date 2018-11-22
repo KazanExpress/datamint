@@ -33,19 +33,8 @@ function __awaiter(thisArg, _arguments, P, generator) {
     });
 }
 
-/**
- * fromPath
- * Returns a value from an object by a given path (usually string).
- *
- * @see [gist](https://gist.github.com/Raiondesu/759425dede5b7ff38db51ea5a1fb8f11)
- *
- * @param obj an object to get a value from.
- * @param path to get a value by.
- * @param splitter to split the path by. Default is '.' ('obj.path.example')
- * @returns a value from a given path. If a path is invalid - returns undefined.
- */
-const Enumerable = (enumerable = true) => function (target, key, desc = {}) {
-    desc.enumerable = enumerable;
+const enumerable = (isEnumerable = true) => function (target, key, desc = {}) {
+    desc.enumerable = isEnumerable;
 };
 
 const LOG_PREFIX = (name) => name ? `[WEBALORM:${name}]` : `[WEBALORM]`;
@@ -79,8 +68,8 @@ function errorTypeFor(type) {
     }
     return Object.keys(debugMap).find(t => type.test(t)) || false;
 }
-function print(instanceName, type, message, level) {
-    if (debugState !== 'disabled') {
+function print(instanceName, type, message, level, force = false) {
+    if ((debugState !== 'disabled') || force) {
         const errorType = errorTypeFor(type);
         if (errorType) {
             if (errorType === 'hard' && level === 'error') {
@@ -95,11 +84,7 @@ function print(instanceName, type, message, level) {
 
 class Debugable {
     constructor() {
-        this.$logFactory = (level) => (message, force = false) => {
-            if (this.$debugEnabled || force) {
-                print(this.$connectionName, this.$debugType, message, level);
-            }
-        };
+        this.$logFactory = (level) => (message, force = false) => print(this.$connectionName, this.$debugType, message, level, force);
         this.$log = this.$logFactory('log');
         this.$warn = this.$logFactory('warn');
         this.$error = this.$logFactory('error');
@@ -111,36 +96,36 @@ class Debugable {
     get $debugEnabled() { return errorTypeFor(this.$debugType); }
 }
 __decorate([
-    Enumerable(false),
+    enumerable(false),
     __metadata("design:type", String)
 ], Debugable.prototype, "$debugType", void 0);
 __decorate([
-    Enumerable(false),
+    enumerable(false),
     __metadata("design:type", String)
 ], Debugable.prototype, "$connectionName", void 0);
 __decorate([
-    Enumerable(false),
+    enumerable(false),
     __metadata("design:type", Object),
     __metadata("design:paramtypes", [])
 ], Debugable.prototype, "$debugEnabled", null);
 __decorate([
-    Enumerable(false),
+    enumerable(false),
     __metadata("design:type", Object)
 ], Debugable.prototype, "$logFactory", void 0);
 __decorate([
-    Enumerable(false),
+    enumerable(false),
     __metadata("design:type", Object)
 ], Debugable.prototype, "$log", void 0);
 __decorate([
-    Enumerable(false),
+    enumerable(false),
     __metadata("design:type", Object)
 ], Debugable.prototype, "$warn", void 0);
 __decorate([
-    Enumerable(false),
+    enumerable(false),
     __metadata("design:type", Object)
 ], Debugable.prototype, "$error", void 0);
 __decorate([
-    Enumerable(false),
+    enumerable(false),
     __metadata("design:type", Object)
 ], Debugable.prototype, "$debug", void 0);
 
@@ -170,55 +155,6 @@ class Driver {
     static get isSupported() {
         throw new Error('Not implemented.');
     }
-}
-
-/* TODO */
-class ApiDriver extends Driver {
-    constructor(connection, apiMap) {
-        super(connection);
-        this.apiMap = apiMap;
-    }
-    create(repository, data) {
-        const repo = this.apiMap[repository.name];
-        if (repo && repo.create) {
-            return repo.create(data);
-        }
-        else {
-            return Promise.reject( /* TODO: error handling */);
-        }
-    }
-    read(repository, data) {
-        const repo = this.apiMap[repository.name];
-        if (repo && repo.read) {
-            return repo.read(data);
-        }
-        else {
-            return Promise.reject( /* TODO: error handling */);
-        }
-    }
-    update(repository, data, query) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const repo = this.apiMap[repository.name];
-            if (!repo || !repo.update) {
-                return Promise.reject( /* TODO: error handling */);
-            }
-            if (query) {
-                const result = yield this.read(repository, data);
-                return repo.update(query(result));
-            }
-            return repo.update(data);
-        });
-    }
-    delete(repository, data) {
-        const repo = this.apiMap[repository.name];
-        if (repo && repo.delete) {
-            return repo.delete(data);
-        }
-        else {
-            return Promise.reject( /* TODO: error handling */);
-        }
-    }
-    static get isSupported() { return true; }
 }
 
 /* TODO: driver that just writes everything to short-term memory */
@@ -251,6 +187,25 @@ class FallbackDriver extends Driver {
     }
 }
 
+class MultiDriver extends Driver {
+    constructor(connection, drivers) {
+        super(connection);
+        this.create = this.request('create');
+        this.read = this.request('read');
+        this.update = this.request('update');
+        this.delete = this.request('delete');
+        this.drivers = drivers.filter(d => d.isSupported).map(D => new D(connection));
+    }
+    request(type) {
+        return function () {
+            const args = arguments;
+            const allResponses = Promise.all(this.drivers.map(d => d[type].apply(d, args)));
+            return allResponses[0];
+        }.bind(this);
+    }
+    static get isSupported() { return true; }
+}
+
 class Repository extends Debugable {
     constructor(name, connection, Data) {
         super();
@@ -259,18 +214,24 @@ class Repository extends Debugable {
         this.$debugType = `db:${this.name.toLowerCase()}`;
         this.connection = connection;
         this.$connectionName = connection.name;
-        this.api = connection.apiDriver;
+        this.api = connection.apiMap;
         if ( /* this class was instantiated directly (without inheritance) */Repository.prototype === this.constructor.prototype) {
             if (this.$debugEnabled) {
                 this.$warn(`Using default empty repository.`);
             }
-            else if (Debug.map.db) {
-                this.$warn(`Using default empty repository for ${name}`, true);
+            else {
+                Debug.$warn(`Using default empty repository for ${name}`, true);
             }
         }
     }
     makeDataInstance(options) {
         return new this.Data(options, this);
+    }
+}
+
+class BrokenRepository extends Repository {
+    get API() {
+        return this.api;
     }
 }
 
@@ -367,14 +328,14 @@ class EntityRepository extends Repository {
                 // Call local driver changes synchronously
                 const queryResult = new QueryResult(true, instance);
                 // Call api driver asynchronously
-                if (apiOptions && this.api) {
+                if (this.api && this.api.add) {
                     this.$log(`API handler execution start: ${this.name}.add()`);
-                    this.api.create(this.driverOptions, apiOptions).then(res => {
+                    this.api.add(options, apiOptions).then(res => {
                         queryResult.result = this.makeDataInstance(result);
-                        this.$log(`API handler execution end: ${this.name}.add()`);
+                        this.$log(`API handler execution end: ${this.name}.add() => ${res}`);
                     }).catch(e => {
                         queryResult.error = e;
-                        this.$log(`API handler execution end: ${this.name}.add()`);
+                        this.$error(`API handler execution end: ${this.name}.add() => ${e}`);
                     });
                 }
                 else {
@@ -397,7 +358,7 @@ class EntityRepository extends Repository {
         return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }
     /* Do we even need this?.. */
-    updateById(id, query, updateApiOptions) {
+    updateById(id, query) {
         throw new Error('Not implemented');
         return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance(query({})));
     }
@@ -427,6 +388,12 @@ class Entity extends Storable {
         this.__col__ = [];
         if (this.__idCol__) {
             this.__idValue__ = options[this.__idCol__];
+            Reflect.deleteProperty(this, this.__idCol__);
+            Reflect.defineProperty(this, this.__idCol__, {
+                get: () => this.__idValue__,
+                set: v => this.__idValue__ = v,
+                enumerable: true
+            });
         }
     }
     $save() {
@@ -438,6 +405,8 @@ class Entity extends Storable {
         throw new Error('Method not implemented.');
     }
     static Column(target, key) {
+        if (!target.__col__)
+            target.__col__ = [];
         target.__col__.push(key);
     }
     static ID(target, key) {
@@ -445,25 +414,25 @@ class Entity extends Storable {
     }
 }
 __decorate([
-    Enumerable(false),
+    enumerable(false),
     __metadata("design:type", Array)
 ], Entity.prototype, "__col__", void 0);
 __decorate([
-    Enumerable(false),
+    enumerable(false),
     __metadata("design:type", Object)
 ], Entity.prototype, "__idCol__", void 0);
 __decorate([
-    Enumerable(false),
+    enumerable(false),
     __metadata("design:type", Object)
 ], Entity.prototype, "__idValue__", void 0);
 __decorate([
-    Enumerable(false),
+    enumerable(false),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], Entity.prototype, "$save", null);
 __decorate([
-    Enumerable(false),
+    enumerable(false),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
@@ -485,13 +454,13 @@ class Record extends Storable {
     }
 }
 __decorate([
-    Enumerable(false),
+    enumerable(false),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], Record.prototype, "$save", null);
 __decorate([
-    Enumerable(false),
+    enumerable(false),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
@@ -506,37 +475,36 @@ __decorate([
  * @template `A` entity constructor parameter options
  */
 class RecordRepository extends Repository {
-    create(options) {
+    create(options, apiOptions) {
         throw new Error('Not implemented');
         return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }
-    update(options) {
+    update(options, apiOptions) {
         throw new Error('Not implemented');
         return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }
-    read() {
+    read(apiOptions) {
         throw new Error('Not implemented');
         return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }
-    delete() {
+    delete(apiOptions) {
         throw new Error('Not implemented');
         return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }
 }
 
 function makeRepository(name, connection, data) {
-    let Constructor;
+    let Repo = BrokenRepository;
     if (data.prototype instanceof Entity) {
-        Constructor = EntityRepository;
+        Repo = EntityRepository;
     }
     else if (data.prototype instanceof Record) {
-        Constructor = RecordRepository;
+        Repo = RecordRepository;
     }
     else {
         print(connection.name, 'db', `No suitable repository found for ${data.name} when trying to connect with ${name}.`, 'error');
-        Constructor = Repository;
     }
-    return new Constructor(name, connection, data);
+    return new Repo(name, connection, data);
 }
 
 class Connection extends Debugable {
@@ -558,21 +526,30 @@ class Connection extends Debugable {
          * A current map of bound repositories
          */
         this.repositories = {};
-        if (apiMap) {
-            this.apiDriver = new ApiDriver(this, apiMap);
-        }
-        else {
+        if (!apiMap) {
             Debug.$warn('The main webalorm functionality is disabled. Are you sure you want to use this without API?', true);
         }
-        // Select the first supported driver from the bunch
-        const SupportedDriver = drivers.find(d => d.isSupported);
-        if (SupportedDriver) {
-            // TODO: multi-driver mode
-            this.$log(`Using driver "${SupportedDriver.name}" as the first supported driver`);
-            this.currentDriver = new SupportedDriver(this);
+        try {
+            if (Array.isArray(drivers)) {
+                // Select the first supported driver from the bunch
+                const SupportedDrivers = drivers.filter(d => d.isSupported);
+                if (SupportedDrivers.length > 0) {
+                    this.currentDriver = new SupportedDrivers[0](this);
+                }
+                else {
+                    throw new TypeError('No supported driver provided. Using fallback.');
+                }
+            }
+            else if (drivers instanceof MultiDriver) {
+                this.currentDriver = drivers;
+            }
+            else {
+                throw new TypeError('No supported driver provided. Using fallback.');
+            }
+            this.$log(`Using driver "${this.currentDriver.constructor.name}"`);
         }
-        else {
-            this.$warn('No supported driver provided. Using fallback.');
+        catch (e) {
+            this.$error(e.message, true);
             this.currentDriver = new FallbackDriver(this);
         }
         let reProxy;
@@ -587,7 +564,7 @@ class Connection extends Debugable {
             const entityConstructor = repositories[name];
             this.repositories[name] = makeRepository(name, {
                 name: this.name,
-                apiDriver: this.apiMap && this.apiMap[name] && this.apiDriver,
+                apiMap: this.apiMap && this.apiMap[name],
                 currentDriver: this.currentDriver,
             }, entityConstructor);
             reProxy && reProxy(name);
@@ -625,5 +602,69 @@ class Connection extends Debugable {
 
 const Connection$1 = Connection;
 
-export { Connection$1 as Connection, Entity, Column, ID, Record, Storable };
+function prints(messageHandler, level = 'log', type = '*', force = false) {
+    return (target, key, desc) => {
+        const _print = function () {
+            const p = _ => {
+                let context = '';
+                if (target.constructor && target.constructor.name) {
+                    context = `${target.constructor.name}:${String(key)}`;
+                }
+                else if (target.name) {
+                    context = `${target.name}:${String(key)}`;
+                }
+                else if (this.name) {
+                    context = `${this.name}:${String(key)}`;
+                }
+                print(context, type, _, level, force);
+            };
+            if (typeof messageHandler === 'function') {
+                p(messageHandler.apply(this, arguments));
+            }
+            else {
+                p(messageHandler);
+            }
+        };
+        const assignDescValue = (d) => {
+            let original = d.value;
+            d.get = function () {
+                _print.apply(this, [key, original]);
+                return original;
+            };
+            d.set = function (v) {
+                _print.apply(this, [key, original, v]);
+                original = v;
+            };
+        };
+        if (desc) {
+            if (typeof desc.value === 'function') {
+                let original = desc.value;
+                desc.value = function () {
+                    _print.apply(this, arguments);
+                    return original.apply(this, arguments);
+                };
+            }
+            else if (typeof desc.value !== 'undefined' || desc.set) {
+                assignDescValue(desc);
+            }
+        }
+        else {
+            const d = {};
+            if (d.get) {
+                const original = d.get;
+                d.get = function () {
+                    _print.apply(this);
+                    return original.apply(this);
+                };
+            }
+            else {
+                assignDescValue(d);
+            }
+            Reflect.deleteProperty(target, key);
+            Reflect.defineProperty(target, key, d);
+        }
+    };
+}
+
+export { Connection$1 as Connection, Entity, Column, ID, Record, Storable, prints };
 //# sourceMappingURL=webalorm.es.js.map

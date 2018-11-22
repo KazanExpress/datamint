@@ -1,5 +1,5 @@
-import { Driver } from './base';
 import { IRepoData } from '../repository';
+import { Driver } from './base';
 export declare class FallbackDriver extends Driver {
     create<A, R extends IRepoData = IRepoData>(repository: R, data: A): Promise<A>;
     read<A, R extends IRepoData = IRepoData>(repository: R, id: any): Promise<A>;

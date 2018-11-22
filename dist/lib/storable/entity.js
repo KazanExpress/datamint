@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const util_1 = require("../util");
+const decorators_1 = require("../decorators");
 const storable_1 = require("./storable");
 class Entity extends storable_1.Storable {
     constructor(options, $repository) {
@@ -18,6 +18,12 @@ class Entity extends storable_1.Storable {
         this.__col__ = [];
         if (this.__idCol__) {
             this.__idValue__ = options[this.__idCol__];
+            Reflect.deleteProperty(this, this.__idCol__);
+            Reflect.defineProperty(this, this.__idCol__, {
+                get: () => this.__idValue__,
+                set: v => this.__idValue__ = v,
+                enumerable: true
+            });
         }
     }
     $save() {
@@ -29,6 +35,8 @@ class Entity extends storable_1.Storable {
         throw new Error('Method not implemented.');
     }
     static Column(target, key) {
+        if (!target.__col__)
+            target.__col__ = [];
         target.__col__.push(key);
     }
     static ID(target, key) {
@@ -36,25 +44,25 @@ class Entity extends storable_1.Storable {
     }
 }
 __decorate([
-    util_1.Enumerable(false),
+    decorators_1.enumerable(false),
     __metadata("design:type", Array)
 ], Entity.prototype, "__col__", void 0);
 __decorate([
-    util_1.Enumerable(false),
+    decorators_1.enumerable(false),
     __metadata("design:type", Object)
 ], Entity.prototype, "__idCol__", void 0);
 __decorate([
-    util_1.Enumerable(false),
+    decorators_1.enumerable(false),
     __metadata("design:type", Object)
 ], Entity.prototype, "__idValue__", void 0);
 __decorate([
-    util_1.Enumerable(false),
+    decorators_1.enumerable(false),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], Entity.prototype, "$save", null);
 __decorate([
-    util_1.Enumerable(false),
+    decorators_1.enumerable(false),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)

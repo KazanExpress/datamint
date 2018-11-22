@@ -9,15 +9,11 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const util_1 = require("../util");
+const decorators_1 = require("../decorators");
 const module_1 = require("./module");
 class Debugable {
     constructor() {
-        this.$logFactory = (level) => (message, force = false) => {
-            if (this.$debugEnabled || force) {
-                module_1.print(this.$connectionName, this.$debugType, message, level);
-            }
-        };
+        this.$logFactory = (level) => (message, force = false) => module_1.print(this.$connectionName, this.$debugType, message, level, force);
         this.$log = this.$logFactory('log');
         this.$warn = this.$logFactory('warn');
         this.$error = this.$logFactory('error');
@@ -29,36 +25,36 @@ class Debugable {
     get $debugEnabled() { return module_1.errorTypeFor(this.$debugType); }
 }
 __decorate([
-    util_1.Enumerable(false),
+    decorators_1.enumerable(false),
     __metadata("design:type", String)
 ], Debugable.prototype, "$debugType", void 0);
 __decorate([
-    util_1.Enumerable(false),
+    decorators_1.enumerable(false),
     __metadata("design:type", String)
 ], Debugable.prototype, "$connectionName", void 0);
 __decorate([
-    util_1.Enumerable(false),
+    decorators_1.enumerable(false),
     __metadata("design:type", Object),
     __metadata("design:paramtypes", [])
 ], Debugable.prototype, "$debugEnabled", null);
 __decorate([
-    util_1.Enumerable(false),
+    decorators_1.enumerable(false),
     __metadata("design:type", Object)
 ], Debugable.prototype, "$logFactory", void 0);
 __decorate([
-    util_1.Enumerable(false),
+    decorators_1.enumerable(false),
     __metadata("design:type", Object)
 ], Debugable.prototype, "$log", void 0);
 __decorate([
-    util_1.Enumerable(false),
+    decorators_1.enumerable(false),
     __metadata("design:type", Object)
 ], Debugable.prototype, "$warn", void 0);
 __decorate([
-    util_1.Enumerable(false),
+    decorators_1.enumerable(false),
     __metadata("design:type", Object)
 ], Debugable.prototype, "$error", void 0);
 __decorate([
-    util_1.Enumerable(false),
+    decorators_1.enumerable(false),
     __metadata("design:type", Object)
 ], Debugable.prototype, "$debug", void 0);
 exports.Debugable = Debugable;

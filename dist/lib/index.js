@@ -5,4 +5,5 @@ function __export(m) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./orm"));
 __export(require("./storable"));
+__export(require("./decorators/logs"));
 //# sourceMappingURL=index.js.map

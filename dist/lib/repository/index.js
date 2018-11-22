@@ -4,7 +4,8 @@ function __export(m) {
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./base"));
-__export(require("./entityRepository"));
+__export(require("./default"));
+__export(require("./entity"));
 __export(require("./factory"));
-__export(require("./recordRepository"));
+__export(require("./record"));
 //# sourceMappingURL=index.js.map

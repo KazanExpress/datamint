@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const debug_1 = require("../debug");
-const api_1 = require("../drivers/api");
 const fallback_1 = require("../drivers/fallback");
+const multiDriver_1 = require("../drivers/multiDriver");
 const repository_1 = require("../repository");
 class Connection extends debug_1.Debugable {
     /**
@@ -23,21 +23,30 @@ class Connection extends debug_1.Debugable {
          * A current map of bound repositories
          */
         this.repositories = {};
-        if (apiMap) {
-            this.apiDriver = new api_1.ApiDriver(this, apiMap);
-        }
-        else {
+        if (!apiMap) {
             debug_1.Debug.$warn('The main webalorm functionality is disabled. Are you sure you want to use this without API?', true);
         }
-        // Select the first supported driver from the bunch
-        const SupportedDriver = drivers.find(d => d.isSupported);
-        if (SupportedDriver) {
-            // TODO: multi-driver mode
-            this.$log(`Using driver "${SupportedDriver.name}" as the first supported driver`);
-            this.currentDriver = new SupportedDriver(this);
+        try {
+            if (Array.isArray(drivers)) {
+                // Select the first supported driver from the bunch
+                const SupportedDrivers = drivers.filter(d => d.isSupported);
+                if (SupportedDrivers.length > 0) {
+                    this.currentDriver = new SupportedDrivers[0](this);
+                }
+                else {
+                    throw new TypeError('No supported driver provided. Using fallback.');
+                }
+            }
+            else if (drivers instanceof multiDriver_1.MultiDriver) {
+                this.currentDriver = drivers;
+            }
+            else {
+                throw new TypeError('No supported driver provided. Using fallback.');
+            }
+            this.$log(`Using driver "${this.currentDriver.constructor.name}"`);
         }
-        else {
-            this.$warn('No supported driver provided. Using fallback.');
+        catch (e) {
+            this.$error(e.message, true);
             this.currentDriver = new fallback_1.FallbackDriver(this);
         }
         let reProxy;
@@ -52,7 +61,7 @@ class Connection extends debug_1.Debugable {
             const entityConstructor = repositories[name];
             this.repositories[name] = repository_1.makeRepository(name, {
                 name: this.name,
-                apiDriver: this.apiMap && this.apiMap[name] && this.apiDriver,
+                apiMap: this.apiMap && this.apiMap[name],
                 currentDriver: this.currentDriver,
             }, entityConstructor);
             reProxy && reProxy(name);

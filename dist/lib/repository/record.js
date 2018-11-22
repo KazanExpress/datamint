@@ -11,22 +11,22 @@ const base_1 = require("./base");
  * @template `A` entity constructor parameter options
  */
 class RecordRepository extends base_1.Repository {
-    create(options) {
+    create(options, apiOptions) {
         throw new Error('Not implemented');
         return new queryResult_1.QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }
-    update(options) {
+    update(options, apiOptions) {
         throw new Error('Not implemented');
         return new queryResult_1.QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }
-    read() {
+    read(apiOptions) {
         throw new Error('Not implemented');
         return new queryResult_1.QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }
-    delete() {
+    delete(apiOptions) {
         throw new Error('Not implemented');
         return new queryResult_1.QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
     }
 }
 exports.RecordRepository = RecordRepository;
-//# sourceMappingURL=recordRepository.js.map
+//# sourceMappingURL=record.js.map

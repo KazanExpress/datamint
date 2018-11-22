@@ -19,7 +19,4 @@ function fromPath(obj, path, splitter = '.') {
     return path.split(splitter).reduce((o, i) => (o === Object(o) ? o[i] : o), obj);
 }
 exports.fromPath = fromPath;
-exports.Enumerable = (enumerable = true) => function (target, key, desc = {}) {
-    desc.enumerable = enumerable;
-};
 //# sourceMappingURL=util.js.map

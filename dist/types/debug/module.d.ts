@@ -44,7 +44,4 @@ export declare function setDebugState(state: DebugState): void;
 export declare function errorTypeFor(type: string): boolean | ExceptionType;
 export declare function errorTypeFor(type: RegExp): boolean | ExceptionType;
 export declare function errorTypeFor(type: DebugType): boolean | ExceptionType;
-export declare function print(instanceName: string, type: any, message: any, level: LogLevel): void;
-export declare function prints(message: any, level?: LogLevel, type?: string): any;
-export declare function prints(message: any, level?: LogLevel, type?: DebugType): any;
-export declare function prints(message: any, level?: LogLevel, type?: RegExp): any;
+export declare function print(instanceName: string, type: any, message: any, level: LogLevel, force?: boolean): void;

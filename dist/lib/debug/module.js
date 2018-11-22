@@ -33,8 +33,8 @@ function errorTypeFor(type) {
     return Object.keys(exports.debugMap).find(t => type.test(t)) || false;
 }
 exports.errorTypeFor = errorTypeFor;
-function print(instanceName, type, message, level) {
-    if (exports.debugState !== 'disabled') {
+function print(instanceName, type, message, level, force = false) {
+    if ((exports.debugState !== 'disabled') || force) {
         const errorType = errorTypeFor(type);
         if (errorType) {
             if (errorType === 'hard' && level === 'error') {
@@ -47,24 +47,4 @@ function print(instanceName, type, message, level) {
     }
 }
 exports.print = print;
-const decoratedLogs = {};
-function prints(message, level = 'log', type = '*') {
-    return (target, key, desc) => {
-        Object.defineProperty(decoratedLogs, key, desc || {
-            value: undefined,
-            writable: true,
-            enumerable: true
-        });
-        Object.defineProperty(target, key, {
-            get: () => {
-                print('', type, message, level);
-                return decoratedLogs[key];
-            },
-            set: v => {
-                decoratedLogs[key] = v;
-            }
-        });
-    };
-}
-exports.prints = prints;
 //# sourceMappingURL=module.js.map
