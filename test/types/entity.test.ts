@@ -3,6 +3,8 @@ import { IProductOptions, Product, User, Broken, IUserOptions } from '../common/
 
 describe('types', () => {
   it('types', async () => {
+    Connection.$debug(true);
+
     const orm = new Connection('asd', [], {
       Products: Product,
       User,
