@@ -1,21 +1,23 @@
 import { Entity, Record } from '../../src';
 
+export interface IProduct {
+  id: number;
+  title: string;
+  url: string;
+}
+
 export class Product extends Entity<'id', number> {
-  @Entity.ID
-  @Entity.Column
+  @Product.ID
+  @Product.Column
   public id: number;
 
-  @Entity.Column
+  @Product.Column
   public title: string;
 
-  @Entity.Column
+  @Product.Column
   public url: string;
 
-  constructor(options: {
-    id: number;
-    title: string;
-    url: string;
-  }, repo?) {
+  constructor(options: IProduct, repo?) {
     super(options, repo);
     this.id = options.id;
     this.title = options.title;

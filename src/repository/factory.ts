@@ -1,25 +1,31 @@
+import { EntityDataMap, RecordDataMap } from '../apiMap';
 import { print } from '../debug';
-import { DataMap } from '../drivers/api';
 import { Entity, IStorableConstructor, Record, Storable } from '../storable';
-import { IRepoConnection, Repository } from './base';
-import { EntityRepository } from './entityRepository';
-import { RecordRepository } from './recordRepository';
+import { IRepoConnection } from './base';
+import { DefaultRepository } from './default';
+import { EntityRepository } from './entity';
+import { RecordRepository } from './record';
 
 export function makeRepository<
-  DM extends DataMap<C>,
+  DM extends EntityDataMap<C, A> | RecordDataMap<C, A>,
   C extends IStorableConstructor<E>,
   E extends Storable = InstanceType<C>,
+  A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
 >(
   name: string,
-  connection: IRepoConnection,
+  connection: IRepoConnection<DM>,
   data: C
-): E extends Entity ? EntityRepository<DM, C, E> : E extends Record ? RecordRepository<DM, C, E> : Repository<DM, C, E> {
-  let Constructor: any;
+): DM extends EntityDataMap<C> ? (
+  E extends Entity ? EntityRepository<DM, C, E, A> : DefaultRepository
+) : DM extends RecordDataMap<C> ? (
+  E extends Record ? RecordRepository<DM, C, E, A> : DefaultRepository
+) : DefaultRepository {
+  let Repo: any = DefaultRepository;
 
   if (data.prototype instanceof Entity) {
-    Constructor = EntityRepository;
+    Repo = EntityRepository;
   } else if (data.prototype instanceof Record) {
-    Constructor = RecordRepository;
+    Repo = RecordRepository;
   } else {
     print(
       connection.name,
@@ -27,9 +33,7 @@ export function makeRepository<
       `No suitable repository found for ${data.name} when trying to connect with ${name}.`,
       'error'
     );
-
-    Constructor = Repository;
   }
 
-  return new Constructor(name, connection, data);
+  return new Repo(name, connection, data);
 }

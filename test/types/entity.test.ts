@@ -1,5 +1,5 @@
 import { Connection } from '../../src';
-import { Broken, Product, User, IUser } from './common';
+import { Broken, Product, User, IUser, IProduct } from './common';
 
 describe('types', () => {
   it('types', () => {
@@ -9,29 +9,34 @@ describe('types', () => {
       Broken
     }, {
       User: {
-        'create': async function ({ username }: { username: string; password: string }) {
+        async create(ormOptions: IUser, { username }: { username: string; password: string }): Promise<IUser> {
           return {
             birthDate: new Date(),
             cart: [],
             name: username
-          } as IUser;
+          };
         },
-        'delete': async function () {
+        async delete() {
           return {
             birthDate: new Date(),
             cart: [],
             name: 'asd'
           };
-        }
+        },
+        update: undefined,
+        read: undefined
       },
       Products: {
-        async add(options: { title: string; id: number; url: string }) {
+        async add(options: IProduct, apiKey: string) {
           return options;
         },
-        async get(options: { title: string; id: number; url: string }) {
+        async get(options: IProduct) {
           return options;
         },
-        cluster: {}
+        update: undefined,
+        delete: undefined,
+        updateById: undefined,
+        count: undefined
       },
       Broken: undefined
     });
@@ -42,8 +47,8 @@ describe('types', () => {
       url: '/products'
     };
 
-    orm.Products.add(podguznik, podguznik);
-    orm.Products.get(0, podguznik);
+    orm.Products.add(podguznik, 'asdasd');
+    orm.Products.get(0);
 
     orm.Products.update({
       id: 0,

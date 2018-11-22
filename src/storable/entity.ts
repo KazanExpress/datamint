@@ -1,10 +1,9 @@
-import { Repository } from '../repository';
-import { Key } from '../util';
-import { Storable } from './storable';
 import { enumerable } from '../decorators';
+import { Repository } from '../repository';
+import { Storable } from './storable';
 
 export class Entity<
-  IDKey extends Key = string,
+  IDKey extends PropertyKey = string,
   ID = any
 > extends Storable {
   // TODO: check to be writable
@@ -19,12 +18,19 @@ export class Entity<
 
   constructor(
     options,
-    $repository: Repository<any, any, any>
+    $repository: Repository<any, any>
   ) {
     super($repository);
 
     if (this.__idCol__) {
       this.__idValue__ = options[this.__idCol__];
+
+      Reflect.deleteProperty(this, this.__idCol__);
+      Reflect.defineProperty(this, this.__idCol__, {
+        get: () => this.__idValue__,
+        set: v => this.__idValue__ = v,
+        enumerable: true
+      });
     }
   }
 

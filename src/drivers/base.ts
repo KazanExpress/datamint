@@ -1,5 +1,5 @@
 import { Connection } from '../orm';
-import { EntityRepository, RecordRepository, IRepoData } from '../repository';
+import { IRepoData } from '../repository';
 
 export interface IDriverConstructor extends Function {
   new (connection: Connection): Driver;

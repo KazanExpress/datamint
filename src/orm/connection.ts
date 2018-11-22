@@ -1,25 +1,19 @@
+import { ApiMap, RepoFromDataMap } from '../apiMap';
 import { Debug, Debugable, debugMap, DebugState, debugState, DebugType, ExceptionType, setDebugState } from '../debug';
 import { Driver, IDriverConstructor } from '../drivers';
-import { ApiDriver, ApiMap, DataMap } from '../drivers/api';
 import { FallbackDriver } from '../drivers/fallback';
-import { EntityRepository, makeRepository, RecordRepository, Repository } from '../repository';
-import { Entity, IStorableConstructor, Record } from '../storable';
 import { MultiDriver } from '../drivers/multiDriver';
+import { makeRepository } from '../repository';
+import { IStorableConstructor } from '../storable';
 
 export interface IRepositoryMap {
   [name: string]: IStorableConstructor<any>;
 }
 
-export type RepoFromConstructor<
-  S extends IStorableConstructor<any>,
-  D extends DataMap<InstanceType<S>> = DataMap<InstanceType<S>>
-> = InstanceType<S> extends Entity ? EntityRepository<D, S>
-  : (InstanceType<S> extends Record ? RecordRepository<D, S> : Repository<D, S>);
-
 type PropFrom<O, Key> = Key extends keyof O ? O[Key] : any;
 
-export type RepoStore<M extends IRepositoryMap, A extends ApiMap<any>> = {
-  [Name in (keyof M | keyof A)]: RepoFromConstructor<PropFrom<M, Name>, PropFrom<A, Name>>;
+export type RepoStore<M extends IRepositoryMap, A extends ApiMap<M>> = {
+  [Name in (keyof M | keyof A)]: RepoFromDataMap<PropFrom<M, Name>, PropFrom<A, Name>>;
 };
 
 export class Connection<
@@ -36,11 +30,6 @@ export class Connection<
    * The driver currently used for operations with entities
    */
   public currentDriver: Driver;
-
-  /**
-   * The driver currently used for operations with api requests
-   */
-  public apiDriver?: ApiDriver;
 
   /**
    * A current map of bound repositories
@@ -62,9 +51,7 @@ export class Connection<
   ) {
     super();
 
-    if (apiMap) {
-      this.apiDriver = new ApiDriver(this, apiMap);
-    } else {
+    if (!apiMap) {
       Debug.$warn('The main webalorm functionality is disabled. Are you sure you want to use this without API?', true);
     }
 
@@ -106,7 +93,7 @@ export class Connection<
 
       this.repositories[name] = makeRepository(name, {
         name: this.name,
-        apiDriver: this.apiMap && this.apiMap[name] && this.apiDriver,
+        apiMap: this.apiMap && this.apiMap[name],
         currentDriver: this.currentDriver,
       }, entityConstructor);
 

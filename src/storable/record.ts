@@ -1,11 +1,11 @@
-import { Repository } from '../repository';
 import { enumerable } from '../decorators';
+import { Repository } from '../repository';
 import { Storable } from './storable';
 
 export class Record extends Storable {
   constructor(
     options,
-    $repository: Repository<any, any, any>
+    $repository: Repository<any, any>
   ) {
     super($repository);
   }

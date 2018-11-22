@@ -1,6 +1,6 @@
-import { Driver, IDriverConstructor } from './base';
-import { IRepoData } from '../repository';
 import { Connection } from '../orm';
+import { IRepoData } from '../repository';
+import { Driver, IDriverConstructor } from './base';
 
 export class MultiDriver extends Driver {
   private drivers: Driver[];

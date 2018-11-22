@@ -1,8 +1,7 @@
-import { Key } from '../util';
-import { LogLevel, DebugType, print } from '../debug';
+import { DebugType, LogLevel, print } from '../debug';
 
 type MessageFactory = ((this: any, ...args: any[]) => string)
-  | ((key: Key, value: any, newValue?: any) => string)
+  | ((key: PropertyKey, value: any, newValue?: any) => string)
   | string;
 
 /**
@@ -25,7 +24,7 @@ export function prints(message: MessageFactory, level?: LogLevel, type?: string)
 export function prints(message: MessageFactory, level?: LogLevel, type?: DebugType);
 export function prints(message: MessageFactory, level?: LogLevel, type?: RegExp);
 export function prints(messageHandler: any, level: LogLevel = 'log', type: any = '*', force: boolean = false) {
-  return (target, key: Key, desc: PropertyDescriptor) => {
+  return (target, key: PropertyKey, desc: PropertyDescriptor) => {
     const _print = function (this: any) {
       const p = _ => {
         let context: string = '';

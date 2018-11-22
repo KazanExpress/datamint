@@ -1,6 +1,6 @@
+import { DataMap } from '../apiMap';
 import { Debug, Debugable, DebugType } from '../debug';
 import { Driver } from '../drivers';
-import { ApiDriver, DataMap } from '../drivers/api';
 import { IStorableConstructor, Storable } from '../storable';
 
 export interface IRepoConnectionInternal {
@@ -8,16 +8,16 @@ export interface IRepoConnectionInternal {
   currentDriver: Driver;
 }
 
-export interface IRepoConnection extends IRepoConnectionInternal{
-  apiDriver?: ApiDriver;
+export interface IRepoConnection<DM> extends IRepoConnectionInternal {
+  apiMap?: DM;
 }
 
 export interface IRepoData {
   name: string;
 }
 
-export class Repository<
-  DM extends DataMap<C, E, A>,
+export abstract class Repository<
+  DM extends DataMap<C>,
   C extends IStorableConstructor<E>,
   E extends Storable = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
@@ -28,28 +28,28 @@ export class Repository<
 
   constructor(
     public name: string,
-    connection: IRepoConnection,
+    connection: IRepoConnection<DM>,
     private Data: C
   ) {
     super();
     this.connection = connection;
     this.$connectionName = connection.name;
 
-    this.api = connection.apiDriver;
+    this.api = connection.apiMap;
 
     if (/* this class was instantiated directly (without inheritance) */
       Repository.prototype === this.constructor.prototype
     ) {
       if (this.$debugEnabled) {
         this.$warn(`Using default empty repository.`);
-      } else if (Debug.map.db) {
-        this.$warn(`Using default empty repository for ${name}`, true);
+      } else {
+        Debug.$warn(`Using default empty repository for ${name}`, true);
       }
     }
 
   }
 
-  public readonly api?: ApiDriver;
+  protected readonly api?: DM;
 
   protected makeDataInstance(options: A) {
     return new this.Data(options, this);

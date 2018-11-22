@@ -1,4 +1,6 @@
 export * from './base';
-export * from './entityRepository';
+export * from './default';
+export * from './entity';
 export * from './factory';
-export * from './recordRepository';
+export * from './record';
+

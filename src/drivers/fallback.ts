@@ -1,5 +1,5 @@
-import { Driver } from './base';
 import { IRepoData } from '../repository';
+import { Driver } from './base';
 
 /* TODO: driver that just writes everything to short-term memory */
 export class FallbackDriver extends Driver {
