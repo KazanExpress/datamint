@@ -72,6 +72,7 @@ export class EntityRepository<
   ) {
     super(name, connection, entity);
     this.primaryKey = entity.prototype.__idCol__;
+    delete entity.prototype.__idCol__;
 
     if (entity.prototype.__col__) {
       this.columns = entity.prototype.__col__;
