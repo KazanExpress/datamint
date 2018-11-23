@@ -38,26 +38,26 @@ describe('types', () => {
     expect((await orm.Products.get(0)).result).toMatchObject(podguznik);
 
     try {
-      orm.Products.update({
+      await orm.Products.update({
         id: 0,
         title: 'Cool Podguzninki for cool kids!'
       });
     } catch (e) { }
 
     try {
-      orm.Products.updateById(0, product => ({
+      await orm.Products.updateById(0, product => ({
         url: `/products/${product.id}`
       }));
     } catch (e) { }
 
     try {
-      orm.Products.delete(0);
+      await orm.Products.delete(0);
     } catch (e) { }
 
     expect(orm.User.name).toBe('User');
 
     try {
-      orm.User.create({
+      await orm.User.create({
         name: 'max',
         birthDate: new Date,
         cart: []
@@ -68,7 +68,7 @@ describe('types', () => {
     } catch (e) { }
 
     try {
-      orm.User.update({
+      await orm.User.update({
         cart: [
           (await orm.Products.get(0)).result!
         ]
@@ -76,7 +76,7 @@ describe('types', () => {
     } catch (e) { }
 
     try {
-      orm.User.delete();
+      await orm.User.delete();
     } catch (e) { }
 
     expect(typeof orm.Broken.name).toBe('string');
