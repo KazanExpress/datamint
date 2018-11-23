@@ -1,4 +1,4 @@
-const LOG_PREFIX = (name: string) => name ? `[WEBALORM:${name}]` : `[WEBALORM]`;
+const LOG_PREFIX = (name: string) => name ? `[webalorm:${name}]` : `[webalorm]`;
 
 /**
  * A type of debug errors
