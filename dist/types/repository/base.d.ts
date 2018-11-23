@@ -7,7 +7,7 @@ export interface IRepoConnectionInternal {
     currentDriver: Driver;
 }
 export interface IRepoConnection<DM> extends IRepoConnectionInternal {
-    apiMap: DM;
+    apiMap?: DM;
 }
 export interface IRepoData {
     name: string;
@@ -20,6 +20,6 @@ export declare abstract class Repository<DM extends DataMap<C> | undefined, C ex
     protected readonly connection: IRepoConnectionInternal;
     readonly $connectionName: string;
     constructor(name: string, connection: IRepoConnection<DM>, Data: C);
-    protected readonly api: DM;
+    protected readonly api?: DM;
     protected makeDataInstance(options: A): E;
 }
