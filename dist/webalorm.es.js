@@ -33,8 +33,18 @@ function __awaiter(thisArg, _arguments, P, generator) {
     });
 }
 
-const enumerable = (isEnumerable = true) => function (target, key, desc = {}) {
-    desc.enumerable = isEnumerable;
+const enumerable = (isEnumerable = true) => function (target, key, desc) {
+    if (desc) {
+        desc.enumerable = isEnumerable;
+    }
+    else {
+        Reflect.deleteProperty(target, key);
+        Reflect.defineProperty(target, key, {
+            value: undefined,
+            enumerable: isEnumerable,
+            writable: true
+        });
+    }
 };
 
 const LOG_PREFIX = (name) => name ? `[webalorm:${name}]` : `[webalorm]`;

@@ -84,8 +84,17 @@
     var enumerable = function (isEnumerable) {
         if (isEnumerable === void 0) { isEnumerable = true; }
         return function (target, key, desc) {
-            if (desc === void 0) { desc = {}; }
-            desc.enumerable = isEnumerable;
+            if (desc) {
+                desc.enumerable = isEnumerable;
+            }
+            else {
+                Reflect.deleteProperty(target, key);
+                Reflect.defineProperty(target, key, {
+                    value: undefined,
+                    enumerable: isEnumerable,
+                    writable: true
+                });
+            }
         };
     };
 
