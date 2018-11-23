@@ -14,7 +14,7 @@ export class FallbackDriver extends Driver {
   public read<A, R extends IRepoData = IRepoData>(repository: R, id: any): Promise<A> {
     const repo: any[] = this.repositoryMap[repository.name];
 
-    return repo.find(i => i.id === id);
+    return repo.find(i => i.id === id); // TODO: use the __idKey__ for comparison
   }
 
   public update<A, R extends IRepoData = IRepoData>(repository: R, id: any, query: (data: A) => Partial<A>): Promise<A>;
