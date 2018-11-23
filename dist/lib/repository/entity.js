@@ -24,9 +24,10 @@ class EntityRepository extends base_1.Repository {
     constructor(name, connection, entity) {
         super(name, connection, entity);
         this.columns = [];
-        this.primaryKey = entity.prototype.__id__;
+        this.primaryKey = entity.prototype.__idCol__;
+        delete entity.prototype.__idCol__;
         if (entity.prototype.__col__) {
-            this.columns = Object.keys(entity.prototype.__col__);
+            this.columns = entity.prototype.__col__;
             delete entity.prototype.__col__;
         }
         else {

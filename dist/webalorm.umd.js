@@ -84,16 +84,10 @@
     var enumerable = function (isEnumerable) {
         if (isEnumerable === void 0) { isEnumerable = true; }
         return function (target, key, desc) {
-            if (desc) {
-                desc.enumerable = isEnumerable;
-            }
-            else {
-                Reflect.deleteProperty(target, key);
-                Reflect.defineProperty(target, key, {
-                    value: undefined,
-                    enumerable: isEnumerable,
-                    writable: true
-                });
+            var descriptor = Object.getOwnPropertyDescriptor(target, key) || {};
+            if (descriptor.enumerable != isEnumerable) {
+                descriptor.enumerable = isEnumerable;
+                Object.defineProperty(target, key, descriptor);
             }
         };
     };
@@ -447,9 +441,10 @@
         function EntityRepository(name, connection, entity) {
             var _this = _super.call(this, name, connection, entity) || this;
             _this.columns = [];
-            _this.primaryKey = entity.prototype.__id__;
+            _this.primaryKey = entity.prototype.__idCol__;
+            delete entity.prototype.__idCol__;
             if (entity.prototype.__col__) {
-                _this.columns = Object.keys(entity.prototype.__col__);
+                _this.columns = entity.prototype.__col__;
                 delete entity.prototype.__col__;
             }
             else {
@@ -598,7 +593,12 @@
             // TODO: check to be writable
             _this.__col__ = [];
             if (_this.__idCol__) {
-                _this.__idValue__ = options[_this.__idCol__];
+                Reflect.deleteProperty(_this, '__idValue__');
+                Reflect.defineProperty(_this, '__idValue__', {
+                    value: options[_this.__idCol__],
+                    writable: true,
+                    enumerable: false
+                });
                 Reflect.deleteProperty(_this, _this.__idCol__);
                 Reflect.defineProperty(_this, _this.__idCol__, {
                     get: function () { return _this.__idValue__; },
@@ -837,81 +837,12 @@
 
     var Connection$1 = Connection;
 
-    function prints(messageHandler, level, type, force) {
-        if (level === void 0) { level = 'log'; }
-        if (type === void 0) { type = '*'; }
-        if (force === void 0) { force = false; }
-        return function (target, key, desc) {
-            var _print = function () {
-                var _this = this;
-                var p = function (_) {
-                    var context = '';
-                    if (target.constructor && target.constructor.name) {
-                        context = target.constructor.name + ":" + String(key);
-                    }
-                    else if (target.name) {
-                        context = target.name + ":" + String(key);
-                    }
-                    else if (_this.name) {
-                        context = _this.name + ":" + String(key);
-                    }
-                    print(context, type, _, level, force);
-                };
-                if (typeof messageHandler === 'function') {
-                    p(messageHandler.apply(this, arguments));
-                }
-                else {
-                    p(messageHandler);
-                }
-            };
-            var assignDescValue = function (d) {
-                var original = d.value;
-                d.get = function () {
-                    _print.apply(this, [key, original]);
-                    return original;
-                };
-                d.set = function (v) {
-                    _print.apply(this, [key, original, v]);
-                    original = v;
-                };
-            };
-            if (desc) {
-                if (typeof desc.value === 'function') {
-                    var original_1 = desc.value;
-                    desc.value = function () {
-                        _print.apply(this, arguments);
-                        return original_1.apply(this, arguments);
-                    };
-                }
-                else if (typeof desc.value !== 'undefined' || desc.set) {
-                    assignDescValue(desc);
-                }
-            }
-            else {
-                var d = {};
-                if (d.get) {
-                    var original_2 = d.get;
-                    d.get = function () {
-                        _print.apply(this);
-                        return original_2.apply(this);
-                    };
-                }
-                else {
-                    assignDescValue(d);
-                }
-                Reflect.deleteProperty(target, key);
-                Reflect.defineProperty(target, key, d);
-            }
-        };
-    }
-
     exports.Connection = Connection$1;
     exports.Entity = Entity;
     exports.Column = Column;
     exports.ID = ID;
     exports.Record = Record;
     exports.Storable = Storable;
-    exports.prints = prints;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 

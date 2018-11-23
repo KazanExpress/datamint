@@ -1,7 +1,7 @@
 import { RecordDataMap } from '../apiMap';
 import { QueryResult } from '../queryResult';
 import { IStorableConstructor, Record } from '../storable';
-import { Repository, FromSecArg } from './base';
+import { FromSecArg, Repository } from './base';
 export interface IRecordRepoMethods<C extends IStorableConstructor<E>, E extends Record = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]> {
     create(options: A, apiOptions?: any): Promise<any>;
     read(apiOptions?: any): Promise<any>;

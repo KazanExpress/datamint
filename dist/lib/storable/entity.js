@@ -17,7 +17,12 @@ class Entity extends storable_1.Storable {
         // TODO: check to be writable
         this.__col__ = [];
         if (this.__idCol__) {
-            this.__idValue__ = options[this.__idCol__];
+            Reflect.deleteProperty(this, '__idValue__');
+            Reflect.defineProperty(this, '__idValue__', {
+                value: options[this.__idCol__],
+                writable: true,
+                enumerable: false
+            });
             Reflect.deleteProperty(this, this.__idCol__);
             Reflect.defineProperty(this, this.__idCol__, {
                 get: () => this.__idValue__,

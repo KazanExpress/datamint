@@ -1,5 +1,5 @@
 import { IRepositoryMap } from './orm/connection';
-import { BrokenRepository, EntityRepository, RecordRepository, IEntityRepoMethods, IRecordRepoMethods } from './repository';
+import { BrokenRepository, EntityRepository, IEntityRepoMethods, IRecordRepoMethods, RecordRepository } from './repository';
 import { Entity, IStorableConstructor, Record } from './storable';
 export declare type DataMap<C extends IStorableConstructor<any>> = EntityDataMap<C> | RecordDataMap<C> | BrokenDataMap<C>;
 export declare type EntityDataMap<C extends IStorableConstructor<any>> = IEntityRepoMethods<C>;
