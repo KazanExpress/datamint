@@ -1,7 +1,7 @@
 import { RecordDataMap } from '../apiMap';
 import { QueryResult } from '../queryResult';
 import { IStorableConstructor, Record } from '../storable';
-import { Repository, FromSecArg } from './base';
+import { FromSecArg, Repository } from './base';
 
 export interface IRecordRepoMethods<
   C extends IStorableConstructor<E>,

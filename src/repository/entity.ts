@@ -1,7 +1,7 @@
 import { EntityDataMap } from '../apiMap';
 import { QueryResult } from '../queryResult';
 import { Entity, IStorableConstructor } from '../storable';
-import { IRepoConnection, IRepoData, Repository, FromSecArg } from './base';
+import { FromSecArg, IRepoConnection, IRepoData, Repository } from './base';
 
 type PartialWithId<T, ID, IDKey extends PropertyKey> = Partial<T> & {
   [key in IDKey]: ID;

@@ -1,4 +1,4 @@
-import { IRepoData, IEntityRepoData } from '../repository';
+import { IEntityRepoData, IRepoData } from '../repository';
 import { Driver } from './base';
 
 const isEntityRepo = (r): r is IEntityRepoData<any> => !!(r as IEntityRepoData<any>).columns;
