@@ -71,10 +71,10 @@ export class EntityRepository<
     entity: C
   ) {
     super(name, connection, entity);
-    this.primaryKey = entity.prototype.__id__;
+    this.primaryKey = entity.prototype.__idCol__;
 
     if (entity.prototype.__col__) {
-      this.columns = Object.keys(entity.prototype.__col__);
+      this.columns = entity.prototype.__col__;
       delete entity.prototype.__col__;
     } else {
       this.columns = Object.keys(new entity({}, this));
