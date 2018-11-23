@@ -6,8 +6,8 @@ type FunctionKeys<T> = Exclude<{
   [K in keyof T]: T[K] extends ((...args: any[]) => any) ? K : never
 }[keyof T], undefined>;
 
-type NormalFabric<A> = (options: A, apiOptions?: any) => Promise<A>;
-type BrokenFabric<I> = (...apiOptions: any[]) => Promise<I>;
+type NormalFabric<A> = (options: A, additionalOptions?: any) => Promise<A>;
+type BrokenFabric<I> = (...options: any[]) => Promise<I>;
 
 export type DataMap<
   C extends IStorableConstructor<any>
@@ -40,9 +40,9 @@ export type RepoFromDataMap<
   E extends InstanceType<C> = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]
 > = DM extends EntityDataMap<C> ? (
-  E extends Entity ? EntityRepository<DM, C, E, A> : BrokenRepository<DM>
+  EntityRepository<DM, C, E, A>
 ) : DM extends RecordDataMap<C> ? (
-  E extends Record ? RecordRepository<DM, C, E, A> : BrokenRepository<DM>
+  RecordRepository<DM, C, E, A>
 ) : BrokenRepository<DM>;
 
 export type ApiMap<R extends IRepositoryMap> = {

@@ -1,45 +1,18 @@
 import { Connection } from '../../src';
-import { IProductOptions, Product, User, Broken, IUserOptions } from '../common/models';
+import { Broken, Product, ProductApiMap, User, UserApiMap } from '../common/models';
 
 describe('types', () => {
   it('types', async () => {
     Connection.$debug(true);
+
 
     const orm = new Connection('asd', [], {
       Products: Product,
       User,
       Broken
     }, {
-      User: {
-        async create(ormOptions: IUserOptions, { username }: { username: string; password: string }): Promise<IUserOptions> {
-          return {
-            birthDate: new Date(),
-            cart: [],
-            name: username
-          };
-        },
-        async delete() {
-          return {
-            birthDate: new Date(),
-            cart: [],
-            name: 'asd'
-          };
-        },
-        update: undefined,
-        read: undefined
-      },
-      Products: {
-        async add(options: IProductOptions, apiKey: string) {
-          return options;
-        },
-        async get(options: IProductOptions) {
-          return options;
-        },
-        update: undefined,
-        delete: undefined,
-        updateById: undefined,
-        count: undefined
-      },
+      User: new UserApiMap(),
+      Products: new ProductApiMap(),
       Broken: {
         async create() {
           return Promise.resolve(new Broken());
@@ -62,9 +35,7 @@ describe('types', () => {
     orm.Products.add(podguznik, 'asdasd');
     orm.Products.add(podguznik, false);
 
-    try {
-      orm.Products.get(0);
-    } catch (e) { }
+    orm.Products.get(0);
 
     try {
       orm.Products.update({
@@ -99,7 +70,7 @@ describe('types', () => {
     try {
       orm.User.update({
         cart: [
-          await orm.Products.get(0).result
+          (await orm.Products.get(0)).result!
         ]
       });
     } catch (e) { }

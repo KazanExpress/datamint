@@ -63,9 +63,9 @@ export class EntityRepository<
     // TODO: up to debate - singular arguments always or multiple args inference?
     apiOptions?: FromSecArg<DM['add']> | false // Pass false to disable the api call
   ) {
-    const result = await this.connection.currentDriver.create<A, IEntityRepoData<IDKey>>(this.driverOptions, options);
-
     try {
+      const result = await this.connection.currentDriver.create<A, IEntityRepoData<IDKey>>(this.driverOptions, options);
+
       const instance = this.makeDataInstance(result);
 
       // Call local driver changes synchronously
@@ -94,16 +94,41 @@ export class EntityRepository<
     }
   }
 
-  public get(
+  public async get(
     id: ID,
-    getApiOptions?: FromSecArg<DM['get']>
-  ): QueryResult<E> {
-    throw new Error('Not implemented');
+    getApiOptions?: FromSecArg<DM['get']> | false
+  ) {
+    try {
+      const result = await this.connection.currentDriver.read<A, IEntityRepoData<IDKey>>(this.driverOptions, id);
 
-    return new QueryResult(/* TODO: implement this */
-      true,
-      this.makeDataInstance({} as any)
-    );
+      const instance = this.makeDataInstance(result);
+
+      // Call local driver changes synchronously
+      const queryResult = new QueryResult(true, instance);
+
+      // Call api driver asynchronously
+      if (this.api && this.api.get && getApiOptions !== false) {
+        this.$log(`API handler execution start: ${this.name}.add()`);
+
+        this.api.get(id as any, getApiOptions).then(res => {
+          queryResult.result = this.makeDataInstance(result);
+          this.$log(`API handler execution end: ${this.name}.add() => ${JSON.stringify(res, undefined, '  ')}`);
+        }).catch(e => {
+          queryResult.error = e;
+          this.$error(`API handler execution end: ${this.name}.add() => ${e}`);
+        });
+      } else {
+        this.$log('No API handler detected');
+      }
+
+      return queryResult;
+    } catch (e) {
+      return new QueryResult(
+        false,
+        undefined,
+        e
+      );
+    }
   }
 
   public update(
