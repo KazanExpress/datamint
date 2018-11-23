@@ -1,4 +1,4 @@
-import { EntityDataMap, RecordDataMap } from '../apiMap';
+import { DataMap, EntityDataMap, RecordDataMap } from '../apiMap';
 import { print } from '../debug';
 import { Entity, IStorableConstructor, Record, Storable } from '../storable';
 import { IRepoConnection } from './base';
@@ -7,7 +7,7 @@ import { EntityRepository } from './entity';
 import { RecordRepository } from './record';
 
 export function makeRepository<
-  DM extends EntityDataMap<C, A> | RecordDataMap<C, A>,
+  DM extends DataMap<C>,
   C extends IStorableConstructor<E>,
   E extends Storable = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],

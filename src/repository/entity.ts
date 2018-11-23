@@ -12,6 +12,37 @@ export interface IEntityRepoData<IDKey extends PropertyKey> extends IRepoData {
   readonly primaryKey: IDKey;
 }
 
+export interface IEntityRepoMethods<
+  C extends IStorableConstructor<E>,
+  E extends Entity = InstanceType<C>,
+  A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
+  ID = E extends Entity<string, infer IdType> ? IdType : any,
+  IDKey extends PropertyKey = E extends Entity<infer IdKey, unknown> ? IdKey : string,
+> {
+  add(
+    options: A,
+    apiOptions?: any
+  ): Promise<any>;
+
+  get(
+    id: ID,
+    apiOptions?: any
+  ): Promise<any>;
+
+  update(
+    entity: PartialWithId<A, ID, IDKey> | ID,
+    deleteApiOptions?: any
+  ): Promise<any>;
+
+  delete(
+    entity: PartialWithId<A, ID, IDKey> | ID,
+    deleteApiOptions?: any
+  ): Promise<any>;
+
+  //...
+  // TODO - other methods
+}
+
 /**
  * A typical multi-entity repository.
  *
@@ -23,13 +54,13 @@ export interface IEntityRepoData<IDKey extends PropertyKey> extends IRepoData {
  * @template `IDKey` entity primary key name
  */
 export class EntityRepository<
-  DM extends EntityDataMap<C, A>,
+  DM extends EntityDataMap<C>,
   C extends IStorableConstructor<E>,
   E extends Entity = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
   ID = E extends Entity<string, infer IdType> ? IdType : any,
   IDKey extends PropertyKey = E extends Entity<infer IdKey, unknown> ? IdKey : string,
-> extends Repository<DM, C, E, A> implements IEntityRepoData<IDKey> {
+> extends Repository<DM, C, E, A> implements IEntityRepoData<IDKey>, IEntityRepoMethods<C, E, A, ID, IDKey> {
 
   public readonly columns: Array<string> = [];
   public readonly primaryKey: IDKey;
@@ -77,14 +108,14 @@ export class EntityRepository<
 
         // @TODO: implement async request queue
         this.api.add(options, apiOptions).then(res => {
-          queryResult.result = this.makeDataInstance(result);
+          queryResult.result = this.makeDataInstance(res);
           this.$log(`API handler execution end: ${this.name}.add() => ${JSON.stringify(res, undefined, '  ')}`);
         }).catch(e => {
           queryResult.error = e;
           this.$error(`API handler execution end: ${this.name}.add() => ${e}`);
         });
       } else {
-        this.$log('No API handler detected');
+        this.$log('No API handler called');
       }
 
       return queryResult;
@@ -109,18 +140,18 @@ export class EntityRepository<
 
       // Call api driver asynchronously
       if (this.api && this.api.get && getApiOptions !== false) {
-        this.$log(`API handler execution start: ${this.name}.add()`);
+        this.$log(`API handler execution start: ${this.name}.get()`);
 
         // @TODO: implement async request queue
         this.api.get(id as any, getApiOptions).then(res => {
-          queryResult.result = this.makeDataInstance(result);
-          this.$log(`API handler execution end: ${this.name}.add() => ${JSON.stringify(res, undefined, '  ')}`);
+          queryResult.result = this.makeDataInstance(res);
+          this.$log(`API handler execution end: ${this.name}.get() => ${JSON.stringify(res, undefined, '  ')}`);
         }).catch(e => {
           queryResult.error = e;
-          this.$error(`API handler execution end: ${this.name}.add() => ${e}`);
+          this.$error(`API handler execution end: ${this.name}.get() => ${e}`);
         });
       } else {
-        this.$log('No API handler detected');
+        this.$log('No API handler called');
       }
 
       return queryResult;
@@ -133,10 +164,10 @@ export class EntityRepository<
     }
   }
 
-  public update(
+  public async update(
     entity: PartialWithId<A, ID, IDKey>,
     updateApiOptions?: FromSecArg<DM['update']>
-  ): QueryResult<E> {
+  ) {
     throw new Error('Not implemented');
 
     return new QueryResult(/* TODO: implement this */
@@ -146,11 +177,11 @@ export class EntityRepository<
   }
 
   /* Do we even need this?.. */
-  public updateById(
+  public async updateById(
     id: ID,
     query: (entity: E) => Partial<A>,
     // updateApiOptions?: FromSecArg<DM['updateById']>
-  ): QueryResult<E> {
+  ) {
     throw new Error('Not implemented');
 
     return new QueryResult(/* TODO: implement this */
@@ -159,10 +190,10 @@ export class EntityRepository<
     );
   }
 
-  public delete(
+  public async delete(
     entity: PartialWithId<A, ID, IDKey> | ID,
-    deleteApiOptions?: FromSecArg<DM['delete']>
-  ): QueryResult<E> {
+    deleteApiOptions?: FromSecArg<DM['delete']> | false
+  ) {
     throw new Error('Not implemented');
 
     return new QueryResult(/* TODO: implement this */
@@ -173,7 +204,7 @@ export class EntityRepository<
 
   // TODO: Find, find by, exists, etc...
 
-  public count() {
+  public async count() {
     // TODO: count entities
   }
 

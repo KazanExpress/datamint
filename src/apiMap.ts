@@ -1,37 +1,24 @@
 import { IRepositoryMap } from './orm/connection';
-import { BrokenRepository, EntityRepository, RecordRepository } from './repository';
+import { BrokenRepository, EntityRepository, RecordRepository, IEntityRepoMethods, IRecordRepoMethods } from './repository';
 import { Entity, IStorableConstructor, Record } from './storable';
-
-type FunctionKeys<T> = Exclude<{
-  [K in keyof T]: T[K] extends ((...args: any[]) => any) ? K : never
-}[keyof T], undefined>;
-
-type NormalFabric<A> = (options: A, additionalOptions?: any) => Promise<A>;
-type BrokenFabric<I> = (...options: any[]) => Promise<I>;
 
 export type DataMap<
   C extends IStorableConstructor<any>
 > = EntityDataMap<C> | RecordDataMap<C> | BrokenDataMap<C>;
 
 export type EntityDataMap<
-  C extends IStorableConstructor<any>,
-  A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]
-> = {
-  [key in FunctionKeys<EntityRepository<any, any>>]: NormalFabric<A> | undefined;
-};
+  C extends IStorableConstructor<any>
+> = IEntityRepoMethods<C>;
 
 export type RecordDataMap<
-  C extends IStorableConstructor<any>,
-  A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]
-> = {
-  [key in FunctionKeys<RecordRepository<any, any>>]: NormalFabric<A> | undefined;
-};
+  C extends IStorableConstructor<any>
+> = IRecordRepoMethods<C>;
 
 export type BrokenDataMap<
   C extends IStorableConstructor<any>,
-  Keys extends PropertyKey = FunctionKeys<RecordRepository<any, any> & EntityRepository<any, any>>
+  Keys extends PropertyKey = keyof (IEntityRepoMethods<C> & IRecordRepoMethods<C>)
 > = {
-  [key in Keys]?: BrokenFabric<InstanceType<C>>;
+  [key in Keys]?: (...options: any[]) => Promise<InstanceType<C>>;
 };
 
 export type RepoFromDataMap<

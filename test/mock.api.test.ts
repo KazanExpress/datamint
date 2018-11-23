@@ -1,17 +1,20 @@
-import { API, Max } from './common/api';
+import { UserApiMap, create } from './common/api';
 import { IUserOptions } from './common/models';
 
 describe('mock.api', () => {
   it('resolves user objects', async () => {
-    expect(await API.user.createUser(Max.name, 'asdsad')).toMatchObject(Max);
+    expect(await new UserApiMap().create(create(), {
+      username: create().name,
+      password: 'asdsad'
+    })).toMatchObject(create());
 
-    expect(await API.user.setUserData({
+    expect(((await new UserApiMap().update({
       name: 'John Smith'
-    })).toBe(true);
+    })) as IUserOptions).name).toBe('John Smith');
 
-    expect(await API.user.getUser()).toMatchObject({
+    expect(await new UserApiMap().read()).toMatchObject({
       name: 'John Smith',
-      birthDate: Max.birthDate,
+      birthDate: create().birthDate,
       cart: []
     } as IUserOptions);
   });

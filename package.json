@@ -55,12 +55,15 @@
     "transform": {
       ".(ts|tsx)": "ts-jest"
     },
-    "testEnvironment": "node",
+    "testEnvironment": "jsdom",
     "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
     "moduleFileExtensions": [
       "ts",
       "tsx",
       "js"
+    ],
+    "transformIgnorePatterns": [
+      "<rootDir>/node_modules/(?!kefetchup).*"
     ],
     "coveragePathIgnorePatterns": [
       "/node_modules/",
@@ -88,7 +91,7 @@
     "cross-env": "^5.2.0",
     "jest": "^23.6.0",
     "jest-config": "^23.6.0",
-    "kefetchup": "^1.0.7",
+    "kefetchup": "^1.1.0",
     "lodash.camelcase": "^4.3.0",
     "rollup": "^0.66.2",
     "rollup-plugin-commonjs": "^9.1.8",
@@ -102,7 +105,6 @@
     "typescript": "^3.0.3"
   },
   "dependencies": {
-    "js-simple-events": "^1.0.7",
     "ts-async-queue": "^1.0.0"
   }
 }

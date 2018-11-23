@@ -1,10 +1,10 @@
 import { Connection } from '../../src';
-import { Broken, Product, ProductApiMap, User, UserApiMap } from '../common/models';
+import { Broken, Product, User } from '../common/models';
+import { UserApiMap, ProductApiMap } from '../common/api';
 
 describe('types', () => {
   it('types', async () => {
     Connection.$debug(true);
-
 
     const orm = new Connection('asd', [], {
       Products: Product,
@@ -32,10 +32,10 @@ describe('types', () => {
       url: '/products'
     };
 
-    orm.Products.add(podguznik, 'asdasd');
-    orm.Products.add(podguznik, false);
+    await orm.Products.add(podguznik, 'asdasd');
+    await orm.Products.add(podguznik, false);
 
-    orm.Products.get(0);
+    expect((await orm.Products.get(0)).result).toMatchObject(podguznik);
 
     try {
       orm.Products.update({

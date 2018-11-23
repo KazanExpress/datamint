@@ -12,7 +12,9 @@ export class FallbackDriver extends Driver {
   }
 
   public read<A, R extends IRepoData = IRepoData>(repository: R, id: any): Promise<A> {
-    throw new Error('Method not implemented.');
+    const repo: any[] = this.repositoryMap[repository.name];
+
+    return repo.find(i => i.id === id);
   }
 
   public update<A, R extends IRepoData = IRepoData>(repository: R, id: any, query: (data: A) => Partial<A>): Promise<A>;
