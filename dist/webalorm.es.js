@@ -157,6 +157,7 @@ class Driver {
     }
 }
 
+const isEntityRepo = (r) => !!r.columns;
 /* TODO: driver that just writes everything to short-term memory */
 class FallbackDriver extends Driver {
     constructor() {
@@ -165,24 +166,41 @@ class FallbackDriver extends Driver {
     }
     create(repository, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            this.repositoryMap[repository.name] = this.repositoryMap[repository.name] || [];
-            this.repositoryMap[repository.name].push(data);
+            if (isEntityRepo(repository)) {
+                this.repositoryMap[repository.name] = {};
+                this.repositoryMap[repository.name][data[repository.primaryKey]] = data;
+            }
+            else {
+                this.repositoryMap[repository.name] = data;
+            }
             return data;
         });
     }
     read(repository, id) {
-        throw new Error('Method not implemented.');
+        if (isEntityRepo(repository)) {
+            return this.repositoryMap[repository.name][id];
+        }
+        return this.repositoryMap[repository.name];
     }
     update(repository, id, query) {
         throw new Error('Method not implemented.');
         return Promise.resolve();
     }
     delete(repository, entity) {
-        const idx = this.repositoryMap[repository.name].findIndex(e => Object.keys(e).some(key => {
-            return e[key] === entity[key];
-        }));
-        const res = this.repositoryMap[repository.name][idx];
-        this.repositoryMap[repository.name].splice(idx, 1);
+        const repo = this.repositoryMap[repository.name];
+        let res;
+        if (isEntityRepo(repository)) {
+            const key = Object.keys(repo).findIndex(e => Object.keys(repo[e]).some(key => {
+                return e[key] === entity[key];
+            }));
+            res = this.repositoryMap[repository.name][key];
+            this.repositoryMap[repository.name][key] = undefined;
+            delete this.repositoryMap[repository.name][key];
+        }
+        else {
+            res = this.repositoryMap[repository.name];
+            this.repositoryMap[repository.name] = undefined;
+        }
         return res;
     }
 }
@@ -320,26 +338,28 @@ class EntityRepository extends Repository {
     }
     add(options, 
     // TODO: up to debate - singular arguments always or multiple args inference?
-    apiOptions) {
+    apiOptions // Pass false to disable the api call
+    ) {
         return __awaiter(this, void 0, void 0, function* () {
-            const result = yield this.connection.currentDriver.create(this.driverOptions, options);
             try {
+                const result = yield this.connection.currentDriver.create(this.driverOptions, options);
                 const instance = this.makeDataInstance(result);
                 // Call local driver changes synchronously
                 const queryResult = new QueryResult(true, instance);
                 // Call api driver asynchronously
-                if (this.api && this.api.add) {
+                if (this.api && this.api.add && apiOptions !== false) {
                     this.$log(`API handler execution start: ${this.name}.add()`);
+                    // @TODO: implement async request queue
                     this.api.add(options, apiOptions).then(res => {
-                        queryResult.result = this.makeDataInstance(result);
-                        this.$log(`API handler execution end: ${this.name}.add() => ${res}`);
+                        queryResult.result = this.makeDataInstance(res);
+                        this.$log(`API handler execution end: ${this.name}.add() => ${JSON.stringify(res, undefined, '  ')}`);
                     }).catch(e => {
                         queryResult.error = e;
                         this.$error(`API handler execution end: ${this.name}.add() => ${e}`);
                     });
                 }
                 else {
-                    this.$log('No API handler detected');
+                    this.$log('No API handler called');
                 }
                 return queryResult;
             }
@@ -350,25 +370,58 @@ class EntityRepository extends Repository {
         });
     }
     get(id, getApiOptions) {
-        throw new Error('Not implemented');
-        return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const result = yield this.connection.currentDriver.read(this.driverOptions, id);
+                const instance = this.makeDataInstance(result);
+                // Call local driver changes synchronously
+                const queryResult = new QueryResult(true, instance);
+                // Call api driver asynchronously
+                if (this.api && this.api.get && getApiOptions !== false) {
+                    this.$log(`API handler execution start: ${this.name}.get()`);
+                    // @TODO: implement async request queue
+                    this.api.get(id, getApiOptions).then(res => {
+                        queryResult.result = this.makeDataInstance(res);
+                        this.$log(`API handler execution end: ${this.name}.get() => ${JSON.stringify(res, undefined, '  ')}`);
+                    }).catch(e => {
+                        queryResult.error = e;
+                        this.$error(`API handler execution end: ${this.name}.get() => ${e}`);
+                    });
+                }
+                else {
+                    this.$log('No API handler called');
+                }
+                return queryResult;
+            }
+            catch (e) {
+                return new QueryResult(false, undefined, e);
+            }
+        });
     }
     update(entity, updateApiOptions) {
-        throw new Error('Not implemented');
-        return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('Not implemented');
+            return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        });
     }
     /* Do we even need this?.. */
     updateById(id, query) {
-        throw new Error('Not implemented');
-        return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance(query({})));
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('Not implemented');
+            return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance(query({})));
+        });
     }
     delete(entity, deleteApiOptions) {
-        throw new Error('Not implemented');
-        return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('Not implemented');
+            return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        });
     }
     // TODO: Find, find by, exists, etc...
     count() {
-        // TODO: count entities
+        return __awaiter(this, void 0, void 0, function* () {
+            // TODO: count entities
+        });
     }
 }
 
@@ -476,20 +529,28 @@ __decorate([
  */
 class RecordRepository extends Repository {
     create(options, apiOptions) {
-        throw new Error('Not implemented');
-        return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('Not implemented');
+            return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        });
     }
     update(options, apiOptions) {
-        throw new Error('Not implemented');
-        return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('Not implemented');
+            return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        });
     }
     read(apiOptions) {
-        throw new Error('Not implemented');
-        return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('Not implemented');
+            return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        });
     }
     delete(apiOptions) {
-        throw new Error('Not implemented');
-        return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('Not implemented');
+            return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        });
     }
 }
 
@@ -502,7 +563,7 @@ function makeRepository(name, connection, data) {
         Repo = RecordRepository;
     }
     else {
-        print(connection.name, 'db', `No suitable repository found for ${data.name} when trying to connect with ${name}.`, 'error');
+        print(connection.name, 'db', `No suitable repository found for "${data.name}".`, 'error');
     }
     return new Repo(name, connection, data);
 }

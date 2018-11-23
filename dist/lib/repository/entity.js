@@ -42,26 +42,28 @@ class EntityRepository extends base_1.Repository {
     }
     add(options, 
     // TODO: up to debate - singular arguments always or multiple args inference?
-    apiOptions) {
+    apiOptions // Pass false to disable the api call
+    ) {
         return __awaiter(this, void 0, void 0, function* () {
-            const result = yield this.connection.currentDriver.create(this.driverOptions, options);
             try {
+                const result = yield this.connection.currentDriver.create(this.driverOptions, options);
                 const instance = this.makeDataInstance(result);
                 // Call local driver changes synchronously
                 const queryResult = new queryResult_1.QueryResult(true, instance);
                 // Call api driver asynchronously
-                if (this.api && this.api.add) {
+                if (this.api && this.api.add && apiOptions !== false) {
                     this.$log(`API handler execution start: ${this.name}.add()`);
+                    // @TODO: implement async request queue
                     this.api.add(options, apiOptions).then(res => {
-                        queryResult.result = this.makeDataInstance(result);
-                        this.$log(`API handler execution end: ${this.name}.add() => ${res}`);
+                        queryResult.result = this.makeDataInstance(res);
+                        this.$log(`API handler execution end: ${this.name}.add() => ${JSON.stringify(res, undefined, '  ')}`);
                     }).catch(e => {
                         queryResult.error = e;
                         this.$error(`API handler execution end: ${this.name}.add() => ${e}`);
                     });
                 }
                 else {
-                    this.$log('No API handler detected');
+                    this.$log('No API handler called');
                 }
                 return queryResult;
             }
@@ -72,25 +74,58 @@ class EntityRepository extends base_1.Repository {
         });
     }
     get(id, getApiOptions) {
-        throw new Error('Not implemented');
-        return new queryResult_1.QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const result = yield this.connection.currentDriver.read(this.driverOptions, id);
+                const instance = this.makeDataInstance(result);
+                // Call local driver changes synchronously
+                const queryResult = new queryResult_1.QueryResult(true, instance);
+                // Call api driver asynchronously
+                if (this.api && this.api.get && getApiOptions !== false) {
+                    this.$log(`API handler execution start: ${this.name}.get()`);
+                    // @TODO: implement async request queue
+                    this.api.get(id, getApiOptions).then(res => {
+                        queryResult.result = this.makeDataInstance(res);
+                        this.$log(`API handler execution end: ${this.name}.get() => ${JSON.stringify(res, undefined, '  ')}`);
+                    }).catch(e => {
+                        queryResult.error = e;
+                        this.$error(`API handler execution end: ${this.name}.get() => ${e}`);
+                    });
+                }
+                else {
+                    this.$log('No API handler called');
+                }
+                return queryResult;
+            }
+            catch (e) {
+                return new queryResult_1.QueryResult(false, undefined, e);
+            }
+        });
     }
     update(entity, updateApiOptions) {
-        throw new Error('Not implemented');
-        return new queryResult_1.QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('Not implemented');
+            return new queryResult_1.QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        });
     }
     /* Do we even need this?.. */
     updateById(id, query) {
-        throw new Error('Not implemented');
-        return new queryResult_1.QueryResult(/* TODO: implement this */ true, this.makeDataInstance(query({})));
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('Not implemented');
+            return new queryResult_1.QueryResult(/* TODO: implement this */ true, this.makeDataInstance(query({})));
+        });
     }
     delete(entity, deleteApiOptions) {
-        throw new Error('Not implemented');
-        return new queryResult_1.QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('Not implemented');
+            return new queryResult_1.QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        });
     }
     // TODO: Find, find by, exists, etc...
     count() {
-        // TODO: count entities
+        return __awaiter(this, void 0, void 0, function* () {
+            // TODO: count entities
+        });
     }
 }
 exports.EntityRepository = EntityRepository;

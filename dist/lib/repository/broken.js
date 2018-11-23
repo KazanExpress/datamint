@@ -7,4 +7,4 @@ class BrokenRepository extends base_1.Repository {
     }
 }
 exports.BrokenRepository = BrokenRepository;
-//# sourceMappingURL=default.js.map
+//# sourceMappingURL=broken.js.map

@@ -233,6 +233,7 @@ var Driver = /** @class */ (function () {
     return Driver;
 }());
 
+var isEntityRepo = function (r) { return !!r.columns; };
 /* TODO: driver that just writes everything to short-term memory */
 var FallbackDriver = /** @class */ (function (_super) {
     __extends(FallbackDriver, _super);
@@ -244,25 +245,42 @@ var FallbackDriver = /** @class */ (function (_super) {
     FallbackDriver.prototype.create = function (repository, data) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                this.repositoryMap[repository.name] = this.repositoryMap[repository.name] || [];
-                this.repositoryMap[repository.name].push(data);
+                if (isEntityRepo(repository)) {
+                    this.repositoryMap[repository.name] = {};
+                    this.repositoryMap[repository.name][data[repository.primaryKey]] = data;
+                }
+                else {
+                    this.repositoryMap[repository.name] = data;
+                }
                 return [2 /*return*/, data];
             });
         });
     };
     FallbackDriver.prototype.read = function (repository, id) {
-        throw new Error('Method not implemented.');
+        if (isEntityRepo(repository)) {
+            return this.repositoryMap[repository.name][id];
+        }
+        return this.repositoryMap[repository.name];
     };
     FallbackDriver.prototype.update = function (repository, id, query) {
         throw new Error('Method not implemented.');
         return Promise.resolve();
     };
     FallbackDriver.prototype.delete = function (repository, entity) {
-        var idx = this.repositoryMap[repository.name].findIndex(function (e) { return Object.keys(e).some(function (key) {
-            return e[key] === entity[key];
-        }); });
-        var res = this.repositoryMap[repository.name][idx];
-        this.repositoryMap[repository.name].splice(idx, 1);
+        var repo = this.repositoryMap[repository.name];
+        var res;
+        if (isEntityRepo(repository)) {
+            var key = Object.keys(repo).findIndex(function (e) { return Object.keys(repo[e]).some(function (key) {
+                return e[key] === entity[key];
+            }); });
+            res = this.repositoryMap[repository.name][key];
+            this.repositoryMap[repository.name][key] = undefined;
+            delete this.repositoryMap[repository.name][key];
+        }
+        else {
+            res = this.repositoryMap[repository.name];
+            this.repositoryMap[repository.name] = undefined;
+        }
         return res;
     };
     return FallbackDriver;
@@ -441,63 +459,111 @@ var EntityRepository = /** @class */ (function (_super) {
     });
     EntityRepository.prototype.add = function (options, 
     // TODO: up to debate - singular arguments always or multiple args inference?
-    apiOptions) {
+    apiOptions // Pass false to disable the api call
+    ) {
         return __awaiter(this, void 0, void 0, function () {
-            var result, instance, queryResult_1;
+            var result, instance, queryResult_1, e_1;
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.connection.currentDriver.create(this.driverOptions, options)];
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, this.connection.currentDriver.create(this.driverOptions, options)];
                     case 1:
                         result = _a.sent();
-                        try {
-                            instance = this.makeDataInstance(result);
-                            queryResult_1 = new QueryResult(true, instance);
-                            // Call api driver asynchronously
-                            if (this.api && this.api.add) {
-                                this.$log("API handler execution start: " + this.name + ".add()");
-                                this.api.add(options, apiOptions).then(function (res) {
-                                    queryResult_1.result = _this.makeDataInstance(result);
-                                    _this.$log("API handler execution end: " + _this.name + ".add() => " + res);
-                                }).catch(function (e) {
-                                    queryResult_1.error = e;
-                                    _this.$error("API handler execution end: " + _this.name + ".add() => " + e);
-                                });
-                            }
-                            else {
-                                this.$log('No API handler detected');
-                            }
-                            return [2 /*return*/, queryResult_1];
+                        instance = this.makeDataInstance(result);
+                        queryResult_1 = new QueryResult(true, instance);
+                        // Call api driver asynchronously
+                        if (this.api && this.api.add && apiOptions !== false) {
+                            this.$log("API handler execution start: " + this.name + ".add()");
+                            // @TODO: implement async request queue
+                            this.api.add(options, apiOptions).then(function (res) {
+                                queryResult_1.result = _this.makeDataInstance(res);
+                                _this.$log("API handler execution end: " + _this.name + ".add() => " + JSON.stringify(res, undefined, '  '));
+                            }).catch(function (e) {
+                                queryResult_1.error = e;
+                                _this.$error("API handler execution end: " + _this.name + ".add() => " + e);
+                            });
                         }
-                        catch (e) {
-                            this.$error(e);
-                            return [2 /*return*/, new QueryResult(false, this.makeDataInstance(options), e)];
+                        else {
+                            this.$log('No API handler called');
                         }
-                        return [2 /*return*/];
+                        return [2 /*return*/, queryResult_1];
+                    case 2:
+                        e_1 = _a.sent();
+                        this.$error(e_1);
+                        return [2 /*return*/, new QueryResult(false, this.makeDataInstance(options), e_1)];
+                    case 3: return [2 /*return*/];
                 }
             });
         });
     };
     EntityRepository.prototype.get = function (id, getApiOptions) {
-        throw new Error('Not implemented');
-        return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        return __awaiter(this, void 0, void 0, function () {
+            var result, instance, queryResult_2, e_2;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, this.connection.currentDriver.read(this.driverOptions, id)];
+                    case 1:
+                        result = _a.sent();
+                        instance = this.makeDataInstance(result);
+                        queryResult_2 = new QueryResult(true, instance);
+                        // Call api driver asynchronously
+                        if (this.api && this.api.get && getApiOptions !== false) {
+                            this.$log("API handler execution start: " + this.name + ".get()");
+                            // @TODO: implement async request queue
+                            this.api.get(id, getApiOptions).then(function (res) {
+                                queryResult_2.result = _this.makeDataInstance(res);
+                                _this.$log("API handler execution end: " + _this.name + ".get() => " + JSON.stringify(res, undefined, '  '));
+                            }).catch(function (e) {
+                                queryResult_2.error = e;
+                                _this.$error("API handler execution end: " + _this.name + ".get() => " + e);
+                            });
+                        }
+                        else {
+                            this.$log('No API handler called');
+                        }
+                        return [2 /*return*/, queryResult_2];
+                    case 2:
+                        e_2 = _a.sent();
+                        return [2 /*return*/, new QueryResult(false, undefined, e_2)];
+                    case 3: return [2 /*return*/];
+                }
+            });
+        });
     };
     EntityRepository.prototype.update = function (entity, updateApiOptions) {
-        throw new Error('Not implemented');
-        return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                throw new Error('Not implemented');
+            });
+        });
     };
     /* Do we even need this?.. */
     EntityRepository.prototype.updateById = function (id, query) {
-        throw new Error('Not implemented');
-        return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance(query({})));
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                throw new Error('Not implemented');
+            });
+        });
     };
     EntityRepository.prototype.delete = function (entity, deleteApiOptions) {
-        throw new Error('Not implemented');
-        return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                throw new Error('Not implemented');
+            });
+        });
     };
     // TODO: Find, find by, exists, etc...
     EntityRepository.prototype.count = function () {
-        // TODO: count entities
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/];
+            });
+        });
     };
     return EntityRepository;
 }(Repository));
@@ -618,20 +684,32 @@ var RecordRepository = /** @class */ (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     RecordRepository.prototype.create = function (options, apiOptions) {
-        throw new Error('Not implemented');
-        return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                throw new Error('Not implemented');
+            });
+        });
     };
     RecordRepository.prototype.update = function (options, apiOptions) {
-        throw new Error('Not implemented');
-        return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                throw new Error('Not implemented');
+            });
+        });
     };
     RecordRepository.prototype.read = function (apiOptions) {
-        throw new Error('Not implemented');
-        return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                throw new Error('Not implemented');
+            });
+        });
     };
     RecordRepository.prototype.delete = function (apiOptions) {
-        throw new Error('Not implemented');
-        return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                throw new Error('Not implemented');
+            });
+        });
     };
     return RecordRepository;
 }(Repository));
@@ -645,7 +723,7 @@ function makeRepository(name, connection, data) {
         Repo = RecordRepository;
     }
     else {
-        print(connection.name, 'db', "No suitable repository found for " + data.name + " when trying to connect with " + name + ".", 'error');
+        print(connection.name, 'db', "No suitable repository found for \"" + data.name + "\".", 'error');
     }
     return new Repo(name, connection, data);
 }
