@@ -3,6 +3,6 @@ import { Repository } from './base';
 
 export class BrokenRepository<DM extends BrokenDataMap<any>> extends Repository<DM, any> {
   public get API() {
-    return this.api;
+    return this.api!;
   }
 }

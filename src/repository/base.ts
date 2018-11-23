@@ -9,7 +9,7 @@ export interface IRepoConnectionInternal {
 }
 
 export interface IRepoConnection<DM> extends IRepoConnectionInternal {
-  apiMap: DM;
+  apiMap?: DM;
 }
 
 export interface IRepoData {
@@ -53,7 +53,7 @@ export abstract class Repository<
 
   }
 
-  protected readonly api: DM;
+  protected readonly api?: DM;
 
   protected makeDataInstance(options: A) {
     return new this.Data(options, this);
