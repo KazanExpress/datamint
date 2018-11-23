@@ -37,7 +37,7 @@ const enumerable = (isEnumerable = true) => function (target, key, desc = {}) {
     desc.enumerable = isEnumerable;
 };
 
-const LOG_PREFIX = (name) => name ? `[WEBALORM:${name}]` : `[WEBALORM]`;
+const LOG_PREFIX = (name) => name ? `[webalorm:${name}]` : `[webalorm]`;
 /**
  * Shows the current debug state of WEBALORM
  *

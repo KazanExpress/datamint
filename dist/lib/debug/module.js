@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const LOG_PREFIX = (name) => name ? `[WEBALORM:${name}]` : `[WEBALORM]`;
+const LOG_PREFIX = (name) => name ? `[webalorm:${name}]` : `[webalorm]`;
 /**
  * Shows the current debug state of WEBALORM
  *

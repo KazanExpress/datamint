@@ -86,7 +86,7 @@ var webalorm = (function (exports) {
         };
     };
 
-    var LOG_PREFIX = function (name) { return name ? "[WEBALORM:" + name + "]" : "[WEBALORM]"; };
+    var LOG_PREFIX = function (name) { return name ? "[webalorm:" + name + "]" : "[webalorm]"; };
     /**
      * Shows the current debug state of WEBALORM
      *
