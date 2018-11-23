@@ -75,6 +75,7 @@ export class EntityRepository<
       if (this.api && this.api.add && apiOptions !== false) {
         this.$log(`API handler execution start: ${this.name}.add()`);
 
+        // @TODO: implement async request queue
         this.api.add(options, apiOptions).then(res => {
           queryResult.result = this.makeDataInstance(result);
           this.$log(`API handler execution end: ${this.name}.add() => ${JSON.stringify(res, undefined, '  ')}`);
@@ -110,6 +111,7 @@ export class EntityRepository<
       if (this.api && this.api.get && getApiOptions !== false) {
         this.$log(`API handler execution start: ${this.name}.add()`);
 
+        // @TODO: implement async request queue
         this.api.get(id as any, getApiOptions).then(res => {
           queryResult.result = this.makeDataInstance(result);
           this.$log(`API handler execution end: ${this.name}.add() => ${JSON.stringify(res, undefined, '  ')}`);

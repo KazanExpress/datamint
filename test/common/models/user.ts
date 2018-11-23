@@ -1,6 +1,7 @@
 import { Record } from '../../..';
 import { Product } from './product';
 import { RecordDataMap } from '../../../src/apiMap';
+import { JsonAPIClient } from 'kefetchup/src';
 
 export interface IUserOptions {
   name: string;
@@ -23,7 +24,15 @@ export class User extends Record implements IUserOptions {
   }
 }
 
-export class UserApiMap implements RecordDataMap<typeof User> {
+export class UserApiMap extends JsonAPIClient implements RecordDataMap<typeof User> {
+  constructor() {
+    super('https://kazanexpress.ru', {
+      headers: {
+        Authorization: 'basic asdasd'
+      }
+    });
+  }
+
   public async create(
     ormOptions: IUserOptions,
     { username }: { username: string; password: string }

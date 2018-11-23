@@ -28,6 +28,14 @@ export class Product extends Entity<'id', number> {
 }
 
 export class ProductApiMap extends JsonAPIClient implements EntityDataMap<typeof Product, any> {
+  constructor() {
+    super('https://kazanexpress.ru', {
+      headers: {
+        Authorization: 'basic asdasd'
+      }
+    });
+  }
+
   public async add(options: IProductOptions, apiKey: string) {
     return options;
   }
