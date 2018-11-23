@@ -1,20 +1,28 @@
-import { IRepoData } from '../repository';
+import { IRepoData, IEntityRepoData } from '../repository';
 import { Driver } from './base';
+
+const isEntityRepo = (r): r is IEntityRepoData<any> => !!(r as IEntityRepoData<any>).columns;
 
 /* TODO: driver that just writes everything to short-term memory */
 export class FallbackDriver extends Driver {
   public async create<A, R extends IRepoData = IRepoData>(repository: R, data: A): Promise<A> {
-    this.repositoryMap[repository.name] = this.repositoryMap[repository.name] || [];
+    if (isEntityRepo(repository)) {
+      this.repositoryMap[repository.name] = {};
 
-    this.repositoryMap[repository.name].push(data);
+      this.repositoryMap[repository.name][data[repository.primaryKey]] = data;
+    } else {
+      this.repositoryMap[repository.name] = data;
+    }
 
     return data;
   }
 
   public read<A, R extends IRepoData = IRepoData>(repository: R, id: any): Promise<A> {
-    const repo: any[] = this.repositoryMap[repository.name];
+    if (isEntityRepo(repository)) {
+      return this.repositoryMap[repository.name][id];
+    }
 
-    return repo.find(i => i.id === id); // TODO: use the __idKey__ for comparison
+    return this.repositoryMap[repository.name];
   }
 
   public update<A, R extends IRepoData = IRepoData>(repository: R, id: any, query: (data: A) => Partial<A>): Promise<A>;
@@ -26,13 +34,25 @@ export class FallbackDriver extends Driver {
   }
 
   public delete<A, R extends IRepoData = IRepoData>(repository: R, entity: any): Promise<A> {
-    const idx = this.repositoryMap[repository.name].findIndex(e => Object.keys(e).some(key => {
-      return e[key] === entity[key];
-    }));
+    const repo = this.repositoryMap[repository.name];
 
-    const res = this.repositoryMap[repository.name][idx];
+    let res;
 
-    this.repositoryMap[repository.name].splice(idx, 1);
+    if (isEntityRepo(repository)) {
+      const key = Object.keys(repo).findIndex(e => Object.keys(repo[e]).some(key => {
+        return e[key] === entity[key];
+      }));
+
+      res = this.repositoryMap[repository.name][key];
+
+      this.repositoryMap[repository.name][key] = undefined;
+
+      delete this.repositoryMap[repository.name][key];
+    } else {
+      res = this.repositoryMap[repository.name];
+
+      this.repositoryMap[repository.name] = undefined;
+    }
 
     return res;
   }
