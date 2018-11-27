@@ -1,40 +1,132 @@
-import { IEntityRepoData, IRepoData } from '../repository';
+import { IRepoData } from '../repository';
 import { Driver } from './base';
+import { DebugType } from '../debug';
 
-const isEntityRepo = (r): r is IEntityRepoData<any> => !!(r as IEntityRepoData<any>).columns;
-
-/* TODO: driver that just writes everything to short-term memory */
+/**
+ * @todo refactor, code is a mess
+ */
 export class FallbackDriver extends Driver {
-  public async create<A, R extends IRepoData = IRepoData>(repository: R, data: A): Promise<A> {
-    if (isEntityRepo(repository)) {
-      this.repositoryMap[repository.name] = {};
+  public async create<A, R extends IRepoData>({ primaryKey, name }: R, data: A): Promise<A> {
+    if (!this.repositoryMap[name]) {
+      if ({ primaryKey, name }.primaryKey) {
+        this.repositoryMap[name] = {};
+      } else {
+        this.repositoryMap[name] = [];
+      }
+    }
 
-      this.repositoryMap[repository.name][data[repository.primaryKey]] = data;
-    } else {
-      this.repositoryMap[repository.name] = data;
+    const repo: Array<A> | { [key: string]: A } = this.repositoryMap[name];
+
+    if (primaryKey) {
+      const key = String(data[primaryKey]);
+
+      repo[key] = data;
+    } else if (Array.isArray(repo)) {
+      repo.push(data);
     }
 
     return data;
   }
 
-  public read<A, R extends IRepoData = IRepoData>(repository: R, id: any): Promise<A> {
-    if (isEntityRepo(repository)) {
-      return this.repositoryMap[repository.name][id];
+  public async findById<A, R extends IRepoData>({ primaryKey, name }: R, id: PropertyKey) {
+    const repo: Array<A> | { [key: string]: A } = this.repositoryMap[name];
+
+    if (primaryKey) {
+      if (Array.isArray(repo)) {
+        return repo.find(i => i[primaryKey] === id);
+      } else {
+        if (primaryKey) {
+          let result: A | undefined = repo[String(id)];
+
+          if (!result) {
+            result = Object.values(repo).find(i => i[primaryKey] === id);
+          }
+
+          return result;
+        } else if (id) {
+          return repo[String(id)];
+        }
+      }
+    } else if (Array.isArray(repo)) {
+      return repo[0];
     }
 
-    return this.repositoryMap[repository.name];
+    return Object.values(repo)[0];
   }
 
-  public update<A, R extends IRepoData = IRepoData>(repository: R, id: any, query: (data: A) => Partial<A>): Promise<A>;
-  public update<A, R extends IRepoData = IRepoData>(repository: R, data: Partial<A>): Promise<A>;
-  public update(repository: any, id: any, query?: any) {
+  public async update<A, R extends IRepoData>(
+    { name, primaryKey }: R,
+    data: Partial<A>
+  ): Promise<Array<A>> {
     throw new Error('Method not implemented.');
 
-    return Promise.resolve();
+    return [] as Array<A>;
   }
 
-  public delete<A, R extends IRepoData = IRepoData>(repository: R, entity: any): Promise<A> {
-    const repo = this.repositoryMap[repository.name];
+  public async updateOne<A extends object, R extends IRepoData>(
+    { name, primaryKey }: R,
+    id: PropertyKey, query: (entity: A) => Partial<A>
+  ): Promise<A | undefined> {
+    const repo = this.repositoryMap[name];
+
+    let res: A | undefined = undefined;
+
+    const mixInQuery = (obj: A): A => ({ ...obj as object, ...query(obj) as object } as A);
+
+    if (primaryKey) {
+      if (Array.isArray(repo)) {
+        const idx = repo.findIndex(i => i[primaryKey] === id);
+
+        if (idx === -1) {
+          this.$error(`No entity by id ${String(id)} was found`);
+
+          return res;
+        }
+
+        repo[idx] = res = mixInQuery(repo[idx]);
+      } else {
+        repo[id] = res = mixInQuery(repo[id]);
+      }
+    } else if (Array.isArray(repo) && typeof id === 'number') {
+      repo[id] = res = mixInQuery(repo[id]);
+    } else {
+      this.$error(`Id ${String(id)} is of the wrong type ${typeof id}`);
+    }
+
+    return res;
+  }
+
+  public async deleteOne<A, R extends IRepoData>({ name, primaryKey }: R, id: PropertyKey): Promise<A | undefined> {
+    const repo = this.repositoryMap[name];
+
+    let res: A;
+
+    if (primaryKey) {
+      if (Array.isArray(repo)) {
+        const idx = repo.findIndex(i => i[primaryKey] === id);
+
+        res = repo[idx];
+
+        repo.splice(idx, 1);
+      } else {
+        res = repo[id];
+
+        repo[id] = undefined;
+        delete repo[id];
+      }
+    } else if (Array.isArray(repo) && typeof id === 'number') {
+      res = repo[id];
+
+      repo.splice(id, 1);
+    } else {
+      throw new Error(`Id ${String(id)} is of the wrong type ${typeof id}`);
+    }
+
+    return res;
+  }
+
+  public async delete<A, R extends IRepoData>({ name, primaryKey }: R, entity: Partial<A>): Promise<Array<A>> {
+    const repo = this.repositoryMap[name];
 
     let res;
 
