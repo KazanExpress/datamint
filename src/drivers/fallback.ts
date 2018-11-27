@@ -48,7 +48,7 @@ export class FallbackDriver extends Driver {
         }
       }
     } else if (Array.isArray(repo)) {
-      return repo[0];
+      return repo[id];
     }
 
     return Object.values(repo)[0];

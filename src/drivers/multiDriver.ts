@@ -14,7 +14,9 @@ export class MultiDriver extends Driver {
     this.drivers = drivers.filter(d => d.isSupported).map(D => new D(connection));
   }
 
-  private request(type: 'create' | 'update' | 'read' | 'delete') {
+  private request(
+    type: { [key in keyof Driver]: Driver[key] extends Function ? key : never }[keyof Driver]
+  ) {
     return function (this: MultiDriver) {
       const args = arguments;
       const allResponses = Promise.all(this.drivers.map(d => d[type].apply(d, args)));
@@ -29,15 +31,22 @@ export class MultiDriver extends Driver {
 
   public readonly findById: {
     <A, R extends IRepoData = IRepoData>(repository: R, id: any): Promise<A>;
-  } = this.request('read');
+  } = this.request('findById');
 
   public readonly update: {
-    <A, R extends IRepoData = IRepoData>(repository: R, id: any, query: (data: A) => Partial<A>): Promise<A>;
-    <A, R extends IRepoData = IRepoData>(repository: R, data: Partial<A>): Promise<A>;
+    <A, R extends IRepoData = IRepoData>(repository: R, data: Partial<A>): Promise<Array<A>>;
   } = this.request('update');
 
-  public readonly delete: {
+  public readonly updateOne: {
+    <A, R extends IRepoData = IRepoData>(repository: R, id: any, query: (data: A) => Partial<A>): Promise<A | undefined>;
+  } = this.request('updateOne');
+
+  public readonly deleteOne: {
     <A, R extends IRepoData = IRepoData>(repository: R, id: any): Promise<A>;
+  } = this.request('deleteOne');
+
+  public readonly delete: {
+    <A, R extends IRepoData = IRepoData>(repository: R, data: Partial<A>): Promise<Array<A>>;
   } = this.request('delete');
 
   public static get isSupported() { return true; }
