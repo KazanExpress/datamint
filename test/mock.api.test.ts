@@ -1,12 +1,12 @@
-import { UserApiMap, create } from './common/api';
+import { UserApiMap, createUser } from './common/api';
 import { IUserOptions } from './common/models';
 
 describe('mock.api', () => {
   it('resolves user objects', async () => {
-    expect(await new UserApiMap().create(create(), {
-      username: create().name,
+    expect(await new UserApiMap().create(createUser(), {
+      username: createUser().name,
       password: 'asdsad'
-    })).toMatchObject(create());
+    })).toMatchObject(createUser());
 
     expect(((await new UserApiMap().update({
       name: 'John Smith'
@@ -14,7 +14,7 @@ describe('mock.api', () => {
 
     expect(await new UserApiMap().read()).toMatchObject({
       name: 'John Smith',
-      birthDate: create().birthDate,
+      birthDate: createUser().birthDate,
       cart: []
     } as IUserOptions);
   });

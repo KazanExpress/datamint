@@ -2,7 +2,7 @@ import { JsonAPIClient } from 'kefetchup/src';
 import { EntityDataMap, RecordDataMap } from '../../src/apiMap';
 import { IProductOptions, IUserOptions, Product, User } from './models';
 
-export const create: () => IUserOptions = () => ({
+export const createUser: () => IUserOptions = () => ({
   name: 'max',
   // tslint:disable-next-line:no-magic-numbers
   birthDate: new Date(Date.UTC(1997, 8, 9)),
@@ -28,7 +28,7 @@ export class UserApiMap extends JsonAPIClient implements RecordDataMap<typeof Us
     ormOptions: IUserOptions,
     { username, password }: { username: string; password: string }
   ): Promise<IUserOptions> {
-    DB.USER = create();
+    DB.USER = createUser();
     DB.USER.name = username;
 
     return Promise.resolve(DB.USER);

@@ -8,13 +8,13 @@ export interface IProductOptions {
 
 export class Product extends Entity<'id', number> {
   @Product.ID
-  @Product.Column
+  @Product.Property('productId')
   public id: number;
 
-  @Product.Column
+  @Product.Property('productTitle')
   public title: string;
 
-  @Product.Column
+  @Product.Property
   public url: string;
 
   constructor(options: IProductOptions, repo?) {
