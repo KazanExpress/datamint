@@ -21,7 +21,7 @@ export abstract class Storable extends Debugable {
   public abstract $delete(): Promise<void>;
 
   @enumerable(false)
-  protected static __col__: Array<PropertyKey> = [];
+  private static __col__: Array<PropertyKey> = [];
 
   // TODO: make it accept optional property name to write to
   public static Property(target: typeof Storable['prototype'], key: PropertyKey) {
