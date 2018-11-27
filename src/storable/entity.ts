@@ -58,10 +58,9 @@ export class Entity<
     target.__col__.push(key);
   }
 
-  public static ID(target: typeof Entity['prototype'], key: string) {
-    target.__idCol__ = key;
+  public static ID(target: typeof Entity['prototype'], key: PropertyKey) {
+    target.__idKey__ = key;
   }
 }
 
-export const Column = Entity.Column;
 export const ID = Entity.ID;
