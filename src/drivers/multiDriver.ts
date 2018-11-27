@@ -27,7 +27,7 @@ export class MultiDriver extends Driver {
     <A, R extends IRepoData = IRepoData>(repository: R, data: A): Promise<A>;
   } = this.request('create');
 
-  public readonly read: {
+  public readonly findById: {
     <A, R extends IRepoData = IRepoData>(repository: R, id: any): Promise<A>;
   } = this.request('read');
 
