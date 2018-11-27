@@ -4,16 +4,18 @@ import { Driver } from '../drivers';
 import { IStorableConstructor, Storable } from '../storable';
 
 export interface IRepoConnectionInternal {
-  name: string;
-  currentDriver: Driver;
+  readonly name: string;
+  readonly currentDriver: Driver;
 }
 
 export interface IRepoConnection<DM> extends IRepoConnectionInternal {
-  apiMap?: DM;
+  readonly apiMap?: DM;
 }
 
-export interface IRepoData {
-  name: string;
+export interface IRepoData<IDKey = PropertyKey> {
+  readonly name: string;
+  readonly columns?: Array<string>;
+  readonly primaryKey?: IDKey;
 }
 
 export type FromSecArg<
@@ -30,14 +32,17 @@ export abstract class Repository<
   protected readonly connection: IRepoConnectionInternal;
   public readonly $connectionName: string;
 
+  public $currentDriver: Driver;
+
   constructor(
-    public name: string,
+    public readonly name: string,
     connection: IRepoConnection<DM>,
-    private Data: C
+    private readonly Data: C
   ) {
     super();
     this.connection = connection;
     this.$connectionName = connection.name;
+    this.$currentDriver = connection.currentDriver;
 
     this.api = connection.apiMap;
 

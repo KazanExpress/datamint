@@ -1,7 +1,7 @@
 import { RecordDataMap } from '../apiMap';
 import { QueryResult } from '../queryResult';
 import { IStorableConstructor, Record } from '../storable';
-import { FromSecArg, Repository } from './base';
+import { FromSecArg, Repository, IRepoData } from './base';
 
 export interface IRecordRepoMethods<
   C extends IStorableConstructor<E>,
@@ -43,7 +43,7 @@ export class RecordRepository<
   C extends IStorableConstructor<E>,
   E extends Record = InstanceType<C>,
   A extends ConstructorParameters<C>[0]= ConstructorParameters<C>[0],
-> extends Repository<DM, C, E, A> implements IRecordRepoMethods<C, E ,A> {
+> extends Repository<DM, C, E, A> implements IRepoData, IRecordRepoMethods<C, E ,A> {
   public async create(
     options: A,
     apiOptions?: FromSecArg<DM['create']> | false

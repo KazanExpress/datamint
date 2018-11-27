@@ -3,21 +3,16 @@ import { QueryResult } from '../queryResult';
 import { Entity, IStorableConstructor } from '../storable';
 import { FromSecArg, IRepoConnection, IRepoData, Repository } from './base';
 
-type PartialWithId<T, ID, IDKey extends PropertyKey> = Partial<T> & {
+export type PartialWithId<T, ID, IDKey extends PropertyKey> = Partial<T> & {
   [key in IDKey]: ID;
 };
-
-export interface IEntityRepoData<IDKey extends PropertyKey> extends IRepoData {
-  readonly columns: Array<string>;
-  readonly primaryKey: IDKey;
-}
 
 export interface IEntityRepoMethods<
   C extends IStorableConstructor<E>,
   E extends Entity = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
   ID = E extends Entity<string, infer IdType> ? IdType : any,
-  IDKey extends PropertyKey = E extends Entity<infer IdKey, unknown> ? IdKey : string,
+  IDKey extends PropertyKey = E extends Entity<infer IdKey, any> ? IdKey : string,
 > {
   add(
     options: A,
@@ -30,12 +25,12 @@ export interface IEntityRepoMethods<
   ): Promise<any>;
 
   update(
-    entity: PartialWithId<A, ID, IDKey> | ID,
+    entity: Partial<A> | ID,
     deleteApiOptions?: any
   ): Promise<any>;
 
   delete(
-    entity: PartialWithId<A, ID, IDKey> | ID,
+    entity: Partial<A> | ID,
     deleteApiOptions?: any
   ): Promise<any>;
 
@@ -58,9 +53,9 @@ export class EntityRepository<
   C extends IStorableConstructor<E>,
   E extends Entity = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
-  ID = E extends Entity<string, infer IdType> ? IdType : any,
-  IDKey extends PropertyKey = E extends Entity<infer IdKey, unknown> ? IdKey : string,
-> extends Repository<DM, C, E, A> implements IEntityRepoData<IDKey>, IEntityRepoMethods<C, E, A, ID, IDKey> {
+  ID extends PropertyKey = E extends Entity<string, infer IdType> ? IdType : PropertyKey,
+  IDKey extends PropertyKey = E extends Entity<infer IdKey, any> ? IdKey : PropertyKey,
+> extends Repository<DM, C, E, A> implements IRepoData<IDKey>, IEntityRepoMethods<C, E, A, ID, IDKey> {
 
   public readonly columns: Array<string> = [];
   public readonly primaryKey: IDKey;
@@ -71,8 +66,8 @@ export class EntityRepository<
     entity: C
   ) {
     super(name, connection, entity);
-    this.primaryKey = entity.prototype.__idCol__;
-    delete entity.prototype.__idCol__;
+    this.primaryKey = entity.prototype.__idKey__;
+    delete entity.prototype.__idKey__;
 
     if (entity.prototype.__col__) {
       this.columns = entity.prototype.__col__;
@@ -82,7 +77,7 @@ export class EntityRepository<
     }
   }
 
-  private get driverOptions(): IEntityRepoData<IDKey> {
+  private get driverOptions(): IRepoData<IDKey> {
     return {
       name: this.name,
       columns: this.columns,
@@ -96,7 +91,7 @@ export class EntityRepository<
     apiOptions?: FromSecArg<DM['add']> | false // Pass false to disable the api call
   ) {
     try {
-      const result = await this.connection.currentDriver.create<A, IEntityRepoData<IDKey>>(this.driverOptions, options);
+      const result = await this.connection.currentDriver.create<A, IRepoData<IDKey>>(this.driverOptions, options);
 
       const instance = this.makeDataInstance(result);
 
@@ -132,7 +127,11 @@ export class EntityRepository<
     getApiOptions?: FromSecArg<DM['get']> | false
   ) {
     try {
-      const result = await this.connection.currentDriver.read<A, IEntityRepoData<IDKey>>(this.driverOptions, id);
+      const result = await this.connection.currentDriver.findById<A, IRepoData<IDKey>, ID>(this.driverOptions, id);
+
+      if (!result) {
+        throw new Error(`No results found for id ${id}`);
+      }
 
       const instance = this.makeDataInstance(result);
 
@@ -166,7 +165,7 @@ export class EntityRepository<
   }
 
   public async update(
-    entity: PartialWithId<A, ID, IDKey>,
+    entity: Partial<A>,
     updateApiOptions?: FromSecArg<DM['update']>
   ) {
     throw new Error('Not implemented');
@@ -192,7 +191,7 @@ export class EntityRepository<
   }
 
   public async delete(
-    entity: PartialWithId<A, ID, IDKey> | ID,
+    entity: Partial<A> | ID,
     deleteApiOptions?: FromSecArg<DM['delete']> | false
   ) {
     throw new Error('Not implemented');
