@@ -2,6 +2,8 @@ import { enumerable } from '../decorators';
 import { Repository } from '../repository';
 import { Storable } from './storable';
 
+const defaultIdAliases = ['id', 'ID', 'Id', '_id', '_ID', '_Id', '__id', '__ID', '__Id', '__id__', '__ID__', '__Id__'];
+
 export class Entity<
   IDKey extends PropertyKey = string,
   ID extends PropertyKey = any
@@ -17,6 +19,12 @@ export class Entity<
     $repository: Repository<any, any>
   ) {
     super(__options, $repository);
+
+    if (!this.__idKey__) {
+      const key = Object.keys(this).find(key => defaultIdAliases.some(a => a === key));
+
+      this.__idKey__ = key as IDKey;
+    }
 
     if (this.__idKey__) {
       Reflect.deleteProperty(this, '__idValue__');
