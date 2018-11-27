@@ -4,34 +4,30 @@ import { Storable } from './storable';
 
 export class Entity<
   IDKey extends PropertyKey = string,
-  ID = any
+  ID extends PropertyKey = any
 > extends Storable {
-  // TODO: check to be writable
   @enumerable(false)
-  private __col__: Array<string> = [];
-
-  @enumerable(false)
-  private __idCol__?: IDKey;
+  private __idKey__?: IDKey;
 
   @enumerable(false)
   private __idValue__?: ID;
 
   constructor(
-    options,
+    __options,
     $repository: Repository<any, any>
   ) {
-    super($repository);
+    super(__options, $repository);
 
-    if (this.__idCol__) {
+    if (this.__idKey__) {
       Reflect.deleteProperty(this, '__idValue__');
       Reflect.defineProperty(this, '__idValue__', {
-        value: options[this.__idCol__],
+        value: __options[this.__idKey__],
         writable: true,
         enumerable: false
       });
 
-      Reflect.deleteProperty(this, this.__idCol__);
-      Reflect.defineProperty(this, this.__idCol__, {
+      Reflect.deleteProperty(this, this.__idKey__);
+      Reflect.defineProperty(this, this.__idKey__, {
         get: () => this.__idValue__,
         set: v => this.__idValue__ = v,
         enumerable: true
@@ -40,22 +36,22 @@ export class Entity<
   }
 
   @enumerable(false)
-  public $save(): Promise<void> {
-    /* TODO */
-    throw new Error('Method not implemented.');
+  public async $save(): Promise<void> {
+    await this.$repository.$currentDriver
+      .updateOne(
+        this.$repository,
+        this.__idKey__ ? (this as any)[this.__idKey__] : '',
+        (_) => this
+      );
   }
 
   @enumerable(false)
-  public $delete(): Promise<void> {
-    /* TODO */
-    throw new Error('Method not implemented.');
-  }
-
-  public static Column(target: typeof Entity['prototype'], key: string) {
-    if (!target.__col__)
-      target.__col__ = [];
-
-    target.__col__.push(key);
+  public async $delete(): Promise<void> {
+    await this.$repository.$currentDriver
+      .deleteOne(
+        this.$repository,
+        this.__idKey__ ? (this as any)[this.__idKey__] : ''
+      );
   }
 
   public static ID(target: typeof Entity['prototype'], key: PropertyKey) {

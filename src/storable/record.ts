@@ -4,21 +4,28 @@ import { Storable } from './storable';
 
 export class Record extends Storable {
   constructor(
-    options,
+    __options,
     $repository: Repository<any, any>
   ) {
-    super($repository);
+    super(__options, $repository);
   }
 
   @enumerable(false)
-  public $save(): Promise<void> {
-    /* TODO */
-    throw new Error('Method not implemented.');
+  public async $save(): Promise<void> {
+    await this.$repository.$currentDriver
+      .updateOne(
+        this.$repository,
+        0,
+        (_) => this
+      );
   }
 
   @enumerable(false)
-  public $delete(): Promise<void> {
-    /* TODO */
-    throw new Error('Method not implemented.');
+  public async $delete(): Promise<void> {
+    await this.$repository.$currentDriver
+      .deleteOne(
+        this.$repository,
+        0
+      );
   }
 }
