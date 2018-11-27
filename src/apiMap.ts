@@ -27,9 +27,9 @@ export type RepoFromDataMap<
   E extends InstanceType<C> = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]
 > = DM extends EntityDataMap<C> ? (
-  EntityRepository<DM, C, E, A>
+  E extends Entity ? EntityRepository<DM, C, E, A> : BrokenRepository<DM>
 ) : DM extends RecordDataMap<C> ? (
-  RecordRepository<DM, C, E, A>
+  E extends Record ? RecordRepository<DM, C, E, A> : BrokenRepository<DM>
 ) : BrokenRepository<DM>;
 
 export type ApiMap<R extends IRepositoryMap> = {

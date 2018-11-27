@@ -6,7 +6,7 @@ import { FromSecArg, Repository, IRepoData } from './base';
 export interface IRecordRepoMethods<
   C extends IStorableConstructor<E>,
   E extends Record = InstanceType<C>,
-  A extends ConstructorParameters<C>[0]= ConstructorParameters<C>[0]
+  A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]
 > {
   create(
     options: A,
@@ -42,8 +42,8 @@ export class RecordRepository<
   DM extends RecordDataMap<C>,
   C extends IStorableConstructor<E>,
   E extends Record = InstanceType<C>,
-  A extends ConstructorParameters<C>[0]= ConstructorParameters<C>[0],
-> extends Repository<DM, C, E, A> implements IRepoData, IRecordRepoMethods<C, E ,A> {
+  A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
+> extends Repository<DM, C, E, A> implements IRepoData<never>, IRecordRepoMethods<C, E ,A> {
   public async create(
     options: A,
     apiOptions?: FromSecArg<DM['create']> | false

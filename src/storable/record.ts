@@ -28,4 +28,6 @@ export class Record extends Storable {
         0
       );
   }
+
+  public __test: number = 0;
 }

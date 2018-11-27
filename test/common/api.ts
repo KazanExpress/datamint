@@ -1,6 +1,6 @@
 import { JsonAPIClient } from 'kefetchup/src';
-import { EntityDataMap, RecordDataMap } from '../../src/apiMap';
 import { IProductOptions, IUserOptions, Product, User } from './models';
+import { RecordDataMap, EntityDataMap } from '../../src';
 
 export const createUser: () => IUserOptions = () => ({
   name: 'max',
@@ -48,7 +48,6 @@ export class UserApiMap extends JsonAPIClient implements RecordDataMap<typeof Us
     return Promise.resolve(DB.USER);
   }
 
-
   public async delete() {
     const temp = DB.USER;
     DB.USER = null;
@@ -76,8 +75,26 @@ export class ProductApiMap extends JsonAPIClient implements EntityDataMap<typeof
     return Promise.resolve(DB.PRODUCTS.find(p => p.id === id));
   }
 
-  public update;
-  public delete;
-  public updateById;
-  public count;
+  public async update(entity: any, deleteApiOptions?: any) {
+
+    return {} as any;
+  }
+
+  public async delete(
+    entity: any,
+    deleteApiOptions?: any
+  ): Promise<any> {
+    const idx = DB.PRODUCTS.findIndex(p => p.id === 0);
+
+    return {} as any;
+  }
+
+  public updateById() {
+
+    return {} as any;
+  }
+
+  public async count() {
+    return DB.PRODUCTS.length;
+  }
 }

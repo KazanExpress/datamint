@@ -65,13 +65,18 @@ export class FallbackDriver extends Driver {
 
   public async updateOne<A extends object, R extends IRepoData>(
     { name, primaryKey }: R,
-    id: PropertyKey, query: (entity: A) => Partial<A>
+    id: PropertyKey,
+    query: ((entity: A) => Partial<A>) | Partial<A>
   ): Promise<A | undefined> {
     const repo = this.repositoryMap[name];
 
     let res: A | undefined = undefined;
 
-    const mixInQuery = (obj: A): A => ({ ...obj as object, ...query(obj) as object } as A);
+    const mixInQuery = (obj: A): A => typeof query === 'function' ? (
+        { ...obj as object, ...query(obj) as object } as A
+      ) : (
+        { ...obj as object, ...query as object } as A
+      );
 
     if (primaryKey) {
       if (Array.isArray(repo)) {

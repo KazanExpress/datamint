@@ -11,8 +11,7 @@ export interface IEntityRepoMethods<
   C extends IStorableConstructor<E>,
   E extends Entity = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
-  ID = E extends Entity<string, infer IdType> ? IdType : any,
-  IDKey extends PropertyKey = E extends Entity<infer IdKey, any> ? IdKey : string,
+  ID = E extends Entity<string, infer IdType> ? IdType : any
 > {
   add(
     options: A,
@@ -55,7 +54,7 @@ export class EntityRepository<
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
   ID extends PropertyKey = E extends Entity<string, infer IdType> ? IdType : PropertyKey,
   IDKey extends PropertyKey = E extends Entity<infer IdKey, any> ? IdKey : PropertyKey,
-> extends Repository<DM, C, E, A> implements IRepoData<IDKey>, IEntityRepoMethods<C, E, A, ID, IDKey> {
+> extends Repository<DM, C, E, A> implements IRepoData<IDKey>, IEntityRepoMethods<C, E, A, ID> {
 
   public readonly columns: Array<string> = [];
   public readonly primaryKey: IDKey;

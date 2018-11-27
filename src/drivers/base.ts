@@ -37,7 +37,7 @@ export abstract class Driver extends Debugable {
   public abstract updateOne<A extends object, R extends IRepoData, ID extends PropertyKey>(
     repository: R,
     id: ID,
-    query: (entity: A) => Partial<A>
+    query: ((entity: A) => Partial<A>) | Partial<A>
   ): Promise<A | undefined>;
 
   public abstract delete<A extends object, R extends IRepoData>(

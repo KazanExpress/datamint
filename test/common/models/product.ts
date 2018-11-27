@@ -6,12 +6,12 @@ export interface IProductOptions {
   url: string;
 }
 
-export class Product extends Entity<'id', number> {
+export class Product extends Entity<'id', number> implements IProductOptions {
   @Product.ID
-  @Product.Property('productId')
+  @Product.Property
   public id: number;
 
-  @Product.Property('productTitle')
+  @Product.Property
   public title: string;
 
   @Product.Property

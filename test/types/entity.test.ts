@@ -11,8 +11,8 @@ describe('types', () => {
       User,
       Broken
     }, {
-      User: new UserApiMap(),
       Products: new ProductApiMap(),
+      User: new UserApiMap(),
       Broken: {
         async create() {
           return Promise.resolve(new Broken());
