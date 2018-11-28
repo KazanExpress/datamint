@@ -75,24 +75,8 @@ export class ProductApiMap extends JsonAPIClient implements EntityDataMap<typeof
     return Promise.resolve(DB.PRODUCTS.find(p => p.id === id));
   }
 
-  public async update(entity: any, deleteApiOptions?: any) {
-
-    return {} as any;
-  }
-
-  public async delete(
-    entity: any,
-    deleteApiOptions?: any
-  ): Promise<any> {
-    const idx = DB.PRODUCTS.findIndex(p => p.id === 0);
-
-    return {} as any;
-  }
-
-  public updateById() {
-
-    return {} as any;
-  }
+  public update;
+  public delete;
 
   public async count() {
     return DB.PRODUCTS.length;

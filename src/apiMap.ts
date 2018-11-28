@@ -8,11 +8,15 @@ export type DataMap<
 
 export type EntityDataMap<
   C extends IStorableConstructor<any>
-> = IEntityRepoMethods<C>;
+> = InstanceType<C> extends Entity ? {
+  [key in keyof IEntityRepoMethods<C>]: IEntityRepoMethods<C>[key] | undefined;
+} : never;
 
 export type RecordDataMap<
   C extends IStorableConstructor<any>
-> = IRecordRepoMethods<C>;
+> = InstanceType<C> extends Record ? {
+  [key in keyof IRecordRepoMethods<C>]: IRecordRepoMethods<C>[key] | undefined;
+} : never;
 
 export type BrokenDataMap<
   C extends IStorableConstructor<any>,
