@@ -1,17 +1,20 @@
-import { EntityDataMap } from '../apiMap';
+import { Driver, FallbackDriver, IDriverConstructor } from '../drivers';
+import { Connection } from '../connection/connection';
 import { QueryResult } from '../queryResult';
-import { Entity, IStorableConstructor } from '../storable';
-import { FromSecArg, IRepoConnection, IRepoData, Repository } from './base';
+import { IStorableConstructor } from '../storable';
+import { Entity } from '../storable/entity';
+import { FromSecArg, IRepoData, RepoFactory, IRepoFactoryOptions, Repository, selectDriver } from './base';
 
-export type PartialWithId<T, ID, IDKey extends PropertyKey> = Partial<T> & {
-  [key in IDKey]: ID;
-};
+export type PartialWithId<T, IDValue, IDKey extends PropertyKey> = {
+  [key in IDKey]: IDValue;
+} & Partial<T>;
 
 export interface IEntityRepoMethods<
   C extends IStorableConstructor<E>,
   E extends Entity = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
-  ID = E extends Entity<string, infer IdType> ? IdType : any
+  IDKey extends PropertyKey = E extends Entity<infer IdKey, any> ? IdKey : PropertyKey,
+  IDValue extends PropertyKey = E extends Entity<string, infer IdType> ? IdType : any
 > {
   add(
     options: A,
@@ -19,23 +22,29 @@ export interface IEntityRepoMethods<
   ): Promise<any>;
 
   get(
-    id: ID,
+    id: IDValue,
     apiOptions?: any
   ): Promise<any>;
 
   update(
-    entity: Partial<A> | ID,
+    entity: PartialWithId<A, IDValue, IDKey> | IDValue,
     deleteApiOptions?: any
   ): Promise<any>;
 
   delete(
-    entity: Partial<A> | ID,
+    entity: Partial<A> | IDValue,
     deleteApiOptions?: any
   ): Promise<any>;
 
   //...
   // TODO - other methods
 }
+
+export type EntityDataMap<
+  C extends IStorableConstructor<E>,
+  E extends Entity = InstanceType<C>,
+  A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]
+> = Partial<IEntityRepoMethods<C, E, A>>;
 
 /**
  * A typical multi-entity repository.
@@ -47,32 +56,42 @@ export interface IEntityRepoMethods<
  * @template `ID` entity primary key type
  * @template `IDKey` entity primary key name
  */
-export class EntityRepository<
-  DM extends EntityDataMap<C>,
+export class EntityRepositoryClass<
+  DM extends EntityDataMap<C, E, A>,
   C extends IStorableConstructor<E>,
   E extends Entity = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
-  ID extends PropertyKey = E extends Entity<string, infer IdType> ? IdType : PropertyKey,
   IDKey extends PropertyKey = E extends Entity<infer IdKey, any> ? IdKey : PropertyKey,
-> extends Repository<DM, C, E, A> implements IRepoData<IDKey>, IEntityRepoMethods<C, E, A, ID> {
+  IDValue extends PropertyKey = E extends Entity<string, infer IdType> ? IdType : PropertyKey
+> extends Repository<DM, C, E, A> implements IRepoData<IDKey>, IEntityRepoMethods<C, E, A, IDKey, IDValue> {
 
   public readonly columns: Array<string> = [];
   public readonly primaryKey: IDKey;
 
   constructor(
     name: string,
-    connection: IRepoConnection<DM>,
-    entity: C
+    connectionName: string,
+    public readonly currentDriver: Driver,
+    entity: C,
+    api?: DM,
   ) {
-    super(name, connection, entity);
+    super(name, connectionName, entity, api);
+
     this.primaryKey = entity.prototype.__idKey__;
     delete entity.prototype.__idKey__;
 
     if (entity.prototype.__col__) {
       this.columns = entity.prototype.__col__;
+
+      if (!this.columns.includes(String(this.primaryKey))) {
+        this.columns.push(String(this.primaryKey));
+      }
+
       delete entity.prototype.__col__;
     } else {
-      this.columns = Object.keys(new entity({}, this));
+      // Cast to any to allow passing `this` as a second arg for classes implementing IActiveRecord to work
+      // and to avoid pointless casting to Saveable
+      this.columns = Object.keys(new (entity as any)({}, this));
     }
   }
 
@@ -90,7 +109,7 @@ export class EntityRepository<
     apiOptions?: FromSecArg<DM['add']> | false // Pass false to disable the api call
   ) {
     try {
-      const result = await this.connection.currentDriver.create<A, IRepoData<IDKey>>(this.driverOptions, options);
+      const result = await this.currentDriver.create<A, IRepoData<IDKey>>(this.driverOptions, options);
 
       const instance = this.makeDataInstance(result);
 
@@ -122,11 +141,11 @@ export class EntityRepository<
   }
 
   public async get(
-    id: ID,
+    id: IDValue,
     getApiOptions?: FromSecArg<DM['get']> | false
   ) {
     try {
-      const result = await this.connection.currentDriver.findById<A, IRepoData<IDKey>, ID>(this.driverOptions, id);
+      const result = await this.currentDriver.findById<A, IRepoData<IDKey>, IDValue>(this.driverOptions, id);
 
       if (!result) {
         throw new Error(`No results found for id ${id}`);
@@ -164,7 +183,7 @@ export class EntityRepository<
   }
 
   public async update(
-    entity: Partial<A>,
+    entity: PartialWithId<A, IDValue, IDKey>,
     updateApiOptions?: FromSecArg<DM['update']>
   ) {
     throw new Error('Not implemented');
@@ -177,9 +196,9 @@ export class EntityRepository<
 
   /* Do we even need this?.. */
   public async updateById(
-    id: ID,
-    query: (entity: E) => Partial<A>,
-    // updateApiOptions?: FromSecArg<DM['updateById']>
+    id: IDValue,
+    query: (entity: A) => Partial<A>,
+    updateApiOptions?: FromSecArg<DM['update']>
   ) {
     throw new Error('Not implemented');
 
@@ -190,7 +209,7 @@ export class EntityRepository<
   }
 
   public async delete(
-    entity: Partial<A> | ID,
+    entity: Partial<A> | IDValue,
     deleteApiOptions?: FromSecArg<DM['delete']> | false
   ) {
     throw new Error('Not implemented');
@@ -208,4 +227,23 @@ export class EntityRepository<
   }
 
   // TODO: Cluster operations
+}
+
+export function EntityRepository<
+  D extends EntityDataMap<C, E, A>,
+  C extends IStorableConstructor<any>,
+  E extends Entity = InstanceType<C>,
+  A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
+  IDKey extends PropertyKey = E extends Entity<infer IdKey, any> ? IdKey : PropertyKey,
+  IDValue extends PropertyKey = E extends Entity<string, infer IdType> ? IdType : PropertyKey
+>(options: IRepoFactoryOptions<C, D> & {
+  dirvers?: IDriverConstructor | IDriverConstructor[];
+}): RepoFactory<EntityRepositoryClass<D, C, E, A, IDKey, IDValue>> {
+  return (name: string, connection: Connection) => new EntityRepositoryClass<D, C, E, A, IDKey, IDValue>(
+    name,
+    connection.name,
+    new (selectDriver(options.dirvers || FallbackDriver, name))(connection),
+    options.model,
+    options.api
+  );
 }

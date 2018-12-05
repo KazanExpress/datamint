@@ -1,4 +1,4 @@
-import { Connection } from '../orm';
+import { Connection } from '../connection';
 import { IRepoData } from '../repository';
 import { Driver, IDriverConstructor } from './base';
 

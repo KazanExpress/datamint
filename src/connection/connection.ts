@@ -1,86 +1,40 @@
-import { ApiMap, RepoFromDataMap } from '../apiMap';
-import { Debug, Debugable, debugMap, DebugState, debugState, DebugType, ExceptionType, setDebugState } from '../debug';
-import { Driver, IDriverConstructor } from '../drivers';
-import { FallbackDriver } from '../drivers/fallback';
-import { MultiDriver } from '../drivers/multiDriver';
-import { makeRepository } from '../repository';
-import { IStorableConstructor } from '../storable';
+import { Debugable, debugMap, DebugState, debugState, DebugType, ExceptionType, setDebugState } from '../debug';
+import { DataMap, RepoFactory, Repository } from '../repository/base';
 
 export interface IRepositoryMap {
-  [name: string]: IStorableConstructor<any>;
+  [name: string]: RepoFactory<any>;
 }
 
-type PropFrom<O, Key> = Key extends keyof O ? O[Key] : any;
-
-export type RepoStore<M extends IRepositoryMap, A extends ApiMap<M>> = {
-  [Name in (keyof M | keyof A)]: RepoFromDataMap<PropFrom<M, Name>, PropFrom<A, Name>>;
+export type RepoStore<M extends IRepositoryMap> = {
+  [Name in keyof M]: ReturnType<M[Name]>;
 };
 
 export class Connection<
   RM extends IRepositoryMap = IRepositoryMap,
-  AM extends ApiMap<RM> = ApiMap<RM>,
 > extends Debugable {
   protected $debugType: DebugType = `connection`;
   protected $connectionName: string = this.name;
 
-  // TODO
-  // public static readonly plugins: WEBALORM.IPlugin[] = [];
-
-  /**
-   * The driver currently used for operations with entities
-   */
-  public currentDriver: Driver;
-
   /**
    * A current map of bound repositories
    */
-  public repositories: RepoStore<RM, AM> = {} as any;
+  public readonly repositories: RepoStore<RM> = {} as any;
 
   /**
-   * Creates a WEBALORM connection instance.
+   * Creates a connection instance.
    * @param name the name of the connection to the storage. Namespaces all respositories invoked from the instance.
-   * @param drivers determine a variety of drivers the orm can select from. The first one that fits for the environment is selected.
-   * @param repositories sets the relation of a repository name to its contents' prototype.
-   * @param apiMap maps the API calls onto the current data structure
+   * @param repositories sets the relation of a repository name to its contents' options.
    */
   constructor(
-    public name: string,
-    public drivers: IDriverConstructor[] | MultiDriver,
+    public readonly name: string,
     repositories: RM,
-    public readonly apiMap?: AM
   ) {
     super();
-
-    if (!apiMap) {
-      Debug.$warn('The main webalorm functionality is disabled. Are you sure you want to use this without API?', true);
-    }
-
-    try {
-      if (Array.isArray(drivers)) {
-        // Select the first supported driver from the bunch
-        const SupportedDrivers = drivers.filter(d => d.isSupported);
-        if (SupportedDrivers.length > 0) {
-          this.currentDriver = new SupportedDrivers[0](this);
-        } else {
-          throw new TypeError('No supported driver provided. Using fallback.');
-        }
-      } else if (drivers instanceof MultiDriver) {
-        this.currentDriver = drivers;
-      } else {
-        throw new TypeError('No supported driver provided. Using fallback.');
-      }
-
-      this.$log(`Using driver "${this.currentDriver.constructor.name}"`);
-    } catch (e) {
-      this.$error(e.message, true);
-
-      this.currentDriver = new FallbackDriver(this);
-    }
 
     let reProxy;
 
     if (!Proxy) {
-      this.$warn(`window.Proxy is unavailable. Using insufficient property forwarding.`);
+      this.$warn(`Proxy is unavailable. Using insufficient property forwarding.`);
 
       reProxy = (repoName: string) => Object.defineProperty(this, repoName, {
         get: () => this.repositories[repoName],
@@ -88,26 +42,22 @@ export class Connection<
     }
 
     for (const repoName in repositories) {
-      const name: string = repoName;
-      const entityConstructor = repositories[name];
+      this.repositories[repoName] = repositories[repoName](repoName, this);
 
-      this.repositories[name] = makeRepository(name, {
-        name: this.name,
-        apiMap: this.apiMap && this.apiMap[name] as any,
-        currentDriver: this.currentDriver,
-      }, entityConstructor);
-
-      reProxy && reProxy(name);
+      reProxy && reProxy(repoName);
     }
 
+    // Make repositories immutable
+    this.repositories = Object.freeze(this.repositories);
+
     if (Proxy) {
-      this.$log(`window.Proxy is available. Using modern property forwarding.`);
+      this.$log(`Proxy is available. Using modern property forwarding.`);
 
       return new Proxy(this, {
         get(target, key: string) {
           if (!target.repositories[key]) {
-            if (!target[key]) {
-              target.$log(
+            if (typeof target[key] === 'undefined') {
+              target.$warn(
                 `Repository "${key}" is not registered upon initialization. No other property with the same name was found.`
               );
             }

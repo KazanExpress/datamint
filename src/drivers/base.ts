@@ -1,6 +1,6 @@
-import { Connection } from '../orm';
-import { IRepoData } from '../repository';
 import { Debugable, DebugType } from '../debug';
+import { Connection } from '../connection';
+import { IRepoData } from '../repository';
 
 export interface IDriverConstructor extends Function {
   new (connection: Connection): Driver;

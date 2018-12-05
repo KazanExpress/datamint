@@ -1,16 +1,8 @@
-import { DataMap } from '../apiMap';
 import { Debug, Debugable, DebugType } from '../debug';
-import { Driver } from '../drivers';
+import { FallbackDriver, IDriverConstructor } from '../drivers';
+import { MultiDriver } from '../drivers/multiDriver';
+import { Connection } from '../connection';
 import { IStorableConstructor, Storable } from '../storable';
-
-export interface IRepoConnectionInternal {
-  readonly name: string;
-  readonly currentDriver: Driver;
-}
-
-export interface IRepoConnection<DM> extends IRepoConnectionInternal {
-  readonly apiMap?: DM;
-}
 
 export interface IRepoData<IDKey = PropertyKey> {
   readonly name: string;
@@ -22,45 +14,76 @@ export type FromSecArg<
   T extends undefined | ((arg: any, other: any) => any)
 > = T extends ((arg: any, other: infer U) => any) ? U : undefined;
 
+export type DataMap<C extends IStorableConstructor<any>, Keys extends string = string> = {
+  [key in Keys]: ((...args: any[]) => Promise<InstanceType<C>>) | undefined;
+};
+
 export abstract class Repository<
-  DM extends DataMap<C> | undefined,
+  DM,
   C extends IStorableConstructor<E>,
   E extends Storable = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
-> extends Debugable implements IRepoData {
+> extends Debugable {
   protected readonly $debugType: DebugType = `db:${this.name.toLowerCase()}` as DebugType;
-  protected readonly connection: IRepoConnectionInternal;
-  public readonly $connectionName: string;
-
-  public $currentDriver: Driver;
 
   constructor(
     public readonly name: string,
-    connection: IRepoConnection<DM>,
-    private readonly Data: C
+    public readonly $connectionName: string,
+    private readonly Data: C,
+    protected readonly api?: DM,
   ) {
     super();
-    this.connection = connection;
-    this.$connectionName = connection.name;
-    this.$currentDriver = connection.currentDriver;
 
-    this.api = connection.apiMap;
+    if (!api) {
+      this.$warn('The main functionality is disabled. Are you sure you want to use this without API?', true);
+    }
 
     if (/* this class was instantiated directly (without inheritance) */
       Repository.prototype === this.constructor.prototype
     ) {
       if (this.$debugEnabled) {
-        this.$warn(`Using default empty repository.`);
+        this.$error(`Using default empty repository.`);
       } else {
-        Debug.$warn(`Using default empty repository for ${name}`, true);
+        Debug.$error(`Using default empty repository for ${name}`, true);
       }
     }
-
   }
 
-  protected readonly api?: DM;
+  protected makeDataInstance(options: A): E {
+    // Cast to any to allow passing `this` as a second arg for classes implementing IActiveRecord to work
+    return new (this.Data as any)(options, this);
+  }
+}
 
-  protected makeDataInstance(options: A) {
-    return new this.Data(options, this);
+export interface IRepoFactoryOptions<C, D> {
+  model: C;
+  api: D;
+}
+
+export type RepoFactory<Repo extends Repository<any, any> = Repository<any, any>> = (name: string, connection: Connection) => Repo;
+
+export function selectDriver(drivers: IDriverConstructor | IDriverConstructor[], repoName: string): IDriverConstructor {
+  const error = () => {
+    let msg: string = `No supported driver provided for ${repoName}.`;
+
+    if (Debug.map['*'] !== 'hard') {
+      msg += ' Using fallback.';
+    }
+
+    Debug.$error(msg);
+  };
+
+  if (Array.isArray(drivers)) {
+    // Select the first supported driver from the bunch
+    const SupportedDrivers = drivers.filter(d => d.isSupported);
+    if (SupportedDrivers.length > 0) {
+      return SupportedDrivers[0];
+    } else {
+      return error(), FallbackDriver;
+    }
+  } else if (drivers instanceof MultiDriver) {
+    return drivers;
+  } else {
+    return error(), FallbackDriver;
   }
 }

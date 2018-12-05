@@ -15,13 +15,13 @@ const DB = {
 };
 
 
-export class UserApiMap extends JsonAPIClient implements RecordDataMap<typeof User> {
+export class UserApiMap/*  extends JsonAPIClient  */implements RecordDataMap<typeof User> {
   constructor() {
-    super('https://kazanexpress.ru', {
-      headers: {
-        Authorization: 'basic asdasd'
-      }
-    });
+    // super('https://kazanexpress.ru', {
+    //   headers: {
+    //     Authorization: 'basic asdasd'
+    //   }
+    // });
   }
 
   public async create(
@@ -56,13 +56,13 @@ export class UserApiMap extends JsonAPIClient implements RecordDataMap<typeof Us
   }
 }
 
-export class ProductApiMap extends JsonAPIClient implements EntityDataMap<typeof Product> {
+export class ProductApiMap/*  extends JsonAPIClient */ implements EntityDataMap<typeof Product> {
   constructor() {
-    super('https://kazanexpress.ru', {
-      headers: {
-        Authorization: 'basic asdasd'
-      }
-    });
+    // super('https://kazanexpress.ru', {
+    //   headers: {
+    //     Authorization: 'basic asdasd'
+    //   }
+    // });
   }
 
   public async add(options: IProductOptions, apiKey: string) {
@@ -75,8 +75,8 @@ export class ProductApiMap extends JsonAPIClient implements EntityDataMap<typeof
     return Promise.resolve(DB.PRODUCTS.find(p => p.id === id));
   }
 
-  public update;
-  public delete;
+  public update: undefined;
+  public delete: undefined;
 
   public async count() {
     return DB.PRODUCTS.length;

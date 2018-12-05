@@ -6,7 +6,7 @@ class GlobalDebug extends Debugable {
   protected $connectionName: string = '';
   private constructor() { super(); }
 
-  public static instance = new GlobalDebug();
+  public static readonly instance = new GlobalDebug();
 
   public $log!: Debugable['$log'];
   public $warn!: Debugable['$warn'];

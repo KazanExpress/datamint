@@ -21,8 +21,10 @@ export abstract class Debugable {
   public get $debugEnabled() { return errorTypeFor(this.$debugType); }
 
   @enumerable(false)
-  private readonly $logFactory = (level: LogLevel) => (message, force: boolean = false) =>
+  private $logFactory(level: LogLevel) {
+    return (message, force: boolean = false) =>
       print(this.$connectionName, this.$debugType, message, level, force);
+  }
 
   @enumerable(false)
   protected readonly $log = this.$logFactory('log');
@@ -32,4 +34,16 @@ export abstract class Debugable {
   protected readonly $error = this.$logFactory('error');
   @enumerable(false)
   protected readonly $debug = this.$logFactory('debug');
+}
+
+export class DebugInstance extends Debugable {
+  constructor(
+    protected $debugType: DebugType,
+    protected $connectionName: string
+  ) { super(); }
+
+  public $log!: Debugable['$log'];
+  public $warn!: Debugable['$warn'];
+  public $error!: Debugable['$error'];
+  public $debug!: Debugable['$debug'];
 }

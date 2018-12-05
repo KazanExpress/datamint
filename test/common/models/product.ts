@@ -1,26 +1,24 @@
-import { Entity } from '../../..';
+import { SaveableEntity } from '../../../src/storable/entity';
 
 export interface IProductOptions {
   id: number;
   title: string;
-  url: string;
 }
 
-export class Product extends Entity<'id', number> implements IProductOptions {
+export class Product extends SaveableEntity<'id', IProductOptions['id']> implements IProductOptions {
   @Product.ID
-  @Product.Property
   public id: number;
 
   @Product.Property
   public title: string;
 
   @Product.Property
-  public url: string;
+  public readonly url: string;
 
-  constructor(options: IProductOptions, repo?) {
-    super(options, repo);
+  constructor(options: IProductOptions, ...args) {
+    super(options, ...args);
     this.id = options.id;
     this.title = options.title;
-    this.url = options.url;
+    this.url = `/product/${this.id}-${this.title}`;
   }
 }

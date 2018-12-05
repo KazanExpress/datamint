@@ -96,12 +96,16 @@ export function print(instanceName: string, type: any, message: any, level: LogL
       if (errorType === 'hard' && level === 'error') {
         throw new Error(`${LOG_PREFIX(instanceName)}:${type} - ${message}`);
       } else {
-        console[level](`%c${LOG_PREFIX(instanceName)}%c:%c${type}%c - ${message}`,
-          'color: purple',
-          'color: initial',
-          'color: blue',
-          'color: initial'
-        );
+        if (typeof window !== 'undefined') {
+          window.console[level](`%c${LOG_PREFIX(instanceName)}%c:%c${type}%c - ${message}`,
+            'color: purple',
+            'color: initial',
+            'color: blue',
+            'color: initial'
+          );
+        } else {
+          console[level](`${LOG_PREFIX(instanceName)}:${type} - ${message}`);
+        }
       }
     }
   }

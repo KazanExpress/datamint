@@ -1,6 +1,5 @@
 import { IRepoData } from '../repository';
 import { Driver } from './base';
-import { DebugType } from '../debug';
 
 /**
  * @todo refactor, code is a mess
@@ -135,21 +134,21 @@ export class FallbackDriver extends Driver {
 
     let res;
 
-    if (isEntityRepo(repository)) {
-      const key = Object.keys(repo).findIndex(e => Object.keys(repo[e]).some(key => {
-        return e[key] === entity[key];
-      }));
+    // if (isEntityRepo(repository)) {
+    //   const key = Object.keys(repo).findIndex(e => Object.keys(repo[e]).some(key => {
+    //     return e[key] === entity[key];
+    //   }));
 
-      res = this.repositoryMap[repository.name][key];
+    //   res = this.repositoryMap[repository.name][key];
 
-      this.repositoryMap[repository.name][key] = undefined;
+    //   this.repositoryMap[repository.name][key] = undefined;
 
-      delete this.repositoryMap[repository.name][key];
-    } else {
-      res = this.repositoryMap[repository.name];
+    //   delete this.repositoryMap[repository.name][key];
+    // } else {
+    //   res = this.repositoryMap[repository.name];
 
-      this.repositoryMap[repository.name] = undefined;
-    }
+    //   this.repositoryMap[repository.name] = undefined;
+    // }
 
     return res;
   }
