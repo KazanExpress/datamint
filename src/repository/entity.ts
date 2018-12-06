@@ -27,7 +27,7 @@ export interface IEntityRepoMethods<
   ): Promise<any>;
 
   update(
-    entity: PartialWithId<A, IDValue, IDKey> | IDValue,
+    entity: PartialWithId<A, IDValue, IDKey>,
     deleteApiOptions?: any
   ): Promise<any>;
 
