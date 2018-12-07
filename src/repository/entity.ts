@@ -18,34 +18,35 @@ export interface IEntityRepoMethods<
   C extends IStorableConstructor<E>,
   E extends Entity = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
+  R = any,
   IDKey extends PropertyKey = E extends Entity<infer IdKey, any> ? IdKey : PropertyKey,
   IDValue extends PropertyKey = E extends Entity<string, infer IdType> ? IdType : any
 > {
   add(
     options: A,
     apiOptions?: any
-  ): Promise<any>;
+  ): Promise<R>;
 
   get(
     id: IDValue,
     apiOptions?: any
-    ): Promise<any>;
+    ): Promise<R>;
 
   update(
     entity: PartialWithId<A, IDValue, IDKey>,
     deleteApiOptions?: any
-  ): Promise<any>;
+  ): Promise<R>;
 
   updateById(
     id: IDValue,
     query: (entity: A) => Partial<A>,
     deleteApiOptions?: any
-  ): Promise<any>;
+  ): Promise<R>;
 
   delete(
     entity: Partial<A> | IDValue,
     deleteApiOptions?: any
-  ): Promise<any>;
+  ): Promise<R>;
 
   //...
   // TODO - other methods
@@ -57,13 +58,13 @@ export interface IEntityRepository<
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
   IDKey extends PropertyKey = E extends Entity<infer IdKey, any> ? IdKey : PropertyKey,
   IDValue extends PropertyKey = E extends Entity<string, infer IdType> ? IdType : any
-> extends IEntityRepoData<IDKey>, IEntityRepoMethods<C, E, A, IDKey, IDValue>, Debugable {}
+> extends IEntityRepoData<IDKey>, IEntityRepoMethods<C, E, A, QueryResult<E> | QueryResult<undefined>, IDKey, IDValue>, Debugable {}
 
 export type EntityDataMap<
   C extends IStorableConstructor<E>,
   E extends Entity = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]
-> = Partial<IEntityRepoMethods<C, E, A>>;
+> = Partial<IEntityRepoMethods<C, E, A, A | undefined>>;
 
 /**
  * A typical multi-entity repository.
@@ -146,8 +147,12 @@ export class EntityRepositoryClass<
 
         // @TODO: implement async request queue
         this.api.add(options, apiOptions).then(res => {
-          queryResult.result = this.makeDataInstance(res);
-          this.$log(`API handler execution end: ${this.name}.add() => ${JSON.stringify(res, undefined, '  ')}`);
+          if (typeof res !== 'undefined') {
+            queryResult.result = this.makeDataInstance(res);
+            this.$log(`API handler execution end: ${this.name}.add() => ${JSON.stringify(res, undefined, '  ')}`);
+          } else {
+            throw new TypeError('result is undefined');
+          }
         }).catch(e => {
           queryResult.error = e;
           this.$error(`API handler execution end: ${this.name}.add() => ${e}`);
@@ -186,8 +191,12 @@ export class EntityRepositoryClass<
 
         // @TODO: implement async request queue
         this.api.get(id as any, getApiOptions).then(res => {
-          queryResult.result = this.makeDataInstance(res);
-          this.$log(`API handler execution end: ${this.name}.get() => ${JSON.stringify(res, undefined, '  ')}`);
+          if (typeof res !== 'undefined') {
+            queryResult.result = this.makeDataInstance(res);
+            this.$log(`API handler execution end: ${this.name}.get() => ${JSON.stringify(res, undefined, '  ')}`);
+          } else {
+            throw new TypeError('result is undefined');
+          }
         }).catch(e => {
           queryResult.error = e;
           this.$error(`API handler execution end: ${this.name}.get() => ${e}`);

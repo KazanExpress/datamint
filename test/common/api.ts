@@ -4,13 +4,13 @@ import { RecordDataMap, EntityDataMap } from '../../src';
 
 export const createUser: () => IUserOptions = () => ({
   name: 'max',
-  // tslint:disable-next-line:no-magic-numbers
+  // tslint:disable-next-line:no-magic-numbers because my birthday
   birthDate: new Date(Date.UTC(1997, 8, 9)),
   cart: []
 });
 
 const DB = {
-  USER: null as IUserOptions | null,
+  USER: undefined as IUserOptions | undefined,
   PRODUCTS: [] as IProductOptions[],
 };
 
@@ -50,7 +50,7 @@ export class UserApiMap/*  extends JsonAPIClient  */implements RecordDataMap<typ
 
   public async delete() {
     const temp = DB.USER;
-    DB.USER = null;
+    DB.USER = undefined;
 
     return temp;
   }
@@ -74,9 +74,6 @@ export class ProductApiMap/*  extends JsonAPIClient */ implements EntityDataMap<
   public async get(id: number) {
     return Promise.resolve(DB.PRODUCTS.find(p => p.id === id));
   }
-
-  public update: undefined;
-  public delete: undefined;
 
   public async count() {
     return DB.PRODUCTS.length;

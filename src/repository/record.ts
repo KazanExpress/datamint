@@ -8,25 +8,26 @@ import { FromSecArg, IRepoData, IRepoFactoryOptions, RepoFactory, Repository, se
 export interface IRecordRepoMethods<
   C extends IStorableConstructor<E>,
   E extends Record = InstanceType<C>,
-  A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]
+  A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
+  R = any
 > {
   create(
     options: A,
     apiOptions?: any
-  ): Promise<any>;
+  ): Promise<R>;
 
   read(
     apiOptions?: any
-  ): Promise<any>;
+  ): Promise<R>;
 
   update(
     options: Partial<A>,
     apiOptions?: any
-  ): Promise<any>;
+  ): Promise<R>;
 
   delete(
     deleteApiOptions?: any
-  ): Promise<any>;
+  ): Promise<R>;
 
   //...
   // TODO - other methods?
@@ -35,13 +36,13 @@ export interface IRecordRepository<
   C extends IStorableConstructor<E>,
   E extends Record = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]
-> extends IRepoData, IRecordRepoMethods<C, E, A>, Debugable {}
+> extends IRepoData, IRecordRepoMethods<C, E, A, QueryResult<E> | QueryResult<undefined>>, Debugable {}
 
 export type RecordDataMap<
   C extends IStorableConstructor<E>,
   E extends Record = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]
-> = Partial<IRecordRepoMethods<C, E, A>>;
+> = Partial<IRecordRepoMethods<C, E, A, A | undefined>>;
 
 /**
  * A single-entity repository.
@@ -71,7 +72,7 @@ export class RecordRepositoryClass<
   ) {
     throw new Error('Not implemented');
 
-    return new QueryResult(/* TODO: implement this */
+    return new QueryResult<E>(/* TODO: implement this */
       true,
       this.makeDataInstance({} as any)
     );
