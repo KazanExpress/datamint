@@ -65,7 +65,7 @@ export class SaveableEntity extends Entity {
             return Promise.resolve(undefined);
         }
         const idkey = this.__idKey__;
-        return this.__repo.updateById(idkey ? this[idkey] : 0, () => this).then((r) => r.result).catch(e => { throw e; });
+        return this.__repo.updateById(idkey ? this[idkey] : 0, () => this).then(r => r.result).catch(e => { throw e; });
     }
     $delete() {
         if (!this.__repo) {
@@ -73,7 +73,7 @@ export class SaveableEntity extends Entity {
             return Promise.resolve(undefined);
         }
         const idkey = this.__idKey__;
-        return this.__repo.delete(idkey ? this[idkey] : 0).then((r) => r.result).catch(e => { throw e; });
+        return this.__repo.delete(idkey ? this[idkey] : 0).then(r => r.result).catch(e => { throw e; });
     }
 }
 __decorate([

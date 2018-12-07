@@ -94,11 +94,11 @@ export class Connection<
    */
   public static $debug(enabled: boolean, exceptions: ExceptionType): void;
   /**
-   * Enable a certain debug option for WEBALORM
+   * Enable a certain debug option for DATAMINT
    */
   public static $debug(type: DebugType): void;
   /**
-   * Enable a certain debug option for WEBALORM
+   * Enable a certain debug option for DATAMINT
    *
    * Allows specifying different debug types:
    *
@@ -107,11 +107,11 @@ export class Connection<
    */
   public static $debug(type: DebugType, exceptions: ExceptionType): void;
   /**
-   * Enable a certain debug option for WEBALORM
+   * Enable a certain debug option for DATAMINT
    */
   public static $debug(type: string): void;
   /**
-   * Enable a certain debug option for WEBALORM
+   * Enable a certain debug option for DATAMINT
    *
    * Allows specifying different debug types:
    *

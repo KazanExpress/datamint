@@ -9,7 +9,7 @@ export abstract class Debugable {
   protected readonly abstract debugType: DebugType;
 
   /**
-   * The name of the WEBALORM connection this class uses
+   * The name of the DATAMINT connection this class uses
    */
   @enumerable(false)
   public readonly abstract connectionName: string;

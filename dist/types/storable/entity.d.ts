@@ -21,7 +21,7 @@ export declare class SaveableEntity<IDKey extends PropertyKey = string, IDValue 
     constructor(options: WithId<{
         [key: string]: any;
     }, IDKey, IDValue>, repo?: IEntityRepository<any, any, any, IDKey, IDValue>);
-    $save(): Promise<undefined> | Promise<this>;
+    $save(): Promise<this | undefined>;
     $delete(): Promise<this | undefined>;
 }
 export {};

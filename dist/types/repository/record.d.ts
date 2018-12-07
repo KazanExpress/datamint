@@ -3,13 +3,15 @@ import { Driver, IDriverConstructor } from '../drivers';
 import { QueryResult } from '../queryResult';
 import { IStorableConstructor, Record } from '../storable';
 import { FromSecArg, IRepoData, IRepoFactoryOptions, RepoFactory, Repository } from './base';
-export interface IRecordRepository<C extends IStorableConstructor<E>, E extends Record = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]> extends IRepoData, Debugable {
-    create(options: A, apiOptions?: any): Promise<any>;
-    read(apiOptions?: any): Promise<any>;
-    update(options: Partial<A>, apiOptions?: any): Promise<any>;
-    delete(deleteApiOptions?: any): Promise<any>;
+export interface IRecordRepoMethods<C extends IStorableConstructor<E>, E extends Record = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0], R = any> {
+    create(options: A, apiOptions?: any): Promise<R>;
+    read(apiOptions?: any): Promise<R>;
+    update(options: Partial<A>, apiOptions?: any): Promise<R>;
+    delete(deleteApiOptions?: any): Promise<R>;
 }
-export declare type RecordDataMap<C extends IStorableConstructor<E>, E extends Record = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]> = Partial<IRecordRepository<C, E, A>>;
+export interface IRecordRepository<C extends IStorableConstructor<E>, E extends Record = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]> extends IRepoData, IRecordRepoMethods<C, E, A, QueryResult<E> | QueryResult<undefined>>, Debugable {
+}
+export declare type RecordDataMap<C extends IStorableConstructor<E>, E extends Record = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]> = Partial<IRecordRepoMethods<C, E, A, A | undefined>>;
 /**
  * A single-entity repository.
  *

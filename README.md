@@ -1,22 +1,22 @@
 <h1 align="center">
-  <img style="object-fit:cover" src="logo/logo-color-text.svg" alt="webalorm">
+  <img style="object-fit:cover" src="logo/logo-color-text.svg" alt="datamint">
 </h1>
 
 <p align="center">
-  ORM that works over Web 💪
+  Dynamically reFresh your data 💪
 <p>
 
 # WORK IN PROGRESS
 
-This library is not yet ready for usage. So please save this page to bookmarks or [give it a star on GitHub](https://github.com/KazanExpress/webalorm) and come here later! 😊
+This library is not yet ready for usage. So please save this page to bookmarks or [give it a star on GitHub](https://github.com/KazanExpress/datamint) and come here later! 😊
 
 ## What is it?
 
-**WEBALORM** stands for "Webify All ORMs". It's a type of ORM.
+**DATAMINT** is a type of ORM.
 
 ORM (Object-relational mapper) - a programming tool for converting data between incompatible type systems using object-oriented paradigms. It often reduces the amount of code that needs to be written in order to access the needed data.
 
-[Many ORMs](https://github.com/search?q=ORM) exist for back-end data storages and browsers, but yet no real ORM exists to connect them. That's why `webalorm` was created.
+[Many ORMs](https://github.com/search?q=ORM) exist for back-end data storages and browsers, but yet no real ORM exists to connect them. That's why `datamint` was created.
 
 ## Why ORM over web?
 
@@ -26,14 +26,14 @@ Not necessarily.
 
 Modern web browsers support a couple of database solutions already like IndexedDB or WebSQL. There also exist some libraries that simplify working with these databases. But the pain only begins here: once you have your IndexedDB/WebSQL set up, you also need to polyfill them with localStorage (for older browsers) and make a universal API for your app out of all this while keeping all the data up-to-date with the data you have on your server. Quite a few things to keep track of, huh?
 
-That is exactly the problem `webalorm` aims to solve in just under 10 kilobytes.
+That is exactly the problem `datamint` aims to solve in just under 10 kilobytes.
 
-This means that with `webalorm` you can simply map your api client requests (using [kefetchup](https://github.com/KazanExpress/kefetchup), for example) onto your own data-types without and then forget about the fact that your project even uses back-end APIs!
+This means that with `datamint` you can simply map your api client requests (using [kefetchup](https://github.com/KazanExpress/kefetchup), for example) onto your own data-types without and then forget about the fact that your project even uses back-end APIs!
 
 And also...
 
-`webalorm` supports tree-shaking!
+`datamint` supports tree-shaking!
 
-## [Documentation](https://github.com/KazanExpress/webalorm/wiki)
+## [Documentation](https://github.com/KazanExpress/datamint/wiki)
 
-See project's [wiki](https://github.com/KazanExpress/webalorm/wiki).
+See project's [wiki](https://github.com/KazanExpress/datamint/wiki).

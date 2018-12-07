@@ -1,6 +1,6 @@
-const LOG_PREFIX = (name) => name ? `[webalorm:${name}]` : `[webalorm]`;
+const LOG_PREFIX = (name) => name ? `[datamint:${name}]` : `[datamint]`;
 /**
- * Shows the current debug state of WEBALORM
+ * Shows the current debug state of DATAMINT
  *
  * - `enabled` - all the logs and exceptions are enabled
  * - `custom` - custom rules are set via a `debug()` function

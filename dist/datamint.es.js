@@ -48,9 +48,9 @@ const enumerable = (isEnumerable = true) => function (target, key, desc) {
     }
 };
 
-const LOG_PREFIX = (name) => name ? `[webalorm:${name}]` : `[webalorm]`;
+const LOG_PREFIX = (name) => name ? `[datamint:${name}]` : `[datamint]`;
 /**
- * Shows the current debug state of WEBALORM
+ * Shows the current debug state of DATAMINT
  *
  * - `enabled` - all the logs and exceptions are enabled
  * - `custom` - custom rules are set via a `debug()` function
@@ -605,7 +605,7 @@ class SaveableEntity extends Entity {
             return Promise.resolve(undefined);
         }
         const idkey = this.__idKey__;
-        return this.__repo.updateById(idkey ? this[idkey] : 0, () => this).then((r) => r.result).catch(e => { throw e; });
+        return this.__repo.updateById(idkey ? this[idkey] : 0, () => this).then(r => r.result).catch(e => { throw e; });
     }
     $delete() {
         if (!this.__repo) {
@@ -613,7 +613,7 @@ class SaveableEntity extends Entity {
             return Promise.resolve(undefined);
         }
         const idkey = this.__idKey__;
-        return this.__repo.delete(idkey ? this[idkey] : 0).then((r) => r.result).catch(e => { throw e; });
+        return this.__repo.delete(idkey ? this[idkey] : 0).then(r => r.result).catch(e => { throw e; });
     }
 }
 __decorate([
@@ -781,8 +781,13 @@ class EntityRepositoryClass extends Repository {
                     this.$log(`API handler execution start: ${this.name}.add()`);
                     // @TODO: implement async request queue
                     this.api.add(options, apiOptions).then(res => {
-                        queryResult.result = this.makeDataInstance(res);
-                        this.$log(`API handler execution end: ${this.name}.add() => ${JSON.stringify(res, undefined, '  ')}`);
+                        if (typeof res !== 'undefined') {
+                            queryResult.result = this.makeDataInstance(res);
+                            this.$log(`API handler execution end: ${this.name}.add() => ${JSON.stringify(res, undefined, '  ')}`);
+                        }
+                        else {
+                            throw new TypeError('result is undefined');
+                        }
                     }).catch(e => {
                         queryResult.error = e;
                         this.$error(`API handler execution end: ${this.name}.add() => ${e}`);
@@ -814,8 +819,13 @@ class EntityRepositoryClass extends Repository {
                     this.$log(`API handler execution start: ${this.name}.get()`);
                     // @TODO: implement async request queue
                     this.api.get(id, getApiOptions).then(res => {
-                        queryResult.result = this.makeDataInstance(res);
-                        this.$log(`API handler execution end: ${this.name}.get() => ${JSON.stringify(res, undefined, '  ')}`);
+                        if (typeof res !== 'undefined') {
+                            queryResult.result = this.makeDataInstance(res);
+                            this.$log(`API handler execution end: ${this.name}.get() => ${JSON.stringify(res, undefined, '  ')}`);
+                        }
+                        else {
+                            throw new TypeError('result is undefined');
+                        }
                     }).catch(e => {
                         queryResult.error = e;
                         this.$error(`API handler execution end: ${this.name}.get() => ${e}`);
@@ -871,4 +881,4 @@ function RemoteRepository(options) {
 }
 
 export { Connection$1 as Connection, Repository, EntityRepository, RecordRepository, RemoteRepository, Storable, Entity, SaveableEntity, Record, SaveableRecord, Driver, FallbackDriver, MultiDriver };
-//# sourceMappingURL=webalorm.es.js.map
+//# sourceMappingURL=datamint.es.js.map

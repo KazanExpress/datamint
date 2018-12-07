@@ -5,7 +5,7 @@ export declare abstract class Debugable {
      */
     protected readonly abstract debugType: DebugType;
     /**
-     * The name of the WEBALORM connection this class uses
+     * The name of the DATAMINT connection this class uses
      */
     abstract readonly connectionName: string;
     /**

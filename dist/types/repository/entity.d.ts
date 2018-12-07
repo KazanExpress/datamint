@@ -9,14 +9,16 @@ export declare type PartialWithId<T, IDValue, IDKey extends PropertyKey> = {
 export interface IEntityRepoData<IDKey extends PropertyKey = PropertyKey> extends IRepoData {
     readonly primaryKey?: IDKey;
 }
-export interface IEntityRepository<C extends IStorableConstructor<E>, E extends Entity = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0], IDKey extends PropertyKey = E extends Entity<infer IdKey, any> ? IdKey : PropertyKey, IDValue extends PropertyKey = E extends Entity<string, infer IdType> ? IdType : any> extends IEntityRepoData<IDKey>, Debugable {
-    add(options: A, apiOptions?: any): Promise<any>;
-    get(id: IDValue, apiOptions?: any): Promise<any>;
-    update(entity: PartialWithId<A, IDValue, IDKey>, deleteApiOptions?: any): Promise<any>;
-    updateById(id: IDValue, query: (entity: A) => Partial<A>, deleteApiOptions?: any): Promise<any>;
-    delete(entity: Partial<A> | IDValue, deleteApiOptions?: any): Promise<any>;
+export interface IEntityRepoMethods<C extends IStorableConstructor<E>, E extends Entity = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0], R = any, IDKey extends PropertyKey = E extends Entity<infer IdKey, any> ? IdKey : PropertyKey, IDValue extends PropertyKey = E extends Entity<string, infer IdType> ? IdType : any> {
+    add(options: A, apiOptions?: any): Promise<R>;
+    get(id: IDValue, apiOptions?: any): Promise<R>;
+    update(entity: PartialWithId<A, IDValue, IDKey>, deleteApiOptions?: any): Promise<R>;
+    updateById(id: IDValue, query: (entity: A) => Partial<A>, deleteApiOptions?: any): Promise<R>;
+    delete(entity: Partial<A> | IDValue, deleteApiOptions?: any): Promise<R>;
 }
-export declare type EntityDataMap<C extends IStorableConstructor<E>, E extends Entity = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]> = Partial<IEntityRepository<C, E, A>>;
+export interface IEntityRepository<C extends IStorableConstructor<E>, E extends Entity = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0], IDKey extends PropertyKey = E extends Entity<infer IdKey, any> ? IdKey : PropertyKey, IDValue extends PropertyKey = E extends Entity<string, infer IdType> ? IdType : any> extends IEntityRepoData<IDKey>, IEntityRepoMethods<C, E, A, QueryResult<E> | QueryResult<undefined>, IDKey, IDValue>, Debugable {
+}
+export declare type EntityDataMap<C extends IStorableConstructor<E>, E extends Entity = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]> = Partial<IEntityRepoMethods<C, E, A, A | undefined>>;
 /**
  * A typical multi-entity repository.
  *
@@ -33,7 +35,7 @@ export declare class EntityRepositoryClass<DM extends EntityDataMap<C, E, A>, C 
     constructor(name: string, connectionName: string, currentDriver: Driver, entity: C, api?: DM);
     private readonly driverOptions;
     add(options: A, apiOptions?: FromSecArg<DM['add']> | false): Promise<QueryResult<E>>;
-    get(id: IDValue, getApiOptions?: FromSecArg<DM['get']> | false): Promise<QueryResult<E> | QueryResult<undefined>>;
+    get(id: IDValue, getApiOptions?: FromSecArg<DM['get']> | false): Promise<QueryResult<undefined> | QueryResult<E>>;
     update(entity: PartialWithId<A, IDValue, IDKey>, updateApiOptions?: FromSecArg<DM['update']>): Promise<QueryResult<E>>;
     updateById(id: IDValue, query: (entity: A) => Partial<A>, updateApiOptions?: FromSecArg<DM['update']>): Promise<QueryResult<E>>;
     delete(entity: Partial<A> | IDValue, deleteApiOptions?: FromSecArg<DM['delete']> | false): Promise<QueryResult<E>>;

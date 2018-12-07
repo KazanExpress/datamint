@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var LOG_PREFIX = function (name) { return name ? "[webalorm:" + name + "]" : "[webalorm]"; };
+var LOG_PREFIX = function (name) { return name ? "[datamint:" + name + "]" : "[datamint]"; };
 /**
- * Shows the current debug state of WEBALORM
+ * Shows the current debug state of DATAMINT
  *
  * - `enabled` - all the logs and exceptions are enabled
  * - `custom` - custom rules are set via a `debug()` function

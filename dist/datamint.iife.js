@@ -1,4 +1,4 @@
-var webalorm = (function (exports) {
+var datamint = (function (exports) {
     'use strict';
 
     /*! *****************************************************************************
@@ -130,9 +130,9 @@ var webalorm = (function (exports) {
         };
     };
 
-    var LOG_PREFIX = function (name) { return name ? "[webalorm:" + name + "]" : "[webalorm]"; };
+    var LOG_PREFIX = function (name) { return name ? "[datamint:" + name + "]" : "[datamint]"; };
     /**
-     * Shows the current debug state of WEBALORM
+     * Shows the current debug state of DATAMINT
      *
      * - `enabled` - all the logs and exceptions are enabled
      * - `custom` - custom rules are set via a `debug()` function
@@ -993,8 +993,13 @@ var webalorm = (function (exports) {
                                 this.$log("API handler execution start: " + this.name + ".add()");
                                 // @TODO: implement async request queue
                                 this.api.add(options, apiOptions).then(function (res) {
-                                    queryResult_1.result = _this.makeDataInstance(res);
-                                    _this.$log("API handler execution end: " + _this.name + ".add() => " + JSON.stringify(res, undefined, '  '));
+                                    if (typeof res !== 'undefined') {
+                                        queryResult_1.result = _this.makeDataInstance(res);
+                                        _this.$log("API handler execution end: " + _this.name + ".add() => " + JSON.stringify(res, undefined, '  '));
+                                    }
+                                    else {
+                                        throw new TypeError('result is undefined');
+                                    }
                                 }).catch(function (e) {
                                     queryResult_1.error = e;
                                     _this.$error("API handler execution end: " + _this.name + ".add() => " + e);
@@ -1034,8 +1039,13 @@ var webalorm = (function (exports) {
                                 this.$log("API handler execution start: " + this.name + ".get()");
                                 // @TODO: implement async request queue
                                 this.api.get(id, getApiOptions).then(function (res) {
-                                    queryResult_2.result = _this.makeDataInstance(res);
-                                    _this.$log("API handler execution end: " + _this.name + ".get() => " + JSON.stringify(res, undefined, '  '));
+                                    if (typeof res !== 'undefined') {
+                                        queryResult_2.result = _this.makeDataInstance(res);
+                                        _this.$log("API handler execution end: " + _this.name + ".get() => " + JSON.stringify(res, undefined, '  '));
+                                    }
+                                    else {
+                                        throw new TypeError('result is undefined');
+                                    }
                                 }).catch(function (e) {
                                     queryResult_2.error = e;
                                     _this.$error("API handler execution end: " + _this.name + ".get() => " + e);
@@ -1124,4 +1134,4 @@ var webalorm = (function (exports) {
     return exports;
 
 }({}));
-//# sourceMappingURL=webalorm.iife.js.map
+//# sourceMappingURL=datamint.iife.js.map

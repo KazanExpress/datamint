@@ -66,8 +66,13 @@ export class EntityRepositoryClass extends Repository {
                     this.$log(`API handler execution start: ${this.name}.add()`);
                     // @TODO: implement async request queue
                     this.api.add(options, apiOptions).then(res => {
-                        queryResult.result = this.makeDataInstance(res);
-                        this.$log(`API handler execution end: ${this.name}.add() => ${JSON.stringify(res, undefined, '  ')}`);
+                        if (typeof res !== 'undefined') {
+                            queryResult.result = this.makeDataInstance(res);
+                            this.$log(`API handler execution end: ${this.name}.add() => ${JSON.stringify(res, undefined, '  ')}`);
+                        }
+                        else {
+                            throw new TypeError('result is undefined');
+                        }
                     }).catch(e => {
                         queryResult.error = e;
                         this.$error(`API handler execution end: ${this.name}.add() => ${e}`);
@@ -99,8 +104,13 @@ export class EntityRepositoryClass extends Repository {
                     this.$log(`API handler execution start: ${this.name}.get()`);
                     // @TODO: implement async request queue
                     this.api.get(id, getApiOptions).then(res => {
-                        queryResult.result = this.makeDataInstance(res);
-                        this.$log(`API handler execution end: ${this.name}.get() => ${JSON.stringify(res, undefined, '  ')}`);
+                        if (typeof res !== 'undefined') {
+                            queryResult.result = this.makeDataInstance(res);
+                            this.$log(`API handler execution end: ${this.name}.get() => ${JSON.stringify(res, undefined, '  ')}`);
+                        }
+                        else {
+                            throw new TypeError('result is undefined');
+                        }
                     }).catch(e => {
                         queryResult.error = e;
                         this.$error(`API handler execution end: ${this.name}.get() => ${e}`);

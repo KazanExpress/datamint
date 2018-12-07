@@ -120,8 +120,13 @@ var EntityRepositoryClass = /** @class */ (function (_super) {
                             this.$log("API handler execution start: " + this.name + ".add()");
                             // @TODO: implement async request queue
                             this.api.add(options, apiOptions).then(function (res) {
-                                queryResult_2.result = _this.makeDataInstance(res);
-                                _this.$log("API handler execution end: " + _this.name + ".add() => " + JSON.stringify(res, undefined, '  '));
+                                if (typeof res !== 'undefined') {
+                                    queryResult_2.result = _this.makeDataInstance(res);
+                                    _this.$log("API handler execution end: " + _this.name + ".add() => " + JSON.stringify(res, undefined, '  '));
+                                }
+                                else {
+                                    throw new TypeError('result is undefined');
+                                }
                             }).catch(function (e) {
                                 queryResult_2.error = e;
                                 _this.$error("API handler execution end: " + _this.name + ".add() => " + e);
@@ -161,8 +166,13 @@ var EntityRepositoryClass = /** @class */ (function (_super) {
                             this.$log("API handler execution start: " + this.name + ".get()");
                             // @TODO: implement async request queue
                             this.api.get(id, getApiOptions).then(function (res) {
-                                queryResult_3.result = _this.makeDataInstance(res);
-                                _this.$log("API handler execution end: " + _this.name + ".get() => " + JSON.stringify(res, undefined, '  '));
+                                if (typeof res !== 'undefined') {
+                                    queryResult_3.result = _this.makeDataInstance(res);
+                                    _this.$log("API handler execution end: " + _this.name + ".get() => " + JSON.stringify(res, undefined, '  '));
+                                }
+                                else {
+                                    throw new TypeError('result is undefined');
+                                }
                             }).catch(function (e) {
                                 queryResult_3.error = e;
                                 _this.$error("API handler execution end: " + _this.name + ".get() => " + e);

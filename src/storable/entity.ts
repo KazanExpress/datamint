@@ -83,7 +83,7 @@ export class SaveableEntity<
     }
   }
 
-  public $save() {
+  public $save(): Promise<this | undefined> {
     if (!this.__repo) {
       this.__contextWarning('Saving cannot be done.');
 
@@ -95,7 +95,7 @@ export class SaveableEntity<
     return this.__repo.updateById(
       idkey ? this[idkey as PropertyKey] : 0,
       () => this
-    ).then((r: QueryResult<this>) => r.result).catch(e => { throw e; });
+    ).then(r => r.result).catch(e => { throw e; });
   }
 
   public $delete(): Promise<this | undefined> {
@@ -109,6 +109,6 @@ export class SaveableEntity<
 
     return this.__repo.delete(
       idkey ? this[idkey as PropertyKey] : 0
-    ).then((r: QueryResult<this>) => r.result).catch(e => { throw e; });
+    ).then(r => r.result).catch(e => { throw e; });
   }
 }

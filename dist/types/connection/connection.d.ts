@@ -40,11 +40,11 @@ export declare class Connection<RM extends IRepositoryMap = IRepositoryMap> exte
      */
     static $debug(enabled: boolean, exceptions: ExceptionType): void;
     /**
-     * Enable a certain debug option for WEBALORM
+     * Enable a certain debug option for DATAMINT
      */
     static $debug(type: DebugType): void;
     /**
-     * Enable a certain debug option for WEBALORM
+     * Enable a certain debug option for DATAMINT
      *
      * Allows specifying different debug types:
      *
@@ -53,11 +53,11 @@ export declare class Connection<RM extends IRepositoryMap = IRepositoryMap> exte
      */
     static $debug(type: DebugType, exceptions: ExceptionType): void;
     /**
-     * Enable a certain debug option for WEBALORM
+     * Enable a certain debug option for DATAMINT
      */
     static $debug(type: string): void;
     /**
-     * Enable a certain debug option for WEBALORM
+     * Enable a certain debug option for DATAMINT
      *
      * Allows specifying different debug types:
      *

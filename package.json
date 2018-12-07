@@ -1,15 +1,15 @@
 {
-  "name": "webalorm",
+  "name": "datamint",
   "version": "0.0.0",
   "description": "An ORM that works over Web 💪",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/KazanExpress/webalorm.git"
+    "url": "git+https://github.com/KazanExpress/datamint.git"
   },
   "keywords": [
     "ORM",
     "web",
-    "webalorm",
+    "datamint",
     "IndexedDB",
     "indexeddb",
     "localStorage",
@@ -20,12 +20,12 @@
     "api"
   ],
   "bugs": {
-    "url": "https://github.com/KazanExpress/webalorm/issues"
+    "url": "https://github.com/KazanExpress/datamint/issues"
   },
-  "homepage": "https://github.com/KazanExpress/webalorm#readme",
+  "homepage": "https://github.com/KazanExpress/datamint#readme",
   "main": "dist/cjs/index.js",
   "module": "dist/esnext/index.js",
-  "unpkg": "dist/webalorm.iife.js",
+  "unpkg": "dist/datamint.iife.js",
   "typings": "dist/types/index.d.ts",
   "files": [
     "dist",
