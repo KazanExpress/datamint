@@ -5,11 +5,11 @@ import { QueryResult } from '../queryResult';
 import { IStorableConstructor, Record } from '../storable';
 import { FromSecArg, IRepoData, IRepoFactoryOptions, RepoFactory, Repository, selectDriver } from './base';
 
-export interface IRecordRepository<
+export interface IRecordRepoMethods<
   C extends IStorableConstructor<E>,
   E extends Record = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]
-> extends IRepoData, Debugable {
+> {
   create(
     options: A,
     apiOptions?: any
@@ -31,12 +31,17 @@ export interface IRecordRepository<
   //...
   // TODO - other methods?
 }
+export interface IRecordRepository<
+  C extends IStorableConstructor<E>,
+  E extends Record = InstanceType<C>,
+  A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]
+> extends IRepoData, IRecordRepoMethods<C, E, A>, Debugable {}
 
 export type RecordDataMap<
   C extends IStorableConstructor<E>,
   E extends Record = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]
-> = Partial<IRecordRepository<C, E, A>>;
+> = Partial<IRecordRepoMethods<C, E, A>>;
 
 /**
  * A single-entity repository.
