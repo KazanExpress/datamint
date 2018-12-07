@@ -3,7 +3,7 @@
 </h1>
 
 <p align="center">
-  Dynamically reFresh your data 💪
+  Dynamically reFresh your data 🍬
 <p>
 
 # WORK IN PROGRESS

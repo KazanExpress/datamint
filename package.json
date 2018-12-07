@@ -1,7 +1,7 @@
 {
   "name": "datamint",
   "version": "0.0.0",
-  "description": "An ORM that works over Web 💪",
+  "description": "Dynamically reFresh your data 🍬",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/KazanExpress/datamint.git"
