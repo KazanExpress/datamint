@@ -1,6 +1,5 @@
 import { IRepoData } from '../repository';
 import { Driver } from './base';
-import { DebugType } from '../debug';
 
 /**
  * @todo refactor, code is a mess
@@ -17,7 +16,7 @@ export class FallbackDriver extends Driver {
 
     const repo: Array<A> | { [key: string]: A } = this.repositoryMap[name];
 
-    if (primaryKey) {
+    if (primaryKey && !Array.isArray(repo)) {
       const key = String(data[primaryKey]);
 
       repo[key] = data;
@@ -55,7 +54,7 @@ export class FallbackDriver extends Driver {
   }
 
   public async update<A, R extends IRepoData>(
-    { name, primaryKey }: R,
+    { name }: R,
     data: Partial<A>
   ): Promise<Array<A>> {
     throw new Error('Method not implemented.');
@@ -135,21 +134,21 @@ export class FallbackDriver extends Driver {
 
     let res;
 
-    if (isEntityRepo(repository)) {
-      const key = Object.keys(repo).findIndex(e => Object.keys(repo[e]).some(key => {
-        return e[key] === entity[key];
-      }));
+    // if (isEntityRepo(repository)) {
+    //   const key = Object.keys(repo).findIndex(e => Object.keys(repo[e]).some(key => {
+    //     return e[key] === entity[key];
+    //   }));
 
-      res = this.repositoryMap[repository.name][key];
+    //   res = this.repositoryMap[repository.name][key];
 
-      this.repositoryMap[repository.name][key] = undefined;
+    //   this.repositoryMap[repository.name][key] = undefined;
 
-      delete this.repositoryMap[repository.name][key];
-    } else {
-      res = this.repositoryMap[repository.name];
+    //   delete this.repositoryMap[repository.name][key];
+    // } else {
+    //   res = this.repositoryMap[repository.name];
 
-      this.repositoryMap[repository.name] = undefined;
-    }
+    //   this.repositoryMap[repository.name] = undefined;
+    // }
 
     return res;
   }

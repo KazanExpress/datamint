@@ -1,7 +1,9 @@
-import { RecordDataMap } from '../apiMap';
+import { Connection } from '../connection/connection';
+import { Debugable } from '../debug';
+import { Driver, FallbackDriver, IDriverConstructor } from '../drivers';
 import { QueryResult } from '../queryResult';
 import { IStorableConstructor, Record } from '../storable';
-import { FromSecArg, Repository, IRepoData } from './base';
+import { FromSecArg, IRepoData, IRepoFactoryOptions, RepoFactory, Repository, selectDriver } from './base';
 
 export interface IRecordRepoMethods<
   C extends IStorableConstructor<E>,
@@ -29,6 +31,17 @@ export interface IRecordRepoMethods<
   //...
   // TODO - other methods?
 }
+export interface IRecordRepository<
+  C extends IStorableConstructor<E>,
+  E extends Record = InstanceType<C>,
+  A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]
+> extends IRepoData, IRecordRepoMethods<C, E, A>, Debugable {}
+
+export type RecordDataMap<
+  C extends IStorableConstructor<E>,
+  E extends Record = InstanceType<C>,
+  A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]
+> = Partial<IRecordRepoMethods<C, E, A>>;
 
 /**
  * A single-entity repository.
@@ -38,12 +51,20 @@ export interface IRecordRepoMethods<
  * @template `E` entity instance type
  * @template `A` entity constructor parameter options
  */
-export class RecordRepository<
-  DM extends RecordDataMap<C>,
+export class RecordRepositoryClass<
+  DM extends RecordDataMap<C, E, A>,
   C extends IStorableConstructor<E>,
   E extends Record = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
-> extends Repository<DM, C, E, A> implements IRepoData<never>, IRecordRepoMethods<C, E ,A> {
+> extends Repository<DM, C, E, A> implements IRepoData, IRecordRepository<C, E ,A> {
+  constructor(
+    name: string,
+    connectionName: string,
+    public readonly currentDriver: Driver,
+    record: C,
+    api?: DM,
+  ) { super(name, connectionName, record, api); }
+
   public async create(
     options: A,
     apiOptions?: FromSecArg<DM['create']> | false
@@ -85,4 +106,22 @@ export class RecordRepository<
       this.makeDataInstance({} as any)
     );
   }
+}
+
+
+export function RecordRepository<
+  D extends RecordDataMap<C>,
+  C extends IStorableConstructor<any>,
+  E extends Record = InstanceType<C>,
+  A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
+>(options: IRepoFactoryOptions<C, D> & {
+  dirvers?: IDriverConstructor | IDriverConstructor[];
+}): RepoFactory<RecordRepositoryClass<D, C, E, A>> {
+  return (name: string, connection: Connection) => new RecordRepositoryClass<D, C, E, A>(
+    name,
+    connection.name,
+    new (selectDriver(options.dirvers || FallbackDriver, name))(connection),
+    options.model,
+    options.api
+  );
 }

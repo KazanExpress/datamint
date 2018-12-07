@@ -1,12 +1,18 @@
+import { enumerable } from './decorators';
+
 /**
  * Incapsulates the query result data for further manipulation
  *
  * @template T the type of data encapsulated
  */
 export class QueryResult<T> {
+  @enumerable(false)
   private _ok: boolean;
+  @enumerable(false)
   private _result: T;
+  @enumerable(false)
   private _error?: Error;
+  @enumerable(false)
   private handlers: ((error?: Error, result?: T) => any)[] = [];
 
   constructor(ok: boolean, result: T, error?: Error) {

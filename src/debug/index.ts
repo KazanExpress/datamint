@@ -2,11 +2,11 @@ import { Debugable } from './debugable';
 import { debugMap, debugState, DebugType } from './module';
 
 class GlobalDebug extends Debugable {
-  protected $debugType: DebugType = '*';
-  protected $connectionName: string = '';
+  protected readonly debugType: DebugType = '*';
+  public readonly connectionName: string = '';
   private constructor() { super(); }
 
-  public static instance = new GlobalDebug();
+  public static readonly instance = new GlobalDebug();
 
   public $log!: Debugable['$log'];
   public $warn!: Debugable['$warn'];

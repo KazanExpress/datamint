@@ -1,63 +1,78 @@
-import { Connection } from '../../src';
-import { Broken, Product, User } from '../common/models';
-import { UserApiMap, ProductApiMap } from '../common/api';
+import { Connection, EntityRepository, RecordRepository, RemoteRepository } from '../../src';
+import { ProductApiMap, UserApiMap } from '../common/api';
+import { Product, Remote, User } from '../common/models';
+
 
 describe('types', () => {
   it('types', async () => {
     Connection.$debug(true);
 
-    const orm = new Connection('asd', [], {
-      Products: Product,
-      User,
-      Broken
-    }, {
-      Products: new ProductApiMap(),
-      User: new UserApiMap(),
-      Broken: {
-        async create() {
-          return Promise.resolve(new Broken());
-        },
-        async delete() {
-          return Promise.resolve(new Broken());
-        },
-        async update() {
-          return Promise.resolve(new Broken());
-        },
-      }
+    const orm = new Connection('test-connection', {
+      Products: EntityRepository ({
+        model: Product,
+        api: new ProductApiMap()
+      }),
+      User: RecordRepository ({
+        model: User,
+        api: new UserApiMap()
+      }),
+      Remote: RemoteRepository ({
+        model: Remote,
+        api: {
+          async create() {
+            return Promise.resolve(new Remote());
+          },
+          async delete() {
+            return Promise.resolve(new Remote());
+          },
+          async update() {
+            return Promise.resolve(new Remote());
+          },
+        }
+      })
     });
+
+    const products = orm.Products;
+
+    expect(products.primaryKey).toBe('id');
+    expect(products.columns).toContain('id');
+    expect(products.columns).toContain('title');
+
+    const user = orm.User;
+    const remote = orm.Remote.API;
 
     const podguznik = {
       id: 0,
       title: 'podguznik',
-      url: '/products'
+      url: '/product/0-podguznik' // Doesn't actually count, for test checks only
     };
 
-    await orm.Products.add(podguznik, 'asdasd');
-    await orm.Products.add(podguznik, false);
+    await products.add(podguznik, 'asdasd');
+    await products.add(podguznik, false);
 
-    expect((await orm.Products.get(0)).result).toMatchObject(podguznik);
+    expect((await products.get(0)).result).toMatchObject(podguznik);
 
     try {
-      await orm.Products.update({
+      await products.update({
         id: 0,
         title: 'Cool Podguzninki for cool kids!'
       });
     } catch (e) { }
 
     try {
-      await orm.Products.updateById(0, product => ({
-        url: `/products/${product.id}`
+      await products.updateById(0, _ => ({
+        title: 'Wow, pampers'
       }));
     } catch (e) { }
 
     try {
-      await orm.Products.delete(0);
+      await products.delete(0);
     } catch (e) { }
 
-    expect(orm.User.name).toBe('User');
+    expect(user.name).toBe('User');
 
     try {
-      await orm.User.create({
+      await user.create({
         name: 'max',
         birthDate: new Date,
         cart: []
@@ -68,20 +83,20 @@ describe('types', () => {
     } catch (e) { }
 
     try {
-      await orm.User.update({
+      await user.update({
         cart: [
-          (await orm.Products.get(0)).result!
+          (await orm.Products.get(0)).result || new Product(podguznik)
         ]
       });
     } catch (e) { }
 
     try {
-      await orm.User.delete();
+      await user.delete();
     } catch (e) { }
 
-    expect(typeof orm.Broken.name).toBe('string');
-    expect(orm.Broken.name).toBe('Broken');
+    expect(typeof orm.Remote.name).toBe('string');
+    expect(orm.Remote.name).toBe('Remote');
 
-    expect(await orm.Broken.API.create()).toMatchObject(new Broken());
+    expect(await remote.create()).toMatchObject(new Remote());
   });
 });

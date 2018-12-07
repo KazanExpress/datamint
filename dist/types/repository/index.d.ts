@@ -1,5 +1,4 @@
-export * from './base';
-export * from './broken';
-export * from './entity';
-export * from './factory';
-export * from './record';
+export { DataMap, IRepoData, Repository } from './base';
+export { EntityDataMap, EntityRepository } from './entity';
+export { RecordDataMap, RecordRepository } from './record';
+export { RemoteRepository } from './remote';
