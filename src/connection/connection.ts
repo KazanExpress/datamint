@@ -12,13 +12,14 @@ export type RepoStore<M extends IRepositoryMap> = {
 export class Connection<
   RM extends IRepositoryMap = IRepositoryMap,
 > extends Debugable {
-  protected $debugType: DebugType = `connection`;
-  protected $connectionName: string = this.name;
+  protected debugType: DebugType = `connection`;
 
   /**
    * A current map of bound repositories
    */
   public readonly repositories: RepoStore<RM> = {} as any;
+
+  [key: string]: any;
 
   /**
    * Creates a connection instance.
@@ -26,7 +27,7 @@ export class Connection<
    * @param repositories sets the relation of a repository name to its contents' options.
    */
   constructor(
-    public readonly name: string,
+    public readonly connectionName: string,
     repositories: RM,
   ) {
     super();

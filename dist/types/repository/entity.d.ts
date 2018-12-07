@@ -1,18 +1,22 @@
+import { Debugable } from '../debug';
 import { Driver, IDriverConstructor } from '../drivers';
 import { QueryResult } from '../queryResult';
-import { IStorableConstructor } from '../storable';
-import { Entity } from '../storable/entity';
-import { FromSecArg, IRepoData, RepoFactory, IRepoFactoryOptions, Repository } from './base';
+import { Entity, IStorableConstructor } from '../storable';
+import { FromSecArg, IRepoData, IRepoFactoryOptions, RepoFactory, Repository } from './base';
 export declare type PartialWithId<T, IDValue, IDKey extends PropertyKey> = {
     [key in IDKey]: IDValue;
 } & Partial<T>;
-export interface IEntityRepoMethods<C extends IStorableConstructor<E>, E extends Entity = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0], IDKey extends PropertyKey = E extends Entity<infer IdKey, any> ? IdKey : PropertyKey, IDValue extends PropertyKey = E extends Entity<string, infer IdType> ? IdType : any> {
+export interface IEntityRepoData<IDKey extends PropertyKey = PropertyKey> extends IRepoData {
+    readonly primaryKey?: IDKey;
+}
+export interface IEntityRepository<C extends IStorableConstructor<E>, E extends Entity = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0], IDKey extends PropertyKey = E extends Entity<infer IdKey, any> ? IdKey : PropertyKey, IDValue extends PropertyKey = E extends Entity<string, infer IdType> ? IdType : any> extends IEntityRepoData<IDKey>, Debugable {
     add(options: A, apiOptions?: any): Promise<any>;
     get(id: IDValue, apiOptions?: any): Promise<any>;
-    update(entity: PartialWithId<A, IDValue, IDKey> | IDValue, deleteApiOptions?: any): Promise<any>;
+    update(entity: PartialWithId<A, IDValue, IDKey>, deleteApiOptions?: any): Promise<any>;
+    updateById(id: IDValue, query: (entity: A) => Partial<A>, deleteApiOptions?: any): Promise<any>;
     delete(entity: Partial<A> | IDValue, deleteApiOptions?: any): Promise<any>;
 }
-export declare type EntityDataMap<C extends IStorableConstructor<E>, E extends Entity = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]> = Partial<IEntityRepoMethods<C, E, A>>;
+export declare type EntityDataMap<C extends IStorableConstructor<E>, E extends Entity = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]> = Partial<IEntityRepository<C, E, A>>;
 /**
  * A typical multi-entity repository.
  *
@@ -23,9 +27,8 @@ export declare type EntityDataMap<C extends IStorableConstructor<E>, E extends E
  * @template `ID` entity primary key type
  * @template `IDKey` entity primary key name
  */
-export declare class EntityRepositoryClass<DM extends EntityDataMap<C, E, A>, C extends IStorableConstructor<E>, E extends Entity = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0], IDKey extends PropertyKey = E extends Entity<infer IdKey, any> ? IdKey : PropertyKey, IDValue extends PropertyKey = E extends Entity<string, infer IdType> ? IdType : PropertyKey> extends Repository<DM, C, E, A> implements IRepoData<IDKey>, IEntityRepoMethods<C, E, A, IDKey, IDValue> {
+export declare class EntityRepositoryClass<DM extends EntityDataMap<C, E, A>, C extends IStorableConstructor<E>, E extends Entity = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0], IDKey extends PropertyKey = E extends Entity<infer IdKey, any> ? IdKey : PropertyKey, IDValue extends PropertyKey = E extends Entity<string, infer IdType> ? IdType : PropertyKey> extends Repository<DM, C, E, A> implements IEntityRepository<C, E, A, IDKey, IDValue> {
     readonly currentDriver: Driver;
-    readonly columns: Array<string>;
     readonly primaryKey: IDKey;
     constructor(name: string, connectionName: string, currentDriver: Driver, entity: C, api?: DM);
     private readonly driverOptions;

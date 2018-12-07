@@ -3,8 +3,8 @@ import { debugMap, debugState } from './module';
 class GlobalDebug extends Debugable {
     constructor() {
         super();
-        this.$debugType = '*';
-        this.$connectionName = '';
+        this.debugType = '*';
+        this.connectionName = '';
     }
     get map() {
         return debugMap;

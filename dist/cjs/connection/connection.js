@@ -21,11 +21,10 @@ var Connection = /** @class */ (function (_super) {
      * @param name the name of the connection to the storage. Namespaces all respositories invoked from the instance.
      * @param repositories sets the relation of a repository name to its contents' options.
      */
-    function Connection(name, repositories) {
+    function Connection(connectionName, repositories) {
         var _this = _super.call(this) || this;
-        _this.name = name;
-        _this.$debugType = "connection";
-        _this.$connectionName = _this.name;
+        _this.connectionName = connectionName;
+        _this.debugType = "connection";
         /**
          * A current map of bound repositories
          */

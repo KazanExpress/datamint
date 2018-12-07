@@ -6,24 +6,24 @@ export abstract class Debugable {
    * The debug type for this class' actions
    */
   @enumerable(false)
-  protected readonly abstract $debugType: DebugType;
+  protected readonly abstract debugType: DebugType;
 
   /**
    * The name of the WEBALORM connection this class uses
    */
   @enumerable(false)
-  protected readonly abstract $connectionName: string;
+  public readonly abstract connectionName: string;
 
   /**
    * `true` if the debug is enabled for this class
    */
   @enumerable(false)
-  public get $debugEnabled() { return errorTypeFor(this.$debugType); }
+  public get isDebugEnabled() { return errorTypeFor(this.debugType); }
 
   @enumerable(false)
   private $logFactory(level: LogLevel) {
-    return (message, force: boolean = false) =>
-      print(this.$connectionName, this.$debugType, message, level, force);
+    return (message: any, force: boolean = false) =>
+      print(this.connectionName, this.debugType, message, level, force);
   }
 
   @enumerable(false)
@@ -38,8 +38,8 @@ export abstract class Debugable {
 
 export class DebugInstance extends Debugable {
   constructor(
-    protected $debugType: DebugType,
-    protected $connectionName: string
+    protected readonly debugType: DebugType,
+    public readonly connectionName: string
   ) { super(); }
 
   public $log!: Debugable['$log'];

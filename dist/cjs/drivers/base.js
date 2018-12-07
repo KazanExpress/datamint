@@ -19,8 +19,8 @@ var Driver = /** @class */ (function (_super) {
     function Driver(connection) {
         var _this = _super.call(this) || this;
         _this.connection = connection;
-        _this.$debugType = 'driver';
-        _this.$connectionName = _this.connection.name;
+        _this.debugType = 'driver';
+        _this.connectionName = _this.connection.name;
         return _this;
     }
     Object.defineProperty(Driver, "isSupported", {

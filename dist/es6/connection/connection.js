@@ -5,11 +5,10 @@ export class Connection extends Debugable {
      * @param name the name of the connection to the storage. Namespaces all respositories invoked from the instance.
      * @param repositories sets the relation of a repository name to its contents' options.
      */
-    constructor(name, repositories) {
+    constructor(connectionName, repositories) {
         super();
-        this.name = name;
-        this.$debugType = `connection`;
-        this.$connectionName = this.name;
+        this.connectionName = connectionName;
+        this.debugType = `connection`;
         /**
          * A current map of bound repositories
          */

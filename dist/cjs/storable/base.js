@@ -12,24 +12,27 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var decorators_1 = require("../decorators");
 var Storable = /** @class */ (function () {
     function Storable(__options) {
+        var _ = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            _[_i - 1] = arguments[_i];
+        }
+        this.__col__ = [];
         this.__options = __options;
     }
     Storable.Property = function (target, key) {
-        var constructor = target.constructor;
-        if (!constructor.__col__) {
-            constructor.__col__ = [];
+        if (!target.__col__) {
+            target.__col__ = [];
         }
-        constructor.__col__.push(key);
+        target.__col__.push(key);
     };
-    Storable.__col__ = [];
+    __decorate([
+        decorators_1.enumerable(false),
+        __metadata("design:type", Array)
+    ], Storable.prototype, "__col__", void 0);
     __decorate([
         decorators_1.enumerable(false),
         __metadata("design:type", Object)
     ], Storable.prototype, "__options", void 0);
-    __decorate([
-        decorators_1.enumerable(false),
-        __metadata("design:type", Array)
-    ], Storable, "__col__", void 0);
     return Storable;
 }());
 exports.Storable = Storable;

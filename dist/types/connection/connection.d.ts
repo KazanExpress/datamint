@@ -7,19 +7,19 @@ export declare type RepoStore<M extends IRepositoryMap> = {
     [Name in keyof M]: ReturnType<M[Name]>;
 };
 export declare class Connection<RM extends IRepositoryMap = IRepositoryMap> extends Debugable {
-    readonly name: string;
-    protected $debugType: DebugType;
-    protected $connectionName: string;
+    readonly connectionName: string;
+    protected debugType: DebugType;
     /**
      * A current map of bound repositories
      */
     readonly repositories: RepoStore<RM>;
+    [key: string]: any;
     /**
      * Creates a connection instance.
      * @param name the name of the connection to the storage. Namespaces all respositories invoked from the instance.
      * @param repositories sets the relation of a repository name to its contents' options.
      */
-    constructor(name: string, repositories: RM);
+    constructor(connectionName: string, repositories: RM);
     /**
      * Returns a truthy value if debug is currently enabled
      *

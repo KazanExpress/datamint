@@ -72,7 +72,7 @@ export function errorTypeFor(type: DebugType): boolean | ExceptionType;
 export function errorTypeFor(type: string | RegExp | DebugType): boolean | ExceptionType {
   if (debugMap['*']) { return debugMap['*']!; }
 
-  const isString = (t): t is string => typeof t === 'string';
+  const isString = (t: any): t is string => typeof t === 'string';
 
   if (isString(type) && debugMap[type]) {
     return debugMap[type]!;

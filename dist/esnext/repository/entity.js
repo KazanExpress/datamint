@@ -1,5 +1,6 @@
 import { FallbackDriver } from '../drivers';
 import { QueryResult } from '../queryResult';
+import { Entity } from '../storable';
 import { Repository, selectDriver } from './base';
 /**
  * A typical multi-entity repository.
@@ -15,27 +16,31 @@ export class EntityRepositoryClass extends Repository {
     constructor(name, connectionName, currentDriver, entity, api) {
         super(name, connectionName, entity, api);
         this.currentDriver = currentDriver;
-        this.columns = [];
-        this.primaryKey = entity.prototype.__idKey__;
-        delete entity.prototype.__idKey__;
-        if (entity.prototype.__col__) {
-            this.columns = entity.prototype.__col__;
-            if (!this.columns.includes(String(this.primaryKey))) {
-                this.columns.push(String(this.primaryKey));
+        // If no unique ID is set for the entity
+        if (!entity.prototype.__idKey__) {
+            const falseInstance = new entity({}, this);
+            const defaultIdAliases = ['id', 'ID', 'Id', '_id', '_ID', '_Id', '__id', '__ID', '__Id', '__id__', '__ID__', '__Id__'];
+            const key = Object.keys(falseInstance).find(key => defaultIdAliases.some(a => a === key));
+            // Auto-apply the ID decorator if found any compatible property
+            if (key) {
+                Entity.ID(entity.prototype, key);
             }
-            delete entity.prototype.__col__;
+            else {
+                this.$error(`No ID field is set for "${entity.name}".`);
+            }
         }
-        else {
-            // Cast to any to allow passing `this` as a second arg for classes implementing IActiveRecord to work
-            // and to avoid pointless casting to Saveable
-            this.columns = Object.keys(new entity({}, this));
+        this.primaryKey = entity.prototype.__idKey__;
+        if (this.primaryKey && !this.columns.includes(String(this.primaryKey))) {
+            this.columns.push(String(this.primaryKey));
         }
+        delete entity.prototype.__idKey__;
     }
     get driverOptions() {
         return {
             name: this.name,
             columns: this.columns,
-            primaryKey: this.primaryKey
+            primaryKey: this.primaryKey,
+            connectionName: this.connectionName
         };
     }
     async add(options, 

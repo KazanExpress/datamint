@@ -1,13 +1,14 @@
+import { Connection } from '../connection';
 import { Debug, Debugable, DebugType } from '../debug';
 import { FallbackDriver, IDriverConstructor } from '../drivers';
 import { MultiDriver } from '../drivers/multiDriver';
-import { Connection } from '../connection';
 import { IStorableConstructor, Storable } from '../storable';
 
-export interface IRepoData<IDKey = PropertyKey> {
+export interface IRepoData {
   readonly name: string;
-  readonly columns?: Array<string>;
-  readonly primaryKey?: IDKey;
+  readonly connectionName: string;
+  readonly columns: Array<string>;
+  readonly primaryKey?: PropertyKey | undefined;
 }
 
 export type FromSecArg<
@@ -23,12 +24,14 @@ export abstract class Repository<
   C extends IStorableConstructor<E>,
   E extends Storable = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
-> extends Debugable {
-  protected readonly $debugType: DebugType = `db:${this.name.toLowerCase()}` as DebugType;
+> extends Debugable implements IRepoData {
+  public readonly columns: Array<string> = [];
+
+  protected readonly debugType: DebugType = `db:${this.name.toLowerCase()}` as DebugType;
 
   constructor(
     public readonly name: string,
-    public readonly $connectionName: string,
+    public readonly connectionName: string,
     private readonly Data: C,
     protected readonly api?: DM,
   ) {
@@ -41,17 +44,25 @@ export abstract class Repository<
     if (/* this class was instantiated directly (without inheritance) */
       Repository.prototype === this.constructor.prototype
     ) {
-      if (this.$debugEnabled) {
+      if (this.isDebugEnabled) {
         this.$error(`Using default empty repository.`);
       } else {
         Debug.$error(`Using default empty repository for ${name}`, true);
       }
     }
+
+
+    if (Data.prototype.__col__) {
+      this.columns = Data.prototype.__col__.slice();
+
+      delete Data.prototype.__col__;
+    } else {
+      this.columns = Object.keys(new Data({}, this));
+    }
   }
 
   protected makeDataInstance(options: A): E {
-    // Cast to any to allow passing `this` as a second arg for classes implementing IActiveRecord to work
-    return new (this.Data as any)(options, this);
+    return new this.Data(options, this);
   }
 }
 

@@ -9,4 +9,4 @@
  * @param splitter to split the path by. Default is '.' ('obj.path.example')
  * @returns a value from a given path. If a path is invalid - returns undefined.
  */
-export declare function fromPath(obj: any, path: any, splitter?: string): any;
+export declare function fromPath(obj: any, path: number | string, splitter?: string): any;

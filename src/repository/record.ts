@@ -1,14 +1,15 @@
-import { Driver, FallbackDriver, IDriverConstructor } from '../drivers';
 import { Connection } from '../connection/connection';
+import { Debugable } from '../debug';
+import { Driver, FallbackDriver, IDriverConstructor } from '../drivers';
 import { QueryResult } from '../queryResult';
 import { IStorableConstructor, Record } from '../storable';
-import { FromSecArg, IRepoData, RepoFactory, IRepoFactoryOptions, Repository, selectDriver } from './base';
+import { FromSecArg, IRepoData, IRepoFactoryOptions, RepoFactory, Repository, selectDriver } from './base';
 
-export interface IRecordRepoMethods<
+export interface IRecordRepository<
   C extends IStorableConstructor<E>,
   E extends Record = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]
-> {
+> extends IRepoData, Debugable {
   create(
     options: A,
     apiOptions?: any
@@ -35,7 +36,7 @@ export type RecordDataMap<
   C extends IStorableConstructor<E>,
   E extends Record = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]
-> = Partial<IRecordRepoMethods<C, E, A>>;
+> = Partial<IRecordRepository<C, E, A>>;
 
 /**
  * A single-entity repository.
@@ -50,16 +51,14 @@ export class RecordRepositoryClass<
   C extends IStorableConstructor<E>,
   E extends Record = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
-> extends Repository<DM, C, E, A> implements IRepoData<never>, IRecordRepoMethods<C, E ,A> {
+> extends Repository<DM, C, E, A> implements IRepoData, IRecordRepository<C, E ,A> {
   constructor(
     name: string,
     connectionName: string,
     public readonly currentDriver: Driver,
     record: C,
     api?: DM,
-  ) {
-    super(name, connectionName, record, api);
-  }
+  ) { super(name, connectionName, record, api); }
 
   public async create(
     options: A,

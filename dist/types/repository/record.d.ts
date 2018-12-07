@@ -1,14 +1,15 @@
+import { Debugable } from '../debug';
 import { Driver, IDriverConstructor } from '../drivers';
 import { QueryResult } from '../queryResult';
 import { IStorableConstructor, Record } from '../storable';
-import { FromSecArg, IRepoData, RepoFactory, IRepoFactoryOptions, Repository } from './base';
-export interface IRecordRepoMethods<C extends IStorableConstructor<E>, E extends Record = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]> {
+import { FromSecArg, IRepoData, IRepoFactoryOptions, RepoFactory, Repository } from './base';
+export interface IRecordRepository<C extends IStorableConstructor<E>, E extends Record = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]> extends IRepoData, Debugable {
     create(options: A, apiOptions?: any): Promise<any>;
     read(apiOptions?: any): Promise<any>;
     update(options: Partial<A>, apiOptions?: any): Promise<any>;
     delete(deleteApiOptions?: any): Promise<any>;
 }
-export declare type RecordDataMap<C extends IStorableConstructor<E>, E extends Record = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]> = Partial<IRecordRepoMethods<C, E, A>>;
+export declare type RecordDataMap<C extends IStorableConstructor<E>, E extends Record = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]> = Partial<IRecordRepository<C, E, A>>;
 /**
  * A single-entity repository.
  *
@@ -17,7 +18,7 @@ export declare type RecordDataMap<C extends IStorableConstructor<E>, E extends R
  * @template `E` entity instance type
  * @template `A` entity constructor parameter options
  */
-export declare class RecordRepositoryClass<DM extends RecordDataMap<C, E, A>, C extends IStorableConstructor<E>, E extends Record = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]> extends Repository<DM, C, E, A> implements IRepoData<never>, IRecordRepoMethods<C, E, A> {
+export declare class RecordRepositoryClass<DM extends RecordDataMap<C, E, A>, C extends IStorableConstructor<E>, E extends Record = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]> extends Repository<DM, C, E, A> implements IRepoData, IRecordRepository<C, E, A> {
     readonly currentDriver: Driver;
     constructor(name: string, connectionName: string, currentDriver: Driver, record: C, api?: DM);
     create(options: A, apiOptions?: FromSecArg<DM['create']> | false): Promise<QueryResult<E>>;

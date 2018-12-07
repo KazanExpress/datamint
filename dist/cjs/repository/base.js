@@ -18,28 +18,35 @@ var drivers_1 = require("../drivers");
 var multiDriver_1 = require("../drivers/multiDriver");
 var Repository = /** @class */ (function (_super) {
     __extends(Repository, _super);
-    function Repository(name, $connectionName, Data, api) {
+    function Repository(name, connectionName, Data, api) {
         var _this = _super.call(this) || this;
         _this.name = name;
-        _this.$connectionName = $connectionName;
+        _this.connectionName = connectionName;
         _this.Data = Data;
         _this.api = api;
-        _this.$debugType = "db:" + _this.name.toLowerCase();
+        _this.columns = [];
+        _this.debugType = "db:" + _this.name.toLowerCase();
         if (!api) {
             _this.$warn('The main functionality is disabled. Are you sure you want to use this without API?', true);
         }
         if ( /* this class was instantiated directly (without inheritance) */Repository.prototype === _this.constructor.prototype) {
-            if (_this.$debugEnabled) {
+            if (_this.isDebugEnabled) {
                 _this.$error("Using default empty repository.");
             }
             else {
                 debug_1.Debug.$error("Using default empty repository for " + name, true);
             }
         }
+        if (Data.prototype.__col__) {
+            _this.columns = Data.prototype.__col__.slice();
+            delete Data.prototype.__col__;
+        }
+        else {
+            _this.columns = Object.keys(new Data({}, _this));
+        }
         return _this;
     }
     Repository.prototype.makeDataInstance = function (options) {
-        // Cast to any to allow passing `this` as a second arg for classes implementing IActiveRecord to work
         return new this.Data(options, this);
     };
     return Repository;

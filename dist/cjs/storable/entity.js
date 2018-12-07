@@ -21,26 +21,38 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var debug_1 = require("../debug");
 var decorators_1 = require("../decorators");
-var entity_1 = require("../repository/entity");
 var base_1 = require("./base");
-var defaultIdAliases = [
-    'id', 'ID', 'Id', '_id', '_ID', '_Id', '__id', '__ID', '__Id', '__id__', '__ID__', '__Id__'
-];
 var Entity = /** @class */ (function (_super) {
     __extends(Entity, _super);
     function Entity(options) {
-        var _this = _super.call(this, options) || this;
-        // If no unique ID is set for the entity
-        if (!_this.__idKey__) {
-            var key = Object.keys(_this).find(function (key) { return defaultIdAliases.some(function (a) { return a === key; }); });
-            // Auto-apply the ID decorator if found any compatible property
-            if (key) {
-                _this.constructor.ID(_this, key);
-            }
+        var args = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            args[_i - 1] = arguments[_i];
         }
+        var _this = _super.apply(this, __spread([options], args)) || this;
         if (_this.__idKey__ && options[String(_this.__idKey__)]) {
             Reflect.deleteProperty(_this, '__idValue__');
             Reflect.defineProperty(_this, '__idValue__', {
@@ -78,10 +90,10 @@ exports.Entity = Entity;
 var SaveableEntity = /** @class */ (function (_super) {
     __extends(SaveableEntity, _super);
     function SaveableEntity(options, repo) {
-        var _this = _super.call(this, options) || this;
+        var _this = _super.call(this, options, repo) || this;
         if (repo) {
             _this.__repo = repo;
-            _this.__debug = new debug_1.DebugInstance("db:" + repo.name + ":entity", _this.__repo.$connectionName);
+            _this.__debug = new debug_1.DebugInstance("db:" + repo.name + ":entity", _this.__repo.connectionName);
         }
         else {
             _this.__debug = new debug_1.DebugInstance('*', '');
@@ -116,7 +128,7 @@ var SaveableEntity = /** @class */ (function (_super) {
     ], SaveableEntity.prototype, "__debug", void 0);
     __decorate([
         decorators_1.enumerable(false),
-        __metadata("design:type", entity_1.EntityRepositoryClass)
+        __metadata("design:type", Object)
     ], SaveableEntity.prototype, "__repo", void 0);
     __decorate([
         decorators_1.enumerable(false),

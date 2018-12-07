@@ -9,22 +9,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 import { DebugInstance } from '../debug';
 import { enumerable } from '../decorators';
-import { EntityRepositoryClass } from '../repository/entity';
 import { Storable } from './base';
-const defaultIdAliases = [
-    'id', 'ID', 'Id', '_id', '_ID', '_Id', '__id', '__ID', '__Id', '__id__', '__ID__', '__Id__'
-];
 export class Entity extends Storable {
-    constructor(options) {
-        super(options);
-        // If no unique ID is set for the entity
-        if (!this.__idKey__) {
-            const key = Object.keys(this).find(key => defaultIdAliases.some(a => a === key));
-            // Auto-apply the ID decorator if found any compatible property
-            if (key) {
-                this.constructor.ID(this, key);
-            }
-        }
+    constructor(options, ...args) {
+        super(options, ...args);
         if (this.__idKey__ && options[String(this.__idKey__)]) {
             Reflect.deleteProperty(this, '__idValue__');
             Reflect.defineProperty(this, '__idValue__', {
@@ -58,10 +46,10 @@ __decorate([
  */
 export class SaveableEntity extends Entity {
     constructor(options, repo) {
-        super(options);
+        super(options, repo);
         if (repo) {
             this.__repo = repo;
-            this.__debug = new DebugInstance(`db:${repo.name}:entity`, this.__repo.$connectionName);
+            this.__debug = new DebugInstance(`db:${repo.name}:entity`, this.__repo.connectionName);
         }
         else {
             this.__debug = new DebugInstance('*', '');
@@ -77,7 +65,7 @@ export class SaveableEntity extends Entity {
             return Promise.resolve(undefined);
         }
         const idkey = this.__idKey__;
-        return this.__repo.updateById(idkey ? this[idkey] : 0, () => this).then(r => r.result).catch(e => { throw e; });
+        return this.__repo.updateById(idkey ? this[idkey] : 0, () => this).then((r) => r.result).catch(e => { throw e; });
     }
     $delete() {
         if (!this.__repo) {
@@ -85,7 +73,7 @@ export class SaveableEntity extends Entity {
             return Promise.resolve(undefined);
         }
         const idkey = this.__idKey__;
-        return this.__repo.delete(idkey ? this[idkey] : 0).then(r => r.result).catch(e => { throw e; });
+        return this.__repo.delete(idkey ? this[idkey] : 0).then((r) => r.result).catch(e => { throw e; });
     }
 }
 __decorate([
@@ -94,7 +82,7 @@ __decorate([
 ], SaveableEntity.prototype, "__debug", void 0);
 __decorate([
     enumerable(false),
-    __metadata("design:type", EntityRepositoryClass)
+    __metadata("design:type", Object)
 ], SaveableEntity.prototype, "__repo", void 0);
 __decorate([
     enumerable(false),

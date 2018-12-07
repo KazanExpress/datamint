@@ -1,12 +1,7 @@
-import {
-  Connection,
-  EntityRepository,
-  RecordRepository,
-  RemoteRepository
-} from '../../src';
-
+import { Connection, EntityRepository, RecordRepository, RemoteRepository } from '../../src';
 import { ProductApiMap, UserApiMap } from '../common/api';
 import { Product, Remote, User } from '../common/models';
+
 
 describe('types', () => {
   it('types', async () => {
@@ -38,6 +33,11 @@ describe('types', () => {
     });
 
     const products = orm.Products;
+
+    expect(products.primaryKey).toBe('id');
+    expect(products.columns).toContain('id');
+    expect(products.columns).toContain('title');
+
     const user = orm.User;
     const remote = orm.Remote.API;
 

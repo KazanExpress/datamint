@@ -22,8 +22,8 @@ var GlobalDebug = /** @class */ (function (_super) {
     __extends(GlobalDebug, _super);
     function GlobalDebug() {
         var _this = _super.call(this) || this;
-        _this.$debugType = '*';
-        _this.$connectionName = '';
+        _this.debugType = '*';
+        _this.connectionName = '';
         return _this;
     }
     Object.defineProperty(GlobalDebug.prototype, "map", {

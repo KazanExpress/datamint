@@ -108,24 +108,24 @@ class Debugable {
     /**
      * `true` if the debug is enabled for this class
      */
-    get $debugEnabled() { return errorTypeFor(this.$debugType); }
+    get isDebugEnabled() { return errorTypeFor(this.debugType); }
     $logFactory(level) {
-        return (message, force = false) => print(this.$connectionName, this.$debugType, message, level, force);
+        return (message, force = false) => print(this.connectionName, this.debugType, message, level, force);
     }
 }
 __decorate([
     enumerable(false),
     __metadata("design:type", String)
-], Debugable.prototype, "$debugType", void 0);
+], Debugable.prototype, "debugType", void 0);
 __decorate([
     enumerable(false),
     __metadata("design:type", String)
-], Debugable.prototype, "$connectionName", void 0);
+], Debugable.prototype, "connectionName", void 0);
 __decorate([
     enumerable(false),
     __metadata("design:type", Object),
     __metadata("design:paramtypes", [])
-], Debugable.prototype, "$debugEnabled", null);
+], Debugable.prototype, "isDebugEnabled", null);
 __decorate([
     enumerable(false),
     __metadata("design:type", Function),
@@ -149,18 +149,18 @@ __decorate([
     __metadata("design:type", Object)
 ], Debugable.prototype, "$debug", void 0);
 class DebugInstance extends Debugable {
-    constructor($debugType, $connectionName) {
+    constructor(debugType, connectionName) {
         super();
-        this.$debugType = $debugType;
-        this.$connectionName = $connectionName;
+        this.debugType = debugType;
+        this.connectionName = connectionName;
     }
 }
 
 class GlobalDebug extends Debugable {
     constructor() {
         super();
-        this.$debugType = '*';
-        this.$connectionName = '';
+        this.debugType = '*';
+        this.connectionName = '';
     }
     get map() {
         return debugMap;
@@ -178,11 +178,10 @@ class Connection extends Debugable {
      * @param name the name of the connection to the storage. Namespaces all respositories invoked from the instance.
      * @param repositories sets the relation of a repository name to its contents' options.
      */
-    constructor(name, repositories) {
+    constructor(connectionName, repositories) {
         super();
-        this.name = name;
-        this.$debugType = `connection`;
-        this.$connectionName = this.name;
+        this.connectionName = connectionName;
+        this.debugType = `connection`;
         /**
          * A current map of bound repositories
          */
@@ -237,8 +236,8 @@ class Driver extends Debugable {
     constructor(connection) {
         super();
         this.connection = connection;
-        this.$debugType = 'driver';
-        this.$connectionName = this.connection.name;
+        this.debugType = 'driver';
+        this.connectionName = this.connection.name;
     }
     /**
      * Determines if the driver is supported in current environment
@@ -267,7 +266,7 @@ class FallbackDriver extends Driver {
                 }
             }
             const repo = this.repositoryMap[name];
-            if (primaryKey) {
+            if (primaryKey && !Array.isArray(repo)) {
                 const key = String(data[primaryKey]);
                 repo[key] = data;
             }
@@ -303,7 +302,7 @@ class FallbackDriver extends Driver {
             return Object.values(repo)[0];
         });
     }
-    update({ name, primaryKey }, data) {
+    update({ name }, data) {
         return __awaiter(this, void 0, void 0, function* () {
             throw new Error('Method not implemented.');
             return [];
@@ -404,27 +403,34 @@ class MultiDriver extends Driver {
 }
 
 class Repository extends Debugable {
-    constructor(name, $connectionName, Data, api) {
+    constructor(name, connectionName, Data, api) {
         super();
         this.name = name;
-        this.$connectionName = $connectionName;
+        this.connectionName = connectionName;
         this.Data = Data;
         this.api = api;
-        this.$debugType = `db:${this.name.toLowerCase()}`;
+        this.columns = [];
+        this.debugType = `db:${this.name.toLowerCase()}`;
         if (!api) {
             this.$warn('The main functionality is disabled. Are you sure you want to use this without API?', true);
         }
         if ( /* this class was instantiated directly (without inheritance) */Repository.prototype === this.constructor.prototype) {
-            if (this.$debugEnabled) {
+            if (this.isDebugEnabled) {
                 this.$error(`Using default empty repository.`);
             }
             else {
                 Debug.$error(`Using default empty repository for ${name}`, true);
             }
         }
+        if (Data.prototype.__col__) {
+            this.columns = Data.prototype.__col__.slice();
+            delete Data.prototype.__col__;
+        }
+        else {
+            this.columns = Object.keys(new Data({}, this));
+        }
     }
     makeDataInstance(options) {
-        // Cast to any to allow passing `this` as a second arg for classes implementing IActiveRecord to work
         return new this.Data(options, this);
     }
 }
@@ -506,6 +512,218 @@ class QueryResult {
         }
     }
 }
+__decorate([
+    enumerable(false),
+    __metadata("design:type", Boolean)
+], QueryResult.prototype, "_ok", void 0);
+__decorate([
+    enumerable(false),
+    __metadata("design:type", Object)
+], QueryResult.prototype, "_result", void 0);
+__decorate([
+    enumerable(false),
+    __metadata("design:type", Error)
+], QueryResult.prototype, "_error", void 0);
+__decorate([
+    enumerable(false),
+    __metadata("design:type", Array)
+], QueryResult.prototype, "handlers", void 0);
+
+class Storable {
+    constructor(__options, ..._) {
+        this.__col__ = [];
+        this.__options = __options;
+    }
+    static Property(target, key) {
+        if (!target.__col__) {
+            target.__col__ = [];
+        }
+        target.__col__.push(key);
+    }
+}
+__decorate([
+    enumerable(false),
+    __metadata("design:type", Array)
+], Storable.prototype, "__col__", void 0);
+__decorate([
+    enumerable(false),
+    __metadata("design:type", Object)
+], Storable.prototype, "__options", void 0);
+
+class Entity extends Storable {
+    constructor(options, ...args) {
+        super(options, ...args);
+        if (this.__idKey__ && options[String(this.__idKey__)]) {
+            Reflect.deleteProperty(this, '__idValue__');
+            Reflect.defineProperty(this, '__idValue__', {
+                value: options[String(this.__idKey__)],
+                writable: true,
+                enumerable: false
+            });
+            Reflect.deleteProperty(this, this.__idKey__);
+            Reflect.defineProperty(this, this.__idKey__, {
+                get: () => this.__idValue__,
+                set: v => this.__idValue__ = v,
+                enumerable: true
+            });
+        }
+    }
+    static ID(target, key) {
+        target.__idKey__ = key;
+        target.constructor.Property(target, key);
+    }
+}
+__decorate([
+    enumerable(false),
+    __metadata("design:type", Object)
+], Entity.prototype, "__idKey__", void 0);
+__decorate([
+    enumerable(false),
+    __metadata("design:type", Object)
+], Entity.prototype, "__idValue__", void 0);
+/**
+ * Enables ActiveRecord pattern for the entity
+ */
+class SaveableEntity extends Entity {
+    constructor(options, repo) {
+        super(options, repo);
+        if (repo) {
+            this.__repo = repo;
+            this.__debug = new DebugInstance(`db:${repo.name}:entity`, this.__repo.connectionName);
+        }
+        else {
+            this.__debug = new DebugInstance('*', '');
+            this.__contextWarning();
+        }
+    }
+    __contextWarning(optional = '') {
+        this.__debug.$warn(`Seems like the entity "${this.constructor.name}" was initialized in a wrong context.\n${optional}`, true);
+    }
+    $save() {
+        if (!this.__repo) {
+            this.__contextWarning('Saving cannot be done.');
+            return Promise.resolve(undefined);
+        }
+        const idkey = this.__idKey__;
+        return this.__repo.updateById(idkey ? this[idkey] : 0, () => this).then((r) => r.result).catch(e => { throw e; });
+    }
+    $delete() {
+        if (!this.__repo) {
+            this.__contextWarning('Deletion cannot be done.');
+            return Promise.resolve(undefined);
+        }
+        const idkey = this.__idKey__;
+        return this.__repo.delete(idkey ? this[idkey] : 0).then((r) => r.result).catch(e => { throw e; });
+    }
+}
+__decorate([
+    enumerable(false),
+    __metadata("design:type", DebugInstance)
+], SaveableEntity.prototype, "__debug", void 0);
+__decorate([
+    enumerable(false),
+    __metadata("design:type", Object)
+], SaveableEntity.prototype, "__repo", void 0);
+__decorate([
+    enumerable(false),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], SaveableEntity.prototype, "__contextWarning", null);
+
+/**
+ * A single-entity repository.
+ *
+ * @template `DM` API data map for the repo
+ * @template `C` entity constructor type
+ * @template `E` entity instance type
+ * @template `A` entity constructor parameter options
+ */
+class RecordRepositoryClass extends Repository {
+    constructor(name, connectionName, currentDriver, record, api) {
+        super(name, connectionName, record, api);
+        this.currentDriver = currentDriver;
+    }
+    create(options, apiOptions) {
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('Not implemented');
+            return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        });
+    }
+    update(options, apiOptions) {
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('Not implemented');
+            return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        });
+    }
+    read(apiOptions) {
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('Not implemented');
+            return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        });
+    }
+    delete(apiOptions) {
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error('Not implemented');
+            return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
+        });
+    }
+}
+function RecordRepository(options) {
+    return (name, connection) => new RecordRepositoryClass(name, connection.name, new (selectDriver(options.dirvers || FallbackDriver, name))(connection), options.model, options.api);
+}
+
+class Record extends Storable {
+    constructor(options, ...args) { super(options, ...args); }
+}
+class SaveableRecord extends Record {
+    constructor(options, repo) {
+        super(options, repo);
+        if (repo) {
+            this.__repo = repo;
+            this.__debug = new DebugInstance(`db:${repo.name}:entity`, this.__repo.connectionName);
+        }
+        else {
+            this.__debug = new DebugInstance('*', '');
+            this.__contextWarning();
+        }
+    }
+    __contextWarning(optional = '') {
+        this.__debug.$warn(`Seems like the record "${this.constructor.name}" was initialized in a wrong context.\n${optional}`, true);
+    }
+    $save() {
+        if (!this.__repo) {
+            this.__contextWarning('Saving cannot be done.');
+            return Promise.resolve(undefined);
+        }
+        return this.__repo.update(this)
+            .then(r => r.result)
+            .catch(e => { throw e; });
+    }
+    $delete() {
+        if (!this.__repo) {
+            this.__contextWarning('Deletion cannot be done.');
+            return Promise.resolve(undefined);
+        }
+        return this.__repo.delete()
+            .then(r => r.result)
+            .catch(e => { throw e; });
+    }
+}
+__decorate([
+    enumerable(false),
+    __metadata("design:type", DebugInstance)
+], SaveableRecord.prototype, "__debug", void 0);
+__decorate([
+    enumerable(false),
+    __metadata("design:type", RecordRepositoryClass)
+], SaveableRecord.prototype, "__repo", void 0);
+__decorate([
+    enumerable(false),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], SaveableRecord.prototype, "__contextWarning", null);
 
 /**
  * A typical multi-entity repository.
@@ -521,27 +739,31 @@ class EntityRepositoryClass extends Repository {
     constructor(name, connectionName, currentDriver, entity, api) {
         super(name, connectionName, entity, api);
         this.currentDriver = currentDriver;
-        this.columns = [];
-        this.primaryKey = entity.prototype.__idKey__;
-        delete entity.prototype.__idKey__;
-        if (entity.prototype.__col__) {
-            this.columns = entity.prototype.__col__;
-            if (!this.columns.includes(String(this.primaryKey))) {
-                this.columns.push(String(this.primaryKey));
+        // If no unique ID is set for the entity
+        if (!entity.prototype.__idKey__) {
+            const falseInstance = new entity({}, this);
+            const defaultIdAliases = ['id', 'ID', 'Id', '_id', '_ID', '_Id', '__id', '__ID', '__Id', '__id__', '__ID__', '__Id__'];
+            const key = Object.keys(falseInstance).find(key => defaultIdAliases.some(a => a === key));
+            // Auto-apply the ID decorator if found any compatible property
+            if (key) {
+                Entity.ID(entity.prototype, key);
             }
-            delete entity.prototype.__col__;
+            else {
+                this.$error(`No ID field is set for "${entity.name}".`);
+            }
         }
-        else {
-            // Cast to any to allow passing `this` as a second arg for classes implementing IActiveRecord to work
-            // and to avoid pointless casting to Saveable
-            this.columns = Object.keys(new entity({}, this));
+        this.primaryKey = entity.prototype.__idKey__;
+        if (this.primaryKey && !this.columns.includes(String(this.primaryKey))) {
+            this.columns.push(String(this.primaryKey));
         }
+        delete entity.prototype.__idKey__;
     }
     get driverOptions() {
         return {
             name: this.name,
             columns: this.columns,
-            primaryKey: this.primaryKey
+            primaryKey: this.primaryKey,
+            connectionName: this.connectionName
         };
     }
     add(options, 
@@ -639,48 +861,6 @@ function EntityRepository(options) {
     return (name, connection) => new EntityRepositoryClass(name, connection.name, new (selectDriver(options.dirvers || FallbackDriver, name))(connection), options.model, options.api);
 }
 
-/**
- * A single-entity repository.
- *
- * @template `DM` API data map for the repo
- * @template `C` entity constructor type
- * @template `E` entity instance type
- * @template `A` entity constructor parameter options
- */
-class RecordRepositoryClass extends Repository {
-    constructor(name, connectionName, currentDriver, record, api) {
-        super(name, connectionName, record, api);
-        this.currentDriver = currentDriver;
-    }
-    create(options, apiOptions) {
-        return __awaiter(this, void 0, void 0, function* () {
-            throw new Error('Not implemented');
-            return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
-        });
-    }
-    update(options, apiOptions) {
-        return __awaiter(this, void 0, void 0, function* () {
-            throw new Error('Not implemented');
-            return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
-        });
-    }
-    read(apiOptions) {
-        return __awaiter(this, void 0, void 0, function* () {
-            throw new Error('Not implemented');
-            return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
-        });
-    }
-    delete(apiOptions) {
-        return __awaiter(this, void 0, void 0, function* () {
-            throw new Error('Not implemented');
-            return new QueryResult(/* TODO: implement this */ true, this.makeDataInstance({}));
-        });
-    }
-}
-function RecordRepository(options) {
-    return (name, connection) => new RecordRepositoryClass(name, connection.name, new (selectDriver(options.dirvers || FallbackDriver, name))(connection), options.model, options.api);
-}
-
 class RemoteRepositoryClass extends Repository {
     get API() {
         return this.api;
@@ -689,172 +869,6 @@ class RemoteRepositoryClass extends Repository {
 function RemoteRepository(options) {
     return (name, connection) => new RemoteRepositoryClass(name, connection.name, options.model, options.api);
 }
-
-class Storable {
-    constructor(__options) {
-        this.__options = __options;
-    }
-    static Property(target, key) {
-        const constructor = target.constructor;
-        if (!constructor.__col__) {
-            constructor.__col__ = [];
-        }
-        constructor.__col__.push(key);
-    }
-}
-Storable.__col__ = [];
-__decorate([
-    enumerable(false),
-    __metadata("design:type", Object)
-], Storable.prototype, "__options", void 0);
-__decorate([
-    enumerable(false),
-    __metadata("design:type", Array)
-], Storable, "__col__", void 0);
-
-const defaultIdAliases = [
-    'id', 'ID', 'Id', '_id', '_ID', '_Id', '__id', '__ID', '__Id', '__id__', '__ID__', '__Id__'
-];
-class Entity extends Storable {
-    constructor(options) {
-        super(options);
-        // If no unique ID is set for the entity
-        if (!this.__idKey__) {
-            const key = Object.keys(this).find(key => defaultIdAliases.some(a => a === key));
-            // Auto-apply the ID decorator if found any compatible property
-            if (key) {
-                this.constructor.ID(this, key);
-            }
-        }
-        if (this.__idKey__ && options[String(this.__idKey__)]) {
-            Reflect.deleteProperty(this, '__idValue__');
-            Reflect.defineProperty(this, '__idValue__', {
-                value: options[String(this.__idKey__)],
-                writable: true,
-                enumerable: false
-            });
-            Reflect.deleteProperty(this, this.__idKey__);
-            Reflect.defineProperty(this, this.__idKey__, {
-                get: () => this.__idValue__,
-                set: v => this.__idValue__ = v,
-                enumerable: true
-            });
-        }
-    }
-    static ID(target, key) {
-        target.__idKey__ = key;
-        target.constructor.Property(target, key);
-    }
-}
-__decorate([
-    enumerable(false),
-    __metadata("design:type", Object)
-], Entity.prototype, "__idKey__", void 0);
-__decorate([
-    enumerable(false),
-    __metadata("design:type", Object)
-], Entity.prototype, "__idValue__", void 0);
-/**
- * Enables ActiveRecord pattern for the entity
- */
-class SaveableEntity extends Entity {
-    constructor(options, repo) {
-        super(options);
-        if (repo) {
-            this.__repo = repo;
-            this.__debug = new DebugInstance(`db:${repo.name}:entity`, this.__repo.$connectionName);
-        }
-        else {
-            this.__debug = new DebugInstance('*', '');
-            this.__contextWarning();
-        }
-    }
-    __contextWarning(optional = '') {
-        this.__debug.$warn(`Seems like the entity "${this.constructor.name}" was initialized in a wrong context.\n${optional}`, true);
-    }
-    $save() {
-        if (!this.__repo) {
-            this.__contextWarning('Saving cannot be done.');
-            return Promise.resolve(undefined);
-        }
-        const idkey = this.__idKey__;
-        return this.__repo.updateById(idkey ? this[idkey] : 0, () => this).then(r => r.result).catch(e => { throw e; });
-    }
-    $delete() {
-        if (!this.__repo) {
-            this.__contextWarning('Deletion cannot be done.');
-            return Promise.resolve(undefined);
-        }
-        const idkey = this.__idKey__;
-        return this.__repo.delete(idkey ? this[idkey] : 0).then(r => r.result).catch(e => { throw e; });
-    }
-}
-__decorate([
-    enumerable(false),
-    __metadata("design:type", DebugInstance)
-], SaveableEntity.prototype, "__debug", void 0);
-__decorate([
-    enumerable(false),
-    __metadata("design:type", EntityRepositoryClass)
-], SaveableEntity.prototype, "__repo", void 0);
-__decorate([
-    enumerable(false),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], SaveableEntity.prototype, "__contextWarning", null);
-
-class Record extends Storable {
-    constructor(options) { super(options); }
-}
-class SaveableRecord extends Record {
-    constructor(options, repo) {
-        super(options);
-        if (repo) {
-            this.__repo = repo;
-            this.__debug = new DebugInstance(`db:${repo.name}:entity`, this.__repo.$connectionName);
-        }
-        else {
-            this.__debug = new DebugInstance('*', '');
-            this.__contextWarning();
-        }
-    }
-    __contextWarning(optional = '') {
-        this.__debug.$warn(`Seems like the record "${this.constructor.name}" was initialized in a wrong context.\n${optional}`, true);
-    }
-    $save() {
-        if (!this.__repo) {
-            this.__contextWarning('Saving cannot be done.');
-            return Promise.resolve(undefined);
-        }
-        return this.__repo.update(this)
-            .then(r => r.result)
-            .catch(e => { throw e; });
-    }
-    $delete() {
-        if (!this.__repo) {
-            this.__contextWarning('Deletion cannot be done.');
-            return Promise.resolve(undefined);
-        }
-        return this.__repo.delete()
-            .then(r => r.result)
-            .catch(e => { throw e; });
-    }
-}
-__decorate([
-    enumerable(false),
-    __metadata("design:type", DebugInstance)
-], SaveableRecord.prototype, "__debug", void 0);
-__decorate([
-    enumerable(false),
-    __metadata("design:type", RecordRepositoryClass)
-], SaveableRecord.prototype, "__repo", void 0);
-__decorate([
-    enumerable(false),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], SaveableRecord.prototype, "__contextWarning", null);
 
 export { Connection$1 as Connection, Repository, EntityRepository, RecordRepository, RemoteRepository, Storable, Entity, SaveableEntity, Record, SaveableRecord, Driver, FallbackDriver, MultiDriver };
 //# sourceMappingURL=webalorm.es.js.map

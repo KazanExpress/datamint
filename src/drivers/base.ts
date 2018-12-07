@@ -1,5 +1,5 @@
-import { Debugable, DebugType } from '../debug';
 import { Connection } from '../connection';
+import { Debugable, DebugType } from '../debug';
 import { IRepoData } from '../repository';
 
 export interface IDriverConstructor extends Function {
@@ -9,8 +9,8 @@ export interface IDriverConstructor extends Function {
 }
 
 export abstract class Driver extends Debugable {
-  protected $debugType: DebugType = 'driver';
-  protected $connectionName: string = this.connection.name;
+  protected readonly debugType: DebugType = 'driver';
+  public readonly connectionName: string = this.connection.name;
 
   constructor(
     protected connection: Connection

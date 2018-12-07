@@ -1,7 +1,7 @@
 import { RecordRepositoryClass } from '../repository/record';
 import { IActiveRecord, Storable } from './base';
 export declare class Record extends Storable {
-    constructor(options: any);
+    constructor(options: any, ...args: any[]);
 }
 export declare class SaveableRecord extends Record implements IActiveRecord {
     private readonly __debug;

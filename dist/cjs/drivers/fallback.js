@@ -84,7 +84,7 @@ var FallbackDriver = /** @class */ (function (_super) {
                     }
                 }
                 repo = this.repositoryMap[name];
-                if (primaryKey) {
+                if (primaryKey && !Array.isArray(repo)) {
                     key = String(data[primaryKey]);
                     repo[key] = data;
                 }
@@ -126,7 +126,7 @@ var FallbackDriver = /** @class */ (function (_super) {
         });
     };
     FallbackDriver.prototype.update = function (_a, data) {
-        var name = _a.name, primaryKey = _a.primaryKey;
+        var name = _a.name;
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_b) {
                 throw new Error('Method not implemented.');

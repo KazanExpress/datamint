@@ -1,4 +1,4 @@
-import { EntityRepositoryClass } from '../repository/entity';
+import { IEntityRepository } from '../repository/entity';
 import { IActiveRecord, Storable } from './base';
 declare type WithId<T, IDKey extends PropertyKey, IDValue> = T & {
     [key in IDKey]: IDValue;
@@ -8,7 +8,7 @@ export declare class Entity<IDKey extends PropertyKey = any, IDValue extends Pro
     protected __idValue__?: IDValue;
     constructor(options: WithId<{
         [key: string]: any;
-    }, IDKey, IDValue>);
+    }, IDKey, IDValue>, ...args: any[]);
     static ID(target: Entity, key: PropertyKey): void;
 }
 /**
@@ -20,7 +20,7 @@ export declare class SaveableEntity<IDKey extends PropertyKey = string, IDValue 
     private __contextWarning;
     constructor(options: WithId<{
         [key: string]: any;
-    }, IDKey, IDValue>, repo?: EntityRepositoryClass<any, any, any, any, IDKey, IDValue>);
+    }, IDKey, IDValue>, repo?: IEntityRepository<any, any, any, IDKey, IDValue>);
     $save(): Promise<undefined> | Promise<this>;
     $delete(): Promise<this | undefined>;
 }

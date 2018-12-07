@@ -4,7 +4,7 @@ import { RecordRepositoryClass } from '../repository/record';
 import { IActiveRecord, Storable } from './base';
 
 export class Record extends Storable {
-  constructor(options) { super(options); }
+  constructor(options: any, ...args: any[]) { super(options, ...args); }
 }
 
 export class SaveableRecord extends Record implements IActiveRecord {
@@ -21,14 +21,14 @@ export class SaveableRecord extends Record implements IActiveRecord {
   }
 
   constructor(options, repo?: RecordRepositoryClass<any, any, any, any>) {
-    super(options);
+    super(options, repo);
 
     if (repo) {
       this.__repo = repo;
 
       this.__debug = new DebugInstance(
         `db:${repo.name}:entity` as DebugType,
-        this.__repo.$connectionName
+        this.__repo.connectionName
         );
     } else {
       this.__debug = new DebugInstance('*', '');

@@ -50,6 +50,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var drivers_1 = require("../drivers");
 var queryResult_1 = require("../queryResult");
+var storable_1 = require("../storable");
 var base_1 = require("./base");
 /**
  * A typical multi-entity repository.
@@ -66,21 +67,24 @@ var EntityRepositoryClass = /** @class */ (function (_super) {
     function EntityRepositoryClass(name, connectionName, currentDriver, entity, api) {
         var _this = _super.call(this, name, connectionName, entity, api) || this;
         _this.currentDriver = currentDriver;
-        _this.columns = [];
-        _this.primaryKey = entity.prototype.__idKey__;
-        delete entity.prototype.__idKey__;
-        if (entity.prototype.__col__) {
-            _this.columns = entity.prototype.__col__;
-            if (!_this.columns.includes(String(_this.primaryKey))) {
-                _this.columns.push(String(_this.primaryKey));
+        // If no unique ID is set for the entity
+        if (!entity.prototype.__idKey__) {
+            var falseInstance = new entity({}, _this);
+            var defaultIdAliases_1 = ['id', 'ID', 'Id', '_id', '_ID', '_Id', '__id', '__ID', '__Id', '__id__', '__ID__', '__Id__'];
+            var key = Object.keys(falseInstance).find(function (key) { return defaultIdAliases_1.some(function (a) { return a === key; }); });
+            // Auto-apply the ID decorator if found any compatible property
+            if (key) {
+                storable_1.Entity.ID(entity.prototype, key);
             }
-            delete entity.prototype.__col__;
+            else {
+                _this.$error("No ID field is set for \"" + entity.name + "\".");
+            }
         }
-        else {
-            // Cast to any to allow passing `this` as a second arg for classes implementing IActiveRecord to work
-            // and to avoid pointless casting to Saveable
-            _this.columns = Object.keys(new entity({}, _this));
+        _this.primaryKey = entity.prototype.__idKey__;
+        if (_this.primaryKey && !_this.columns.includes(String(_this.primaryKey))) {
+            _this.columns.push(String(_this.primaryKey));
         }
+        delete entity.prototype.__idKey__;
         return _this;
     }
     Object.defineProperty(EntityRepositoryClass.prototype, "driverOptions", {
@@ -88,7 +92,8 @@ var EntityRepositoryClass = /** @class */ (function (_super) {
             return {
                 name: this.name,
                 columns: this.columns,
-                primaryKey: this.primaryKey
+                primaryKey: this.primaryKey,
+                connectionName: this.connectionName
             };
         },
         enumerable: true,

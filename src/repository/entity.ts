@@ -1,21 +1,26 @@
-import { Driver, FallbackDriver, IDriverConstructor } from '../drivers';
 import { Connection } from '../connection/connection';
+import { Debugable } from '../debug';
+import { Driver, FallbackDriver, IDriverConstructor } from '../drivers';
 import { QueryResult } from '../queryResult';
-import { IStorableConstructor } from '../storable';
-import { Entity } from '../storable/entity';
-import { FromSecArg, IRepoData, RepoFactory, IRepoFactoryOptions, Repository, selectDriver } from './base';
+import { Entity, IStorableConstructor } from '../storable';
+import { FromSecArg, IRepoData, IRepoFactoryOptions, RepoFactory, Repository, selectDriver } from './base';
 
 export type PartialWithId<T, IDValue, IDKey extends PropertyKey> = {
   [key in IDKey]: IDValue;
 } & Partial<T>;
 
-export interface IEntityRepoMethods<
+
+export interface IEntityRepoData<IDKey extends PropertyKey = PropertyKey> extends IRepoData {
+  readonly primaryKey?: IDKey;
+}
+
+export interface IEntityRepository<
   C extends IStorableConstructor<E>,
   E extends Entity = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
   IDKey extends PropertyKey = E extends Entity<infer IdKey, any> ? IdKey : PropertyKey,
   IDValue extends PropertyKey = E extends Entity<string, infer IdType> ? IdType : any
-> {
+> extends IEntityRepoData<IDKey>, Debugable {
   add(
     options: A,
     apiOptions?: any
@@ -24,10 +29,16 @@ export interface IEntityRepoMethods<
   get(
     id: IDValue,
     apiOptions?: any
-  ): Promise<any>;
+    ): Promise<any>;
 
   update(
     entity: PartialWithId<A, IDValue, IDKey>,
+    deleteApiOptions?: any
+  ): Promise<any>;
+
+  updateById(
+    id: IDValue,
+    query: (entity: A) => Partial<A>,
     deleteApiOptions?: any
   ): Promise<any>;
 
@@ -44,7 +55,7 @@ export type EntityDataMap<
   C extends IStorableConstructor<E>,
   E extends Entity = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]
-> = Partial<IEntityRepoMethods<C, E, A>>;
+> = Partial<IEntityRepository<C, E, A>>;
 
 /**
  * A typical multi-entity repository.
@@ -63,9 +74,8 @@ export class EntityRepositoryClass<
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
   IDKey extends PropertyKey = E extends Entity<infer IdKey, any> ? IdKey : PropertyKey,
   IDValue extends PropertyKey = E extends Entity<string, infer IdType> ? IdType : PropertyKey
-> extends Repository<DM, C, E, A> implements IRepoData<IDKey>, IEntityRepoMethods<C, E, A, IDKey, IDValue> {
+> extends Repository<DM, C, E, A> implements IEntityRepository<C, E, A, IDKey, IDValue> {
 
-  public readonly columns: Array<string> = [];
   public readonly primaryKey: IDKey;
 
   constructor(
@@ -77,29 +87,35 @@ export class EntityRepositoryClass<
   ) {
     super(name, connectionName, entity, api);
 
-    this.primaryKey = entity.prototype.__idKey__;
-    delete entity.prototype.__idKey__;
+    // If no unique ID is set for the entity
+    if (!entity.prototype.__idKey__) {
+      const falseInstance = new entity({}, this);
+      const defaultIdAliases = [ 'id', 'ID', 'Id', '_id', '_ID', '_Id', '__id', '__ID', '__Id', '__id__', '__ID__', '__Id__' ];
+      const key = Object.keys(falseInstance).find(key => defaultIdAliases.some(a => a === key));
 
-    if (entity.prototype.__col__) {
-      this.columns = entity.prototype.__col__;
-
-      if (!this.columns.includes(String(this.primaryKey))) {
-        this.columns.push(String(this.primaryKey));
+      // Auto-apply the ID decorator if found any compatible property
+      if (key) {
+        Entity.ID(entity.prototype, key);
+      } else {
+        this.$error(`No ID field is set for "${entity.name}".`);
       }
-
-      delete entity.prototype.__col__;
-    } else {
-      // Cast to any to allow passing `this` as a second arg for classes implementing IActiveRecord to work
-      // and to avoid pointless casting to Saveable
-      this.columns = Object.keys(new (entity as any)({}, this));
     }
+
+    this.primaryKey = entity.prototype.__idKey__;
+
+    if (this.primaryKey && !this.columns.includes(String(this.primaryKey))) {
+      this.columns.push(String(this.primaryKey));
+    }
+
+    delete entity.prototype.__idKey__;
   }
 
-  private get driverOptions(): IRepoData<IDKey> {
+  private get driverOptions(): IEntityRepoData<IDKey> {
     return {
       name: this.name,
       columns: this.columns,
-      primaryKey: this.primaryKey
+      primaryKey: this.primaryKey,
+      connectionName: this.connectionName
     };
   }
 
@@ -109,7 +125,7 @@ export class EntityRepositoryClass<
     apiOptions?: FromSecArg<DM['add']> | false // Pass false to disable the api call
   ) {
     try {
-      const result = await this.currentDriver.create<A, IRepoData<IDKey>>(this.driverOptions, options);
+      const result = await this.currentDriver.create<A, IEntityRepoData<IDKey>>(this.driverOptions, options);
 
       const instance = this.makeDataInstance(result);
 
@@ -145,7 +161,7 @@ export class EntityRepositoryClass<
     getApiOptions?: FromSecArg<DM['get']> | false
   ) {
     try {
-      const result = await this.currentDriver.findById<A, IRepoData<IDKey>, IDValue>(this.driverOptions, id);
+      const result = await this.currentDriver.findById<A, IEntityRepoData<IDKey>, IDValue>(this.driverOptions, id);
 
       if (!result) {
         throw new Error(`No results found for id ${id}`);

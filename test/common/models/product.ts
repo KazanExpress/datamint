@@ -6,13 +6,13 @@ export interface IProductOptions {
 }
 
 export class Product extends SaveableEntity<'id', IProductOptions['id']> implements IProductOptions {
-  @Product.ID
+  // Entirely optional
+  // @Product.ID
   public id: number;
 
   @Product.Property
   public title: string;
 
-  @Product.Property
   public readonly url: string;
 
   constructor(options: IProductOptions, ...args) {

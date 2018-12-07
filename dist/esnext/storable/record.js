@@ -12,14 +12,14 @@ import { enumerable } from '../decorators';
 import { RecordRepositoryClass } from '../repository/record';
 import { Storable } from './base';
 export class Record extends Storable {
-    constructor(options) { super(options); }
+    constructor(options, ...args) { super(options, ...args); }
 }
 export class SaveableRecord extends Record {
     constructor(options, repo) {
-        super(options);
+        super(options, repo);
         if (repo) {
             this.__repo = repo;
-            this.__debug = new DebugInstance(`db:${repo.name}:entity`, this.__repo.$connectionName);
+            this.__debug = new DebugInstance(`db:${repo.name}:entity`, this.__repo.connectionName);
         }
         else {
             this.__debug = new DebugInstance('*', '');

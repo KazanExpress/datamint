@@ -21,6 +21,26 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __read = (this && this.__read) || function (o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+};
+var __spread = (this && this.__spread) || function () {
+    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
+    return ar;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var debug_1 = require("../debug");
 var decorators_1 = require("../decorators");
@@ -29,7 +49,11 @@ var base_1 = require("./base");
 var Record = /** @class */ (function (_super) {
     __extends(Record, _super);
     function Record(options) {
-        return _super.call(this, options) || this;
+        var args = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            args[_i - 1] = arguments[_i];
+        }
+        return _super.apply(this, __spread([options], args)) || this;
     }
     return Record;
 }(base_1.Storable));
@@ -37,10 +61,10 @@ exports.Record = Record;
 var SaveableRecord = /** @class */ (function (_super) {
     __extends(SaveableRecord, _super);
     function SaveableRecord(options, repo) {
-        var _this = _super.call(this, options) || this;
+        var _this = _super.call(this, options, repo) || this;
         if (repo) {
             _this.__repo = repo;
-            _this.__debug = new debug_1.DebugInstance("db:" + repo.name + ":entity", _this.__repo.$connectionName);
+            _this.__debug = new debug_1.DebugInstance("db:" + repo.name + ":entity", _this.__repo.connectionName);
         }
         else {
             _this.__debug = new debug_1.DebugInstance('*', '');

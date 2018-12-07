@@ -9,24 +9,23 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 import { enumerable } from '../decorators';
 export class Storable {
-    constructor(__options) {
+    constructor(__options, ..._) {
+        this.__col__ = [];
         this.__options = __options;
     }
     static Property(target, key) {
-        const constructor = target.constructor;
-        if (!constructor.__col__) {
-            constructor.__col__ = [];
+        if (!target.__col__) {
+            target.__col__ = [];
         }
-        constructor.__col__.push(key);
+        target.__col__.push(key);
     }
 }
-Storable.__col__ = [];
+__decorate([
+    enumerable(false),
+    __metadata("design:type", Array)
+], Storable.prototype, "__col__", void 0);
 __decorate([
     enumerable(false),
     __metadata("design:type", Object)
 ], Storable.prototype, "__options", void 0);
-__decorate([
-    enumerable(false),
-    __metadata("design:type", Array)
-], Storable, "__col__", void 0);
 //# sourceMappingURL=base.js.map

@@ -31,11 +31,11 @@ var Debugable = /** @class */ (function () {
         this.$error = this.$logFactory('error');
         this.$debug = this.$logFactory('debug');
     }
-    Object.defineProperty(Debugable.prototype, "$debugEnabled", {
+    Object.defineProperty(Debugable.prototype, "isDebugEnabled", {
         /**
          * `true` if the debug is enabled for this class
          */
-        get: function () { return module_1.errorTypeFor(this.$debugType); },
+        get: function () { return module_1.errorTypeFor(this.debugType); },
         enumerable: true,
         configurable: true
     });
@@ -43,22 +43,22 @@ var Debugable = /** @class */ (function () {
         var _this = this;
         return function (message, force) {
             if (force === void 0) { force = false; }
-            return module_1.print(_this.$connectionName, _this.$debugType, message, level, force);
+            return module_1.print(_this.connectionName, _this.debugType, message, level, force);
         };
     };
     __decorate([
         decorators_1.enumerable(false),
         __metadata("design:type", String)
-    ], Debugable.prototype, "$debugType", void 0);
+    ], Debugable.prototype, "debugType", void 0);
     __decorate([
         decorators_1.enumerable(false),
         __metadata("design:type", String)
-    ], Debugable.prototype, "$connectionName", void 0);
+    ], Debugable.prototype, "connectionName", void 0);
     __decorate([
         decorators_1.enumerable(false),
         __metadata("design:type", Object),
         __metadata("design:paramtypes", [])
-    ], Debugable.prototype, "$debugEnabled", null);
+    ], Debugable.prototype, "isDebugEnabled", null);
     __decorate([
         decorators_1.enumerable(false),
         __metadata("design:type", Function),
@@ -86,10 +86,10 @@ var Debugable = /** @class */ (function () {
 exports.Debugable = Debugable;
 var DebugInstance = /** @class */ (function (_super) {
     __extends(DebugInstance, _super);
-    function DebugInstance($debugType, $connectionName) {
+    function DebugInstance(debugType, connectionName) {
         var _this = _super.call(this) || this;
-        _this.$debugType = $debugType;
-        _this.$connectionName = $connectionName;
+        _this.debugType = debugType;
+        _this.connectionName = connectionName;
         return _this;
     }
     return DebugInstance;

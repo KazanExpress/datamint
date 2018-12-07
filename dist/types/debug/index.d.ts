@@ -1,8 +1,8 @@
 import { Debugable } from './debugable';
 import { DebugType } from './module';
 declare class GlobalDebug extends Debugable {
-    protected $debugType: DebugType;
-    protected $connectionName: string;
+    protected readonly debugType: DebugType;
+    readonly connectionName: string;
     private constructor();
     static readonly instance: GlobalDebug;
     $log: Debugable['$log'];

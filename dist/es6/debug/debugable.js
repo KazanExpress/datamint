@@ -19,24 +19,24 @@ export class Debugable {
     /**
      * `true` if the debug is enabled for this class
      */
-    get $debugEnabled() { return errorTypeFor(this.$debugType); }
+    get isDebugEnabled() { return errorTypeFor(this.debugType); }
     $logFactory(level) {
-        return (message, force = false) => print(this.$connectionName, this.$debugType, message, level, force);
+        return (message, force = false) => print(this.connectionName, this.debugType, message, level, force);
     }
 }
 __decorate([
     enumerable(false),
     __metadata("design:type", String)
-], Debugable.prototype, "$debugType", void 0);
+], Debugable.prototype, "debugType", void 0);
 __decorate([
     enumerable(false),
     __metadata("design:type", String)
-], Debugable.prototype, "$connectionName", void 0);
+], Debugable.prototype, "connectionName", void 0);
 __decorate([
     enumerable(false),
     __metadata("design:type", Object),
     __metadata("design:paramtypes", [])
-], Debugable.prototype, "$debugEnabled", null);
+], Debugable.prototype, "isDebugEnabled", null);
 __decorate([
     enumerable(false),
     __metadata("design:type", Function),
@@ -60,10 +60,10 @@ __decorate([
     __metadata("design:type", Object)
 ], Debugable.prototype, "$debug", void 0);
 export class DebugInstance extends Debugable {
-    constructor($debugType, $connectionName) {
+    constructor(debugType, connectionName) {
         super();
-        this.$debugType = $debugType;
-        this.$connectionName = $connectionName;
+        this.debugType = debugType;
+        this.connectionName = connectionName;
     }
 }
 //# sourceMappingURL=debugable.js.map

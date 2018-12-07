@@ -2,27 +2,34 @@ import { Debug, Debugable } from '../debug';
 import { FallbackDriver } from '../drivers';
 import { MultiDriver } from '../drivers/multiDriver';
 export class Repository extends Debugable {
-    constructor(name, $connectionName, Data, api) {
+    constructor(name, connectionName, Data, api) {
         super();
         this.name = name;
-        this.$connectionName = $connectionName;
+        this.connectionName = connectionName;
         this.Data = Data;
         this.api = api;
-        this.$debugType = `db:${this.name.toLowerCase()}`;
+        this.columns = [];
+        this.debugType = `db:${this.name.toLowerCase()}`;
         if (!api) {
             this.$warn('The main functionality is disabled. Are you sure you want to use this without API?', true);
         }
         if ( /* this class was instantiated directly (without inheritance) */Repository.prototype === this.constructor.prototype) {
-            if (this.$debugEnabled) {
+            if (this.isDebugEnabled) {
                 this.$error(`Using default empty repository.`);
             }
             else {
                 Debug.$error(`Using default empty repository for ${name}`, true);
             }
         }
+        if (Data.prototype.__col__) {
+            this.columns = Data.prototype.__col__.slice();
+            delete Data.prototype.__col__;
+        }
+        else {
+            this.columns = Object.keys(new Data({}, this));
+        }
     }
     makeDataInstance(options) {
-        // Cast to any to allow passing `this` as a second arg for classes implementing IActiveRecord to work
         return new this.Data(options, this);
     }
 }

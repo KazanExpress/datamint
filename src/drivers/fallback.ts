@@ -16,7 +16,7 @@ export class FallbackDriver extends Driver {
 
     const repo: Array<A> | { [key: string]: A } = this.repositoryMap[name];
 
-    if (primaryKey) {
+    if (primaryKey && !Array.isArray(repo)) {
       const key = String(data[primaryKey]);
 
       repo[key] = data;
@@ -54,7 +54,7 @@ export class FallbackDriver extends Driver {
   }
 
   public async update<A, R extends IRepoData>(
-    { name, primaryKey }: R,
+    { name }: R,
     data: Partial<A>
   ): Promise<Array<A>> {
     throw new Error('Method not implemented.');

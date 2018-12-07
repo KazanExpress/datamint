@@ -1,5 +1,5 @@
-import { Debugable, DebugType } from '../debug';
 import { Connection } from '../connection';
+import { Debugable, DebugType } from '../debug';
 import { IRepoData } from '../repository';
 export interface IDriverConstructor extends Function {
     new (connection: Connection): Driver;
@@ -7,8 +7,8 @@ export interface IDriverConstructor extends Function {
 }
 export declare abstract class Driver extends Debugable {
     protected connection: Connection;
-    protected $debugType: DebugType;
-    protected $connectionName: string;
+    protected readonly debugType: DebugType;
+    readonly connectionName: string;
     constructor(connection: Connection);
     abstract create<A extends object, R extends IRepoData>(repository: R, data: A): Promise<A>;
     abstract findById<A extends object, R extends IRepoData, ID extends PropertyKey>(repository: R, id: ID): Promise<A | undefined>;

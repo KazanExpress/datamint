@@ -1,11 +1,8 @@
 import { DebugInstance, DebugType } from '../debug';
 import { enumerable } from '../decorators';
-import { EntityRepositoryClass } from '../repository/entity';
+import { QueryResult } from '../queryResult';
+import { IEntityRepository } from '../repository/entity';
 import { IActiveRecord, Storable } from './base';
-
-const defaultIdAliases = [
-  'id', 'ID', 'Id', '_id', '_ID', '_Id', '__id', '__ID', '__Id', '__id__', '__ID__', '__Id__'
-];
 
 type WithId<T, IDKey extends PropertyKey, IDValue> = T & {
   [key in IDKey]: IDValue;
@@ -21,18 +18,8 @@ export class Entity<
   @enumerable(false)
   protected __idValue__?: IDValue;
 
-  constructor(options: WithId<{ [key: string]: any }, IDKey, IDValue>) {
-    super(options);
-
-    // If no unique ID is set for the entity
-    if (!this.__idKey__) {
-      const key = Object.keys(this).find(key => defaultIdAliases.some(a => a === key));
-
-      // Auto-apply the ID decorator if found any compatible property
-      if (key) {
-        (this.constructor as typeof Entity).ID(this, key);
-      }
-    }
+  constructor(options: WithId<{ [key: string]: any }, IDKey, IDValue>, ...args: any[]) {
+    super(options, ...args);
 
     if (this.__idKey__ && options[String(this.__idKey__)]) {
       Reflect.deleteProperty(this, '__idValue__');
@@ -68,7 +55,7 @@ export class SaveableEntity<
   @enumerable(false)
   private readonly __debug: DebugInstance;
   @enumerable(false)
-  private readonly __repo?: EntityRepositoryClass<any, any, this, any, IDKey, IDValue>;
+  private readonly __repo?: IEntityRepository<any, this, any, IDKey, IDValue>;
 
   @enumerable(false)
   private __contextWarning(optional: string = '') {
@@ -77,15 +64,18 @@ export class SaveableEntity<
     }" was initialized in a wrong context.\n${optional}`, true);
   }
 
-  constructor(options: WithId<{ [key: string]: any }, IDKey, IDValue>, repo?: EntityRepositoryClass<any, any, any, any, IDKey, IDValue>) {
-    super(options);
+  constructor(
+    options: WithId<{ [key: string]: any }, IDKey, IDValue>,
+    repo?: IEntityRepository<any, any, any, IDKey, IDValue>
+  ) {
+    super(options, repo);
 
     if (repo) {
       this.__repo = repo;
 
       this.__debug = new DebugInstance(
         `db:${repo.name}:entity` as DebugType,
-        this.__repo.$connectionName
+        this.__repo.connectionName
         );
     } else {
       this.__debug = new DebugInstance('*', '');
@@ -105,7 +95,7 @@ export class SaveableEntity<
     return this.__repo.updateById(
       idkey ? this[idkey as PropertyKey] : 0,
       () => this
-    ).then(r => r.result).catch(e => { throw e; });
+    ).then((r: QueryResult<this>) => r.result).catch(e => { throw e; });
   }
 
   public $delete(): Promise<this | undefined> {
@@ -119,6 +109,6 @@ export class SaveableEntity<
 
     return this.__repo.delete(
       idkey ? this[idkey as PropertyKey] : 0
-    ).then(r => r.result).catch(e => { throw e; });
+    ).then((r: QueryResult<this>) => r.result).catch(e => { throw e; });
   }
 }

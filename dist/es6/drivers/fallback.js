@@ -26,7 +26,7 @@ export class FallbackDriver extends Driver {
                 }
             }
             const repo = this.repositoryMap[name];
-            if (primaryKey) {
+            if (primaryKey && !Array.isArray(repo)) {
                 const key = String(data[primaryKey]);
                 repo[key] = data;
             }
@@ -62,7 +62,7 @@ export class FallbackDriver extends Driver {
             return Object.values(repo)[0];
         });
     }
-    update({ name, primaryKey }, data) {
+    update({ name }, data) {
         return __awaiter(this, void 0, void 0, function* () {
             throw new Error('Method not implemented.');
             return [];
