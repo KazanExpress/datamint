@@ -11,19 +11,21 @@ export class Repository extends Debugable {
         this.columns = [];
         this.debugType = `db:${this.name.toLowerCase()}`;
         if (!api) {
-            this.$warn('The main functionality is disabled. Are you sure you want to use this without API?', true);
+            this.$warn('The main functionality is disabled. Are you sure you want to use this without API?');
         }
         if ( /* this class was instantiated directly (without inheritance) */Repository.prototype === this.constructor.prototype) {
             if (this.isDebugEnabled) {
                 this.$error(`Using default empty repository.`);
             }
             else {
-                Debug.$error(`Using default empty repository for ${name}`, true);
+                Debug.$error(`Using default empty repository for ${name}`);
             }
         }
         if (Data.prototype.__col__) {
-            this.columns = Data.prototype.__col__.slice();
-            delete Data.prototype.__col__;
+            if (true) {
+                this.columns = Data.prototype.__col__.slice();
+                delete Data.prototype.__col__;
+            }
         }
         else {
             this.columns = Object.keys(new Data({}, this));

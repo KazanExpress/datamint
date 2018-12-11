@@ -5,7 +5,7 @@ export declare abstract class Debugable {
      */
     protected readonly abstract debugType: DebugType;
     /**
-     * The name of the DATAMINT connection this class uses
+     * The name of the connection this class uses
      */
     abstract readonly connectionName: string;
     /**
@@ -13,10 +13,10 @@ export declare abstract class Debugable {
      */
     readonly isDebugEnabled: boolean | "soft" | "hard";
     private $logFactory;
-    protected readonly $log: (message: any, force?: boolean) => void;
-    protected readonly $warn: (message: any, force?: boolean) => void;
-    protected readonly $error: (message: any, force?: boolean) => void;
-    protected readonly $debug: (message: any, force?: boolean) => void;
+    protected readonly $log: (message: any) => undefined;
+    protected readonly $warn: (message: any) => undefined;
+    protected readonly $error: (message: any) => undefined;
+    protected readonly $debug: (message: any) => undefined;
 }
 export declare class DebugInstance extends Debugable {
     protected readonly debugType: DebugType;

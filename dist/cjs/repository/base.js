@@ -27,19 +27,21 @@ var Repository = /** @class */ (function (_super) {
         _this.columns = [];
         _this.debugType = "db:" + _this.name.toLowerCase();
         if (!api) {
-            _this.$warn('The main functionality is disabled. Are you sure you want to use this without API?', true);
+            _this.$warn('The main functionality is disabled. Are you sure you want to use this without API?');
         }
         if ( /* this class was instantiated directly (without inheritance) */Repository.prototype === _this.constructor.prototype) {
             if (_this.isDebugEnabled) {
                 _this.$error("Using default empty repository.");
             }
             else {
-                debug_1.Debug.$error("Using default empty repository for " + name, true);
+                debug_1.Debug.$error("Using default empty repository for " + name);
             }
         }
         if (Data.prototype.__col__) {
-            _this.columns = Data.prototype.__col__.slice();
-            delete Data.prototype.__col__;
+            if (true) {
+                _this.columns = Data.prototype.__col__.slice();
+                delete Data.prototype.__col__;
+            }
         }
         else {
             _this.columns = Object.keys(new Data({}, _this));

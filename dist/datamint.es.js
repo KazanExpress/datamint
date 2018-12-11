@@ -79,39 +79,41 @@ function errorTypeFor(type) {
     }
     return Object.keys(debugMap).find(t => type.test(t)) || false;
 }
-function print(instanceName, type, message, level, force = false) {
-    if ((debugState !== 'disabled') || force) {
+function bindConsole(name, instanceName, type) {
+    if (typeof window !== 'undefined') {
+        return window.console[name].bind(console, `%c${LOG_PREFIX(instanceName)}%c:%c${type}%c`, 'color: purple', 'color: initial', 'color: blue', 'color: initial', '-');
+    }
+    else {
+        return console[name].bind(console, `${LOG_PREFIX(instanceName)}:${type}`, '-');
+    }
+}
+function getPrintFunction(instanceName, type, level) {
+    if ((debugState !== 'disabled')) {
         const errorType = errorTypeFor(type);
         if (errorType) {
             if (errorType === 'hard' && level === 'error') {
-                throw new Error(`${LOG_PREFIX(instanceName)}:${type} - ${message}`);
+                return (message) => { throw new Error(`${LOG_PREFIX(instanceName)}:${type} - ${message}`); };
             }
             else {
-                if (typeof window !== 'undefined') {
-                    window.console[level](`%c${LOG_PREFIX(instanceName)}%c:%c${type}%c - ${message}`, 'color: purple', 'color: initial', 'color: blue', 'color: initial');
-                }
-                else {
-                    console[level](`${LOG_PREFIX(instanceName)}:${type} - ${message}`);
-                }
+                return bindConsole(level, instanceName, type);
             }
         }
     }
+    return () => undefined;
 }
 
 class Debugable {
-    constructor() {
-        this.$log = this.$logFactory('log');
-        this.$warn = this.$logFactory('warn');
-        this.$error = this.$logFactory('error');
-        this.$debug = this.$logFactory('debug');
-    }
     /**
      * `true` if the debug is enabled for this class
      */
     get isDebugEnabled() { return errorTypeFor(this.debugType); }
     $logFactory(level) {
-        return (message, force = false) => print(this.connectionName, this.debugType, message, level, force);
+        return getPrintFunction(this.connectionName, this.debugType, level);
     }
+    get $log() { return this.$logFactory('log'); }
+    get $warn() { return this.$logFactory('warn'); }
+    get $error() { return this.$logFactory('error'); }
+    get $debug() { return this.$logFactory('debug'); }
 }
 __decorate([
     enumerable(false),
@@ -134,20 +136,24 @@ __decorate([
 ], Debugable.prototype, "$logFactory", null);
 __decorate([
     enumerable(false),
-    __metadata("design:type", Object)
-], Debugable.prototype, "$log", void 0);
+    __metadata("design:type", Object),
+    __metadata("design:paramtypes", [])
+], Debugable.prototype, "$log", null);
 __decorate([
     enumerable(false),
-    __metadata("design:type", Object)
-], Debugable.prototype, "$warn", void 0);
+    __metadata("design:type", Object),
+    __metadata("design:paramtypes", [])
+], Debugable.prototype, "$warn", null);
 __decorate([
     enumerable(false),
-    __metadata("design:type", Object)
-], Debugable.prototype, "$error", void 0);
+    __metadata("design:type", Object),
+    __metadata("design:paramtypes", [])
+], Debugable.prototype, "$error", null);
 __decorate([
     enumerable(false),
-    __metadata("design:type", Object)
-], Debugable.prototype, "$debug", void 0);
+    __metadata("design:type", Object),
+    __metadata("design:paramtypes", [])
+], Debugable.prototype, "$debug", null);
 class DebugInstance extends Debugable {
     constructor(debugType, connectionName) {
         super();
@@ -412,19 +418,21 @@ class Repository extends Debugable {
         this.columns = [];
         this.debugType = `db:${this.name.toLowerCase()}`;
         if (!api) {
-            this.$warn('The main functionality is disabled. Are you sure you want to use this without API?', true);
+            this.$warn('The main functionality is disabled. Are you sure you want to use this without API?');
         }
         if ( /* this class was instantiated directly (without inheritance) */Repository.prototype === this.constructor.prototype) {
             if (this.isDebugEnabled) {
                 this.$error(`Using default empty repository.`);
             }
             else {
-                Debug.$error(`Using default empty repository for ${name}`, true);
+                Debug.$error(`Using default empty repository for ${name}`);
             }
         }
         if (Data.prototype.__col__) {
-            this.columns = Data.prototype.__col__.slice();
-            delete Data.prototype.__col__;
+            {
+                this.columns = Data.prototype.__col__.slice();
+                delete Data.prototype.__col__;
+            }
         }
         else {
             this.columns = Object.keys(new Data({}, this));
@@ -597,7 +605,7 @@ class SaveableEntity extends Entity {
         }
     }
     __contextWarning(optional = '') {
-        this.__debug.$warn(`Seems like the entity "${this.constructor.name}" was initialized in a wrong context.\n${optional}`, true);
+        this.__debug.$warn(`Seems like the entity "${this.constructor.name}" was initialized in a wrong context.\n${optional}`);
     }
     $save() {
         if (!this.__repo) {
@@ -689,7 +697,7 @@ class SaveableRecord extends Record {
         }
     }
     __contextWarning(optional = '') {
-        this.__debug.$warn(`Seems like the record "${this.constructor.name}" was initialized in a wrong context.\n${optional}`, true);
+        this.__debug.$warn(`Seems like the record "${this.constructor.name}" was initialized in a wrong context.\n${optional}`);
     }
     $save() {
         if (!this.__repo) {

@@ -29,22 +29,26 @@ export function errorTypeFor(type) {
     }
     return Object.keys(debugMap).find(t => type.test(t)) || false;
 }
-export function print(instanceName, type, message, level, force = false) {
-    if ((debugState !== 'disabled') || force) {
+function bindConsole(name, instanceName, type) {
+    if (typeof window !== 'undefined') {
+        return window.console[name].bind(console, `%c${LOG_PREFIX(instanceName)}%c:%c${type}%c`, 'color: purple', 'color: initial', 'color: blue', 'color: initial', '-');
+    }
+    else {
+        return console[name].bind(console, `${LOG_PREFIX(instanceName)}:${type}`, '-');
+    }
+}
+export function getPrintFunction(instanceName, type, level) {
+    if ((debugState !== 'disabled')) {
         const errorType = errorTypeFor(type);
         if (errorType) {
             if (errorType === 'hard' && level === 'error') {
-                throw new Error(`${LOG_PREFIX(instanceName)}:${type} - ${message}`);
+                return (message) => { throw new Error(`${LOG_PREFIX(instanceName)}:${type} - ${message}`); };
             }
             else {
-                if (typeof window !== 'undefined') {
-                    window.console[level](`%c${LOG_PREFIX(instanceName)}%c:%c${type}%c - ${message}`, 'color: purple', 'color: initial', 'color: blue', 'color: initial');
-                }
-                else {
-                    console[level](`${LOG_PREFIX(instanceName)}:${type} - ${message}`);
-                }
+                return bindConsole(level, instanceName, type);
             }
         }
     }
+    return () => undefined;
 }
 //# sourceMappingURL=module.js.map

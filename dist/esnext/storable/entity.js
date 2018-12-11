@@ -57,7 +57,7 @@ export class SaveableEntity extends Entity {
         }
     }
     __contextWarning(optional = '') {
-        this.__debug.$warn(`Seems like the entity "${this.constructor.name}" was initialized in a wrong context.\n${optional}`, true);
+        this.__debug.$warn(`Seems like the entity "${this.constructor.name}" was initialized in a wrong context.\n${optional}`);
     }
     $save() {
         if (!this.__repo) {

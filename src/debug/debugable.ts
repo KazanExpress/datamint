@@ -1,5 +1,5 @@
 import { enumerable } from '../decorators';
-import { DebugType, errorTypeFor, LogLevel, print } from './module';
+import { DebugType, errorTypeFor, LogLevel, getPrintFunction } from './module';
 
 export abstract class Debugable {
   /**
@@ -9,7 +9,7 @@ export abstract class Debugable {
   protected readonly abstract debugType: DebugType;
 
   /**
-   * The name of the DATAMINT connection this class uses
+   * The name of the connection this class uses
    */
   @enumerable(false)
   public readonly abstract connectionName: string;
@@ -22,18 +22,17 @@ export abstract class Debugable {
 
   @enumerable(false)
   private $logFactory(level: LogLevel) {
-    return (message: any, force: boolean = false) =>
-      print(this.connectionName, this.debugType, message, level, force);
+    return getPrintFunction(this.connectionName, this.debugType, level);
   }
 
   @enumerable(false)
-  protected readonly $log = this.$logFactory('log');
+  protected get $log() { return this.$logFactory('log'); }
   @enumerable(false)
-  protected readonly $warn = this.$logFactory('warn');
+  protected get $warn() { return this.$logFactory('warn'); }
   @enumerable(false)
-  protected readonly $error = this.$logFactory('error');
+  protected get $error() { return this.$logFactory('error'); }
   @enumerable(false)
-  protected readonly $debug = this.$logFactory('debug');
+  protected get $debug() { return this.$logFactory('debug'); }
 }
 
 export class DebugInstance extends Debugable {

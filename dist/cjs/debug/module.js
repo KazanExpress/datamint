@@ -33,24 +33,27 @@ function errorTypeFor(type) {
     return Object.keys(exports.debugMap).find(function (t) { return type.test(t); }) || false;
 }
 exports.errorTypeFor = errorTypeFor;
-function print(instanceName, type, message, level, force) {
-    if (force === void 0) { force = false; }
-    if ((exports.debugState !== 'disabled') || force) {
+function bindConsole(name, instanceName, type) {
+    if (typeof window !== 'undefined') {
+        return window.console[name].bind(console, "%c" + LOG_PREFIX(instanceName) + "%c:%c" + type + "%c", 'color: purple', 'color: initial', 'color: blue', 'color: initial', '-');
+    }
+    else {
+        return console[name].bind(console, LOG_PREFIX(instanceName) + ":" + type, '-');
+    }
+}
+function getPrintFunction(instanceName, type, level) {
+    if ((exports.debugState !== 'disabled')) {
         var errorType = errorTypeFor(type);
         if (errorType) {
             if (errorType === 'hard' && level === 'error') {
-                throw new Error(LOG_PREFIX(instanceName) + ":" + type + " - " + message);
+                return function (message) { throw new Error(LOG_PREFIX(instanceName) + ":" + type + " - " + message); };
             }
             else {
-                if (typeof window !== 'undefined') {
-                    window.console[level]("%c" + LOG_PREFIX(instanceName) + "%c:%c" + type + "%c - " + message, 'color: purple', 'color: initial', 'color: blue', 'color: initial');
-                }
-                else {
-                    console[level](LOG_PREFIX(instanceName) + ":" + type + " - " + message);
-                }
+                return bindConsole(level, instanceName, type);
             }
         }
     }
+    return function () { return undefined; };
 }
-exports.print = print;
+exports.getPrintFunction = getPrintFunction;
 //# sourceMappingURL=module.js.map

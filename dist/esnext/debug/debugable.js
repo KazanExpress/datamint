@@ -8,21 +8,19 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 import { enumerable } from '../decorators';
-import { errorTypeFor, print } from './module';
+import { errorTypeFor, getPrintFunction } from './module';
 export class Debugable {
-    constructor() {
-        this.$log = this.$logFactory('log');
-        this.$warn = this.$logFactory('warn');
-        this.$error = this.$logFactory('error');
-        this.$debug = this.$logFactory('debug');
-    }
     /**
      * `true` if the debug is enabled for this class
      */
     get isDebugEnabled() { return errorTypeFor(this.debugType); }
     $logFactory(level) {
-        return (message, force = false) => print(this.connectionName, this.debugType, message, level, force);
+        return getPrintFunction(this.connectionName, this.debugType, level);
     }
+    get $log() { return this.$logFactory('log'); }
+    get $warn() { return this.$logFactory('warn'); }
+    get $error() { return this.$logFactory('error'); }
+    get $debug() { return this.$logFactory('debug'); }
 }
 __decorate([
     enumerable(false),
@@ -45,20 +43,24 @@ __decorate([
 ], Debugable.prototype, "$logFactory", null);
 __decorate([
     enumerable(false),
-    __metadata("design:type", Object)
-], Debugable.prototype, "$log", void 0);
+    __metadata("design:type", Object),
+    __metadata("design:paramtypes", [])
+], Debugable.prototype, "$log", null);
 __decorate([
     enumerable(false),
-    __metadata("design:type", Object)
-], Debugable.prototype, "$warn", void 0);
+    __metadata("design:type", Object),
+    __metadata("design:paramtypes", [])
+], Debugable.prototype, "$warn", null);
 __decorate([
     enumerable(false),
-    __metadata("design:type", Object)
-], Debugable.prototype, "$error", void 0);
+    __metadata("design:type", Object),
+    __metadata("design:paramtypes", [])
+], Debugable.prototype, "$error", null);
 __decorate([
     enumerable(false),
-    __metadata("design:type", Object)
-], Debugable.prototype, "$debug", void 0);
+    __metadata("design:type", Object),
+    __metadata("design:paramtypes", [])
+], Debugable.prototype, "$debug", null);
 export class DebugInstance extends Debugable {
     constructor(debugType, connectionName) {
         super();

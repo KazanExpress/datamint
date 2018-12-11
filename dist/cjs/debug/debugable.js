@@ -26,10 +26,6 @@ var decorators_1 = require("../decorators");
 var module_1 = require("./module");
 var Debugable = /** @class */ (function () {
     function Debugable() {
-        this.$log = this.$logFactory('log');
-        this.$warn = this.$logFactory('warn');
-        this.$error = this.$logFactory('error');
-        this.$debug = this.$logFactory('debug');
     }
     Object.defineProperty(Debugable.prototype, "isDebugEnabled", {
         /**
@@ -40,12 +36,28 @@ var Debugable = /** @class */ (function () {
         configurable: true
     });
     Debugable.prototype.$logFactory = function (level) {
-        var _this = this;
-        return function (message, force) {
-            if (force === void 0) { force = false; }
-            return module_1.print(_this.connectionName, _this.debugType, message, level, force);
-        };
+        return module_1.getPrintFunction(this.connectionName, this.debugType, level);
     };
+    Object.defineProperty(Debugable.prototype, "$log", {
+        get: function () { return this.$logFactory('log'); },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Debugable.prototype, "$warn", {
+        get: function () { return this.$logFactory('warn'); },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Debugable.prototype, "$error", {
+        get: function () { return this.$logFactory('error'); },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Debugable.prototype, "$debug", {
+        get: function () { return this.$logFactory('debug'); },
+        enumerable: true,
+        configurable: true
+    });
     __decorate([
         decorators_1.enumerable(false),
         __metadata("design:type", String)
@@ -67,20 +79,24 @@ var Debugable = /** @class */ (function () {
     ], Debugable.prototype, "$logFactory", null);
     __decorate([
         decorators_1.enumerable(false),
-        __metadata("design:type", Object)
-    ], Debugable.prototype, "$log", void 0);
+        __metadata("design:type", Object),
+        __metadata("design:paramtypes", [])
+    ], Debugable.prototype, "$log", null);
     __decorate([
         decorators_1.enumerable(false),
-        __metadata("design:type", Object)
-    ], Debugable.prototype, "$warn", void 0);
+        __metadata("design:type", Object),
+        __metadata("design:paramtypes", [])
+    ], Debugable.prototype, "$warn", null);
     __decorate([
         decorators_1.enumerable(false),
-        __metadata("design:type", Object)
-    ], Debugable.prototype, "$error", void 0);
+        __metadata("design:type", Object),
+        __metadata("design:paramtypes", [])
+    ], Debugable.prototype, "$error", null);
     __decorate([
         decorators_1.enumerable(false),
-        __metadata("design:type", Object)
-    ], Debugable.prototype, "$debug", void 0);
+        __metadata("design:type", Object),
+        __metadata("design:paramtypes", [])
+    ], Debugable.prototype, "$debug", null);
     return Debugable;
 }());
 exports.Debugable = Debugable;

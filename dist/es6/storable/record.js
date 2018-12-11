@@ -27,7 +27,7 @@ export class SaveableRecord extends Record {
         }
     }
     __contextWarning(optional = '') {
-        this.__debug.$warn(`Seems like the record "${this.constructor.name}" was initialized in a wrong context.\n${optional}`, true);
+        this.__debug.$warn(`Seems like the record "${this.constructor.name}" was initialized in a wrong context.\n${optional}`);
     }
     $save() {
         if (!this.__repo) {

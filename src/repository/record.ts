@@ -9,25 +9,25 @@ export interface IRecordRepoMethods<
   C extends IStorableConstructor<E>,
   E extends Record = InstanceType<C>,
   A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0],
-  R = any
+  ReturnType = any
 > {
   create(
     options: A,
     apiOptions?: any
-  ): Promise<R>;
+  ): Promise<ReturnType>;
 
   read(
     apiOptions?: any
-  ): Promise<R>;
+  ): Promise<ReturnType>;
 
   update(
     options: Partial<A>,
     apiOptions?: any
-  ): Promise<R>;
+  ): Promise<ReturnType>;
 
   delete(
     deleteApiOptions?: any
-  ): Promise<R>;
+  ): Promise<ReturnType>;
 
   //...
   // TODO - other methods?

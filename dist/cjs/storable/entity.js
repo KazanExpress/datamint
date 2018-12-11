@@ -103,7 +103,7 @@ var SaveableEntity = /** @class */ (function (_super) {
     }
     SaveableEntity.prototype.__contextWarning = function (optional) {
         if (optional === void 0) { optional = ''; }
-        this.__debug.$warn("Seems like the entity \"" + this.constructor.name + "\" was initialized in a wrong context.\n" + optional, true);
+        this.__debug.$warn("Seems like the entity \"" + this.constructor.name + "\" was initialized in a wrong context.\n" + optional);
     };
     SaveableEntity.prototype.$save = function () {
         var _this = this;

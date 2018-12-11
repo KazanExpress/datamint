@@ -41,6 +41,8 @@ describe('types', () => {
     const user = orm.User;
     const remote = orm.Remote.API;
 
+    orm.Pupuska!;
+
     const podguznik = {
       id: 0,
       title: 'podguznik',

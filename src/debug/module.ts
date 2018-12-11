@@ -88,25 +88,32 @@ export function errorTypeFor(type: string | RegExp | DebugType): boolean | Excep
   return (Object.keys(debugMap).find(t => type.test(t)) as ExceptionType | undefined) || false;
 }
 
+function bindConsole<K extends keyof Console>(name: K, instanceName: string, type) {
+  if (typeof window !== 'undefined') {
+    return window.console[name].bind(console, `%c${LOG_PREFIX(instanceName)}%c:%c${type}%c`,
+      'color: purple',
+      'color: initial',
+      'color: blue',
+      'color: initial',
+      '-'
+    );
+  } else {
+    return console[name].bind(console, `${LOG_PREFIX(instanceName)}:${type}`, '-');
+  }
+}
 
-export function print(instanceName: string, type: any, message: any, level: LogLevel, force: boolean = false) {
-  if ((debugState !== 'disabled') || force) {
+
+export function getPrintFunction(instanceName: string, type: any, level: LogLevel): (message) => undefined {
+  if ((debugState !== 'disabled')) {
     const errorType = errorTypeFor(type);
     if (errorType) {
       if (errorType === 'hard' && level === 'error') {
-        throw new Error(`${LOG_PREFIX(instanceName)}:${type} - ${message}`);
+        return (message) => { throw new Error(`${LOG_PREFIX(instanceName)}:${type} - ${message}`); };
       } else {
-        if (typeof window !== 'undefined') {
-          window.console[level](`%c${LOG_PREFIX(instanceName)}%c:%c${type}%c - ${message}`,
-            'color: purple',
-            'color: initial',
-            'color: blue',
-            'color: initial'
-          );
-        } else {
-          console[level](`${LOG_PREFIX(instanceName)}:${type} - ${message}`);
-        }
+        return bindConsole(level, instanceName, type);
       }
     }
   }
+
+  return () => undefined;
 }

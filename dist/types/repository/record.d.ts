@@ -3,11 +3,11 @@ import { Driver, IDriverConstructor } from '../drivers';
 import { QueryResult } from '../queryResult';
 import { IStorableConstructor, Record } from '../storable';
 import { FromSecArg, IRepoData, IRepoFactoryOptions, RepoFactory, Repository } from './base';
-export interface IRecordRepoMethods<C extends IStorableConstructor<E>, E extends Record = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0], R = any> {
-    create(options: A, apiOptions?: any): Promise<R>;
-    read(apiOptions?: any): Promise<R>;
-    update(options: Partial<A>, apiOptions?: any): Promise<R>;
-    delete(deleteApiOptions?: any): Promise<R>;
+export interface IRecordRepoMethods<C extends IStorableConstructor<E>, E extends Record = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0], ReturnType = any> {
+    create(options: A, apiOptions?: any): Promise<ReturnType>;
+    read(apiOptions?: any): Promise<ReturnType>;
+    update(options: Partial<A>, apiOptions?: any): Promise<ReturnType>;
+    delete(deleteApiOptions?: any): Promise<ReturnType>;
 }
 export interface IRecordRepository<C extends IStorableConstructor<E>, E extends Record = InstanceType<C>, A extends ConstructorParameters<C>[0] = ConstructorParameters<C>[0]> extends IRepoData, IRecordRepoMethods<C, E, A, QueryResult<E> | QueryResult<undefined>>, Debugable {
 }

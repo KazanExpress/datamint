@@ -164,32 +164,31 @@
         }
         return Object.keys(debugMap).find(function (t) { return type.test(t); }) || false;
     }
-    function print(instanceName, type, message, level, force) {
-        if (force === void 0) { force = false; }
-        if ((debugState !== 'disabled') || force) {
+    function bindConsole(name, instanceName, type) {
+        if (typeof window !== 'undefined') {
+            return window.console[name].bind(console, "%c" + LOG_PREFIX(instanceName) + "%c:%c" + type + "%c", 'color: purple', 'color: initial', 'color: blue', 'color: initial', '-');
+        }
+        else {
+            return console[name].bind(console, LOG_PREFIX(instanceName) + ":" + type, '-');
+        }
+    }
+    function getPrintFunction(instanceName, type, level) {
+        if ((debugState !== 'disabled')) {
             var errorType = errorTypeFor(type);
             if (errorType) {
                 if (errorType === 'hard' && level === 'error') {
-                    throw new Error(LOG_PREFIX(instanceName) + ":" + type + " - " + message);
+                    return function (message) { throw new Error(LOG_PREFIX(instanceName) + ":" + type + " - " + message); };
                 }
                 else {
-                    if (typeof window !== 'undefined') {
-                        window.console[level]("%c" + LOG_PREFIX(instanceName) + "%c:%c" + type + "%c - " + message, 'color: purple', 'color: initial', 'color: blue', 'color: initial');
-                    }
-                    else {
-                        console[level](LOG_PREFIX(instanceName) + ":" + type + " - " + message);
-                    }
+                    return bindConsole(level, instanceName, type);
                 }
             }
         }
+        return function () { return undefined; };
     }
 
     var Debugable = /** @class */ (function () {
         function Debugable() {
-            this.$log = this.$logFactory('log');
-            this.$warn = this.$logFactory('warn');
-            this.$error = this.$logFactory('error');
-            this.$debug = this.$logFactory('debug');
         }
         Object.defineProperty(Debugable.prototype, "isDebugEnabled", {
             /**
@@ -200,12 +199,28 @@
             configurable: true
         });
         Debugable.prototype.$logFactory = function (level) {
-            var _this = this;
-            return function (message, force) {
-                if (force === void 0) { force = false; }
-                return print(_this.connectionName, _this.debugType, message, level, force);
-            };
+            return getPrintFunction(this.connectionName, this.debugType, level);
         };
+        Object.defineProperty(Debugable.prototype, "$log", {
+            get: function () { return this.$logFactory('log'); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Debugable.prototype, "$warn", {
+            get: function () { return this.$logFactory('warn'); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Debugable.prototype, "$error", {
+            get: function () { return this.$logFactory('error'); },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Debugable.prototype, "$debug", {
+            get: function () { return this.$logFactory('debug'); },
+            enumerable: true,
+            configurable: true
+        });
         __decorate([
             enumerable(false),
             __metadata("design:type", String)
@@ -227,20 +242,24 @@
         ], Debugable.prototype, "$logFactory", null);
         __decorate([
             enumerable(false),
-            __metadata("design:type", Object)
-        ], Debugable.prototype, "$log", void 0);
+            __metadata("design:type", Object),
+            __metadata("design:paramtypes", [])
+        ], Debugable.prototype, "$log", null);
         __decorate([
             enumerable(false),
-            __metadata("design:type", Object)
-        ], Debugable.prototype, "$warn", void 0);
+            __metadata("design:type", Object),
+            __metadata("design:paramtypes", [])
+        ], Debugable.prototype, "$warn", null);
         __decorate([
             enumerable(false),
-            __metadata("design:type", Object)
-        ], Debugable.prototype, "$error", void 0);
+            __metadata("design:type", Object),
+            __metadata("design:paramtypes", [])
+        ], Debugable.prototype, "$error", null);
         __decorate([
             enumerable(false),
-            __metadata("design:type", Object)
-        ], Debugable.prototype, "$debug", void 0);
+            __metadata("design:type", Object),
+            __metadata("design:paramtypes", [])
+        ], Debugable.prototype, "$debug", null);
         return Debugable;
     }());
     var DebugInstance = /** @class */ (function (_super) {
@@ -562,19 +581,21 @@
             _this.columns = [];
             _this.debugType = "db:" + _this.name.toLowerCase();
             if (!api) {
-                _this.$warn('The main functionality is disabled. Are you sure you want to use this without API?', true);
+                _this.$warn('The main functionality is disabled. Are you sure you want to use this without API?');
             }
             if ( /* this class was instantiated directly (without inheritance) */Repository.prototype === _this.constructor.prototype) {
                 if (_this.isDebugEnabled) {
                     _this.$error("Using default empty repository.");
                 }
                 else {
-                    Debug.$error("Using default empty repository for " + name, true);
+                    Debug.$error("Using default empty repository for " + name);
                 }
             }
             if (Data.prototype.__col__) {
-                _this.columns = Data.prototype.__col__.slice();
-                delete Data.prototype.__col__;
+                {
+                    _this.columns = Data.prototype.__col__.slice();
+                    delete Data.prototype.__col__;
+                }
             }
             else {
                 _this.columns = Object.keys(new Data({}, _this));
@@ -779,7 +800,7 @@
         }
         SaveableEntity.prototype.__contextWarning = function (optional) {
             if (optional === void 0) { optional = ''; }
-            this.__debug.$warn("Seems like the entity \"" + this.constructor.name + "\" was initialized in a wrong context.\n" + optional, true);
+            this.__debug.$warn("Seems like the entity \"" + this.constructor.name + "\" was initialized in a wrong context.\n" + optional);
         };
         SaveableEntity.prototype.$save = function () {
             var _this = this;
@@ -891,7 +912,7 @@
         }
         SaveableRecord.prototype.__contextWarning = function (optional) {
             if (optional === void 0) { optional = ''; }
-            this.__debug.$warn("Seems like the record \"" + this.constructor.name + "\" was initialized in a wrong context.\n" + optional, true);
+            this.__debug.$warn("Seems like the record \"" + this.constructor.name + "\" was initialized in a wrong context.\n" + optional);
         };
         SaveableRecord.prototype.$save = function () {
             if (!this.__repo) {

@@ -17,7 +17,7 @@ export class SaveableRecord extends Record implements IActiveRecord {
   private __contextWarning(optional: string = '') {
     this.__debug.$warn(`Seems like the record "${
       this.constructor.name
-    }" was initialized in a wrong context.\n${optional}`, true);
+    }" was initialized in a wrong context.\n${optional}`);
   }
 
   constructor(options, repo?: RecordRepositoryClass<any, any, any, any>) {
