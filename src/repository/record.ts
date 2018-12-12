@@ -120,7 +120,7 @@ export function RecordRepository<
 }): RepoFactory<RecordRepositoryClass<D, C, E, A>> {
   return (name: string, connection: Connection) => new RecordRepositoryClass<D, C, E, A>(
     name,
-    connection.name,
+    connection.connectionName,
     new (selectDriver(options.dirvers || FallbackDriver, name))(connection),
     options.model,
     options.api

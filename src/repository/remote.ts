@@ -17,7 +17,7 @@ export function RemoteRepository<
 >(options: IRepoFactoryOptions<C, D>): RepoFactory<RemoteRepositoryClass<D, C>> {
   return (name: string, connection: Connection) => new RemoteRepositoryClass<D, C>(
     name,
-    connection.name,
+    connection.connectionName,
     options.model,
     options.api
   );

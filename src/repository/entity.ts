@@ -274,7 +274,7 @@ export function EntityRepository<
 }): RepoFactory<EntityRepositoryClass<D, C, E, A, IDKey, IDValue>> {
   return (name: string, connection: Connection) => new EntityRepositoryClass<D, C, E, A, IDKey, IDValue>(
     name,
-    connection.name,
+    connection.connectionName,
     new (selectDriver(options.dirvers || FallbackDriver, name))(connection),
     options.model,
     options.api
